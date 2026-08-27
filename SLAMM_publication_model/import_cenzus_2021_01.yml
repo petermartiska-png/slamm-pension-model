@@ -1,0 +1,21 @@
+
+output: INPUT_DATA/cenzus2021.h5
+globals:
+    periodic:
+        path: INPUT_DATA/global_5_41_sample_20.csv
+        transposed: True
+      
+entities:
+    person:
+       path: INPUT_DATA\cenzus_2021_sample_20.csv
+       fields:
+            - pohlavie: int
+            - vzdelanie: int
+            - isco: int
+            - trv_pobyt: int
+            - suc_pobyt: int
+            - vek: int
+            - nace: int
+            - ekon_status: int
+            - country_b: int
+            

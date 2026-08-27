@@ -1,0 +1,2016 @@
+import: 
+     - premenne_dopyt.yml
+     - demo_cenzus_2021_01.yml
+     - edu_cenzus_2021_01.yml
+     - ea_cenzus_2021_01.yml
+      
+         
+# definig fields from input file and new fields               
+entities: 
+     person: 
+         fields:                     
+            - replacement: {type: bool, initialdata: False}
+            - replacement_inflow: {type: bool, initialdata: False}
+            - matched: {type: bool, initialdata: False}
+            - employed: {type: bool, initialdata: False}           
+            - employed_pool: {type: bool, initialdata: False} 
+            - immigrant_new: {type: bool, initialdata: False}            
+            - immigrant_sim: {type: bool, initialdata: False}  
+            - immigrant_sim2: {type: bool, initialdata: False}                
+            - immigrant_fam: {type: bool, initialdata: False}
+            - immigrant_fam_p: {type: bool, initialdata: False}
+            - country_p: {type: bool, initialdata: False}
+            
+        
+            
+
+# defining macros            
+         macros:
+           
+# defining macros             
+            SLOVAKIA: 1
+            EU: 2
+            WORLD: 3
+         processes: 
+
+            employment():            
+               - nace: if(not ea, -1, nace)
+               - qual: if(not ea, -1, qual)                                   
+               - employed: False                                     
+
+               
+
+# When computing nace5_score, take into account sex, region, nace_1y, ...
+
+# logit ENERGY ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit MAR_SERVICES_2 ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit MINING ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY FIELD4 FIELD7 FIELD8 FIELD9 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57, iter(10)
+# logit NMAR_SERVICES ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit INDUSTRY ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit MAR_SERVICES_1 ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit PROF_AND_ADM_SERVICES ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG17 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit OTHER ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit AGRO ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG17 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+# logit CONSTRUCTION ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY FIELD0 FIELD1 FIELD2 FIELD3 FIELD4 FIELD5 FIELD6 FIELD7 FIELD8 FIELD9 FIELD10 AGEG17 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57 AGEG62, iter(10)
+
+# counting score:
+
+####################################################################
+##  In the first step sectoral score is calculated for all the economically active individuals. The scores present the product of a logit equation estimating the probability of 
+##  being employed in that particular sector. This is regressed on gender, level of education, field of education, and age group. In the second step, estimated scores are 
+##  increased with the increment of +1 for those working in the sector during the previous period. For those assigned as working retired during the previous period an increment 
+##  of +0.6 is used. In the final step those working in the particular sector at a particular qualification level receive a bonus of 0.3, generating a segment specific score. 
+##  Following this procedure we gain in total 40, segment specific scores.
+####################################################################
+
+            employment_nace_score():
+               - nace1_score: if(ea, logit_score(ISFEMALE*(-1.231728)+PRIMARY*(2.59372)+LOWER_SECONDARY*(0.7021321)+UPPER_SECONDARY*(0.2916175)+FIELD1*(-0.0358069)+FIELD2*(0.3711461)+FIELD3*(1.366124)+FIELD4*(1.667954)+FIELD5*(0.7638078)+FIELD7*(1.512565)+FIELD8*(3.972176)+FIELD9*(-0.9153761)+FIELD10*(1.109238)+AGEG22*(4.355341)+AGEG27*(4.930048)+AGEG32*(5.028397)+AGEG37*(5.310196)+AGEG42*(5.384116)+AGEG47*(5.530687)+AGEG52*(5.902419)+AGEG57*(5.727294)+AGEG62*(4.517933)+1*(-11.10253)),0)
+               - nace2_score: if(ea, logit_score(ISFEMALE*(-2.782176)+PRIMARY*(1.796911)+LOWER_SECONDARY*(0.7911024)+UPPER_SECONDARY*(0.1104568)+FIELD4*(0.2592654)+FIELD7*(1.292964)+FIELD8*(-0.2857299)+FIELD9*(1.762461)+FIELD10*(0.053274)+AGEG22*(5.35408)+AGEG27*(3.840878)+AGEG32*(4.273103)+AGEG37*(4.557366)+AGEG42*(5.423941)+AGEG47*(5.597698)+AGEG52*(5.259345)+AGEG57*(4.71006)+1*(-11.53599)),0)
+               - nace3_score: if(ea, logit_score(ISFEMALE*(-0.2145219)+PRIMARY*(0.2900285)+LOWER_SECONDARY*(0.4649834)+UPPER_SECONDARY*(0.508335)+POST_SECONDARY*(0.3136654)+FIELD1*(-1.626115)+FIELD2*(0.042604)+FIELD3*(-0.0646168)+FIELD4*(0.2220665)+FIELD5*(0.8297565)+FIELD6*(0.537337)+FIELD7*(1.220684)+FIELD8*(0.5244265)+FIELD9*(-1.454127)+FIELD10*(0.3388227)+AGEG22*(3.92983)+AGEG27*(4.445998)+AGEG32*(4.544755)+AGEG37*(4.59592)+AGEG42*(4.541563)+AGEG47*(4.467055)+AGEG52*(4.415977)+AGEG57*(4.040288)+AGEG62*(2.418583)+1*(-6.998593)),0)
+               - nace4_score: if(ea, logit_score(ISFEMALE*(-1.422464)+PRIMARY*(0.2532183)+LOWER_SECONDARY*(-0.642902)+UPPER_SECONDARY*(-0.316109)+POST_SECONDARY*(-0.2083604)+FIELD1*(0.0570321)+FIELD2*(0.4518148)+FIELD3*(0.0012872)+FIELD4*(1.068047)+FIELD5*(0.9346451)+FIELD6*(0.6444659)+FIELD7*(1.343524)+FIELD8*(0.4903086)+FIELD10*(-0.1907229)+AGEG22*(3.417404)+AGEG27*(4.345674)+AGEG32*(5.036765)+AGEG37*(5.491537)+AGEG42*(5.421031)+AGEG47*(5.56431)+AGEG52*(5.700053)+AGEG57*(5.576496)+AGEG62*(4.191482)+1*(-9.523405)),0)
+               - nace5_score: if(ea, logit_score(ISFEMALE*(-2.439621)+PRIMARY*(-0.0312407)+LOWER_SECONDARY*(0.5360953)+UPPER_SECONDARY*(0.2639153)+POST_SECONDARY*(-0.7240419)+FIELD0*(1.424968)+FIELD1*(-1.441081)+FIELD2*(-0.6684172)+FIELD3*(-0.4379628)+FIELD4*(0.2692311)+FIELD5*(-0.0942152)+FIELD6*(-0.5239734)+FIELD7*(0.9583526)+FIELD8*(0.25425)+FIELD9*(-1.031687)+FIELD10*(-0.182302)+AGEG17*(1.745068)+AGEG22*(3.902827)+AGEG27*(4.472909)+AGEG32*(4.484207)+AGEG37*(4.363429)+AGEG42*(4.286719)+AGEG47*(4.436202)+AGEG52*(4.456752)+AGEG57*(4.257444)+AGEG62*(3.221776)+1*(-7.242125)),0)
+                              
+                              
+               - nace1_score: nace1_score + 1  
+               - nace2_score: nace2_score + 1    
+               - nace3_score: nace3_score + 1                   
+               - nace4_score: nace4_score + 1
+               - nace5_score: nace5_score + 1           
+               
+               
+               - nace1_score: if(working_retired==True and nace1y==1, nace1_score+0.6, nace1_score)
+               - nace1_score: if(working_retired==True, nace1_score+0.6, nace1_score)               
+               - nace2_score: if(working_retired==True and nace1y==2, nace2_score+0.6, nace2_score)
+               - nace2_score: if(working_retired==True, nace2_score+0.6, nace2_score)
+               - nace3_score: if(working_retired==True and nace1y==3, nace3_score+0.6, nace3_score)
+               - nace3_score: if(working_retired==True, nace3_score+0.6, nace3_score)
+               - nace4_score: if(working_retired==True and nace1y==4, nace4_score+0.6, nace4_score)
+               - nace4_score: if(working_retired==True, nace4_score+0.6, nace4_score)   
+               - nace5_score: if(working_retired==True and nace1y==5, nace5_score+0.6, nace5_score)        
+               - nace5_score: if(working_retired==True , nace5_score+0.6, nace5_score)   
+
+#nace skore
+               - nace1q1_score: if(nace1y==1 and qual1y==1 , nace1_score+0.3, nace1_score)
+               - nace2q1_score: if(nace1y==2 and qual1y==1 , nace2_score+0.3, nace2_score)
+               - nace3q1_score: if(nace1y==3 and qual1y==1 , nace3_score+0.3, nace3_score)
+               - nace4q1_score: if(nace1y==4 and qual1y==1 , nace4_score+0.3, nace4_score)
+               - nace5q1_score: if(nace1y==5 and qual1y==1 , nace5_score+0.3, nace5_score)
+
+               
+               - nace1q2_score: if(nace1y==1 and qual1y==2 , nace1_score+0.3, nace1_score)
+               - nace2q2_score: if(nace1y==2 and qual1y==2 , nace2_score+0.3, nace2_score)
+               - nace3q2_score: if(nace1y==3 and qual1y==2 , nace3_score+0.3, nace3_score)
+               - nace4q2_score: if(nace1y==4 and qual1y==2 , nace4_score+0.3, nace4_score)
+               - nace5q2_score: if(nace1y==5 and qual1y==2 , nace5_score+0.3, nace5_score)
+
+               
+               - nace1q3_score: if(nace1y==1 and qual1y==3 , nace1_score+0.3, nace1_score)
+               - nace2q3_score: if(nace1y==2 and qual1y==3 , nace2_score+0.3, nace2_score)
+               - nace3q3_score: if(nace1y==3 and qual1y==3 , nace3_score+0.3, nace3_score)
+               - nace4q3_score: if(nace1y==4 and qual1y==3 , nace4_score+0.3, nace4_score)
+               - nace5q3_score: if(nace1y==5 and qual1y==3 , nace5_score+0.3, nace5_score)
+
+               
+               - nace1q4_score: if(nace1y==1 and qual1y==4 , nace1_score+0.3, nace1_score)
+               - nace2q4_score: if(nace1y==2 and qual1y==4 , nace2_score+0.3, nace2_score)
+               - nace3q4_score: if(nace1y==3 and qual1y==4 , nace3_score+0.3, nace3_score)
+               - nace4q4_score: if(nace1y==4 and qual1y==4 , nace4_score+0.3, nace4_score)
+               - nace5q4_score: if(nace1y==5 and qual1y==4 , nace5_score+0.3, nace5_score)
+
+              
+
+# creating of naceq (probability)
+               - nace1q1: False
+               - nace1q11: False
+               - nace1q12: False
+               - nace1q13: False
+               - nace1q14: False
+               - nace1q21: False
+               - nace1q22: False
+               - nace1q23: False
+               - nace1q24: False
+               - nace1q25: False
+               - nace1q26: False
+               - nace1q31: False
+               - nace1q32: False
+               - nace1q33: False
+               - nace1q34: False
+               - nace1q35: False
+               - nace1q41: False
+               - nace1q42: False
+               - nace1q43: False
+               - nace1q44: False
+               - nace1q51: False
+               - nace1q52: False
+               - nace1q53: False
+               - nace1q54: False
+               - nace1q61: False
+               - nace1q62: False
+               - nace1q63: False
+               - nace1q71: False
+               - nace1q72: False
+               - nace1q73: False
+               - nace1q74: False
+               - nace1q75: False
+               - nace1q81: False
+               - nace1q82: False
+               - nace1q83: False
+               - nace1q91: False
+               - nace1q92: False
+               - nace1q93: False
+               - nace1q94: False
+               - nace1q95: False
+               - nace1q96: False
+               - nace2q1: False
+               - nace2q11: False
+               - nace2q12: False
+               - nace2q13: False
+               - nace2q14: False
+               - nace2q21: False
+               - nace2q22: False
+               - nace2q23: False
+               - nace2q24: False
+               - nace2q25: False
+               - nace2q26: False
+               - nace2q31: False
+               - nace2q32: False
+               - nace2q33: False
+               - nace2q34: False
+               - nace2q35: False
+               - nace2q41: False
+               - nace2q42: False
+               - nace2q43: False
+               - nace2q44: False
+               - nace2q51: False
+               - nace2q52: False
+               - nace2q53: False
+               - nace2q54: False
+               - nace2q61: False
+               - nace2q62: False
+               - nace2q63: False
+               - nace2q71: False
+               - nace2q72: False
+               - nace2q73: False
+               - nace2q74: False
+               - nace2q75: False
+               - nace2q81: False
+               - nace2q82: False
+               - nace2q83: False
+               - nace2q91: False
+               - nace2q92: False
+               - nace2q93: False
+               - nace2q94: False
+               - nace2q95: False
+               - nace2q96: False
+               - nace3q1: False
+               - nace3q11: False
+               - nace3q12: False
+               - nace3q13: False
+               - nace3q14: False
+               - nace3q21: False
+               - nace3q22: False
+               - nace3q23: False
+               - nace3q24: False
+               - nace3q25: False
+               - nace3q26: False
+               - nace3q31: False
+               - nace3q32: False
+               - nace3q33: False
+               - nace3q34: False
+               - nace3q35: False
+               - nace3q41: False
+               - nace3q42: False
+               - nace3q43: False
+               - nace3q44: False
+               - nace3q51: False
+               - nace3q52: False
+               - nace3q53: False
+               - nace3q54: False
+               - nace3q61: False
+               - nace3q62: False
+               - nace3q63: False
+               - nace3q71: False
+               - nace3q72: False
+               - nace3q73: False
+               - nace3q74: False
+               - nace3q75: False
+               - nace3q81: False
+               - nace3q82: False
+               - nace3q83: False
+               - nace3q91: False
+               - nace3q92: False
+               - nace3q93: False
+               - nace3q94: False
+               - nace3q95: False
+               - nace3q96: False
+               - nace4q1: False
+               - nace4q11: False
+               - nace4q12: False
+               - nace4q13: False
+               - nace4q14: False
+               - nace4q21: False
+               - nace4q22: False
+               - nace4q23: False
+               - nace4q24: False
+               - nace4q25: False
+               - nace4q26: False
+               - nace4q31: False
+               - nace4q32: False
+               - nace4q33: False
+               - nace4q34: False
+               - nace4q35: False
+               - nace4q41: False
+               - nace4q42: False
+               - nace4q43: False
+               - nace4q44: False
+               - nace4q51: False
+               - nace4q52: False
+               - nace4q53: False
+               - nace4q54: False
+               - nace4q61: False
+               - nace4q62: False
+               - nace4q63: False
+               - nace4q71: False
+               - nace4q72: False
+               - nace4q73: False
+               - nace4q74: False
+               - nace4q75: False
+               - nace4q81: False
+               - nace4q82: False
+               - nace4q83: False
+               - nace4q91: False
+               - nace4q92: False
+               - nace4q93: False
+               - nace4q94: False
+               - nace4q95: False
+               - nace4q96: False
+               - nace5q1: False
+               - nace5q11: False
+               - nace5q12: False
+               - nace5q13: False
+               - nace5q14: False
+               - nace5q21: False
+               - nace5q22: False
+               - nace5q23: False
+               - nace5q24: False
+               - nace5q25: False
+               - nace5q26: False
+               - nace5q31: False
+               - nace5q32: False
+               - nace5q33: False
+               - nace5q34: False
+               - nace5q35: False
+               - nace5q41: False
+               - nace5q42: False
+               - nace5q43: False
+               - nace5q44: False
+               - nace5q51: False
+               - nace5q52: False
+               - nace5q53: False
+               - nace5q54: False
+               - nace5q61: False
+               - nace5q62: False
+               - nace5q63: False
+               - nace5q71: False
+               - nace5q72: False
+               - nace5q73: False
+               - nace5q74: False
+               - nace5q75: False
+               - nace5q81: False
+               - nace5q82: False
+               - nace5q83: False
+               - nace5q91: False
+               - nace5q92: False
+               - nace5q93: False
+               - nace5q94: False
+               - nace5q95: False
+               - nace5q96: False
+                              
+               
+               
+####################################################################
+##  Thanks to this process individuals keep they job from their previous period, in case employment in their segment in not declining in absolute terms. This means that 
+##  employment in the previous period minus replacement demand is not smaller bigger than employment in the current period. 
+####################################################################
+               
+            employment_nace():               
+################################### Nace2  
+# Nace 2
+               - nace2q1: if(ea and not employed, align_abs(nace2q1_score, N2q1, filter=nace1y==2 and qual1y==1),False)
+               - nace2q11: if(ea and not employed, align_abs(nace2q1_score, N2q11, filter=nace1y==2 and qual1y==11),False)
+               - nace2q12: if(ea and not employed, align_abs(nace2q1_score, N2q12, filter=nace1y==2 and qual1y==12),False)
+               - nace2q13: if(ea and not employed, align_abs(nace2q1_score, N2q13, filter=nace1y==2 and qual1y==13),False)
+               - nace2q14: if(ea and not employed, align_abs(nace2q1_score, N2q14, filter=nace1y==2 and qual1y==14),False)
+               - nace2q21: if(ea and not employed, align_abs(nace2q1_score, N2q21, filter=nace1y==2 and qual1y==21),False)
+               - nace2q22: if(ea and not employed, align_abs(nace2q1_score, N2q22, filter=nace1y==2 and qual1y==22),False)
+               - nace2q23: if(ea and not employed, align_abs(nace2q1_score, N2q23, filter=nace1y==2 and qual1y==23),False)
+               - nace2q24: if(ea and not employed, align_abs(nace2q1_score, N2q24, filter=nace1y==2 and qual1y==24),False)
+               - nace2q25: if(ea and not employed, align_abs(nace2q1_score, N2q25, filter=nace1y==2 and qual1y==25),False)
+               - nace2q26: if(ea and not employed, align_abs(nace2q1_score, N2q26, filter=nace1y==2 and qual1y==26),False)
+               - nace2q31: if(ea and not employed, align_abs(nace2q1_score, N2q31, filter=nace1y==2 and qual1y==31),False)
+               - nace2q32: if(ea and not employed, align_abs(nace2q1_score, N2q32, filter=nace1y==2 and qual1y==32),False)
+               - nace2q33: if(ea and not employed, align_abs(nace2q1_score, N2q33, filter=nace1y==2 and qual1y==33),False)
+               - nace2q34: if(ea and not employed, align_abs(nace2q1_score, N2q34, filter=nace1y==2 and qual1y==34),False)
+               - nace2q35: if(ea and not employed, align_abs(nace2q1_score, N2q35, filter=nace1y==2 and qual1y==35),False)
+               - nace2q41: if(ea and not employed, align_abs(nace2q1_score, N2q41, filter=nace1y==2 and qual1y==41),False)
+               - nace2q42: if(ea and not employed, align_abs(nace2q1_score, N2q42, filter=nace1y==2 and qual1y==42),False)
+               - nace2q43: if(ea and not employed, align_abs(nace2q1_score, N2q43, filter=nace1y==2 and qual1y==43),False)
+               - nace2q44: if(ea and not employed, align_abs(nace2q1_score, N2q44, filter=nace1y==2 and qual1y==44),False)
+               - nace2q51: if(ea and not employed, align_abs(nace2q1_score, N2q51, filter=nace1y==2 and qual1y==51),False)
+               - nace2q52: if(ea and not employed, align_abs(nace2q1_score, N2q52, filter=nace1y==2 and qual1y==52),False)
+               - nace2q53: if(ea and not employed, align_abs(nace2q1_score, N2q53, filter=nace1y==2 and qual1y==53),False)
+               - nace2q54: if(ea and not employed, align_abs(nace2q1_score, N2q54, filter=nace1y==2 and qual1y==54),False)
+               - nace2q61: if(ea and not employed, align_abs(nace2q1_score, N2q61, filter=nace1y==2 and qual1y==61),False)
+               - nace2q62: if(ea and not employed, align_abs(nace2q1_score, N2q62, filter=nace1y==2 and qual1y==62),False)
+               - nace2q63: if(ea and not employed, align_abs(nace2q1_score, N2q63, filter=nace1y==2 and qual1y==63),False)
+               - nace2q71: if(ea and not employed, align_abs(nace2q1_score, N2q71, filter=nace1y==2 and qual1y==71),False)
+               - nace2q72: if(ea and not employed, align_abs(nace2q1_score, N2q72, filter=nace1y==2 and qual1y==72),False)
+               - nace2q73: if(ea and not employed, align_abs(nace2q1_score, N2q73, filter=nace1y==2 and qual1y==73),False)
+               - nace2q74: if(ea and not employed, align_abs(nace2q1_score, N2q74, filter=nace1y==2 and qual1y==74),False)
+               - nace2q75: if(ea and not employed, align_abs(nace2q1_score, N2q75, filter=nace1y==2 and qual1y==75),False)
+               - nace2q81: if(ea and not employed, align_abs(nace2q1_score, N2q81, filter=nace1y==2 and qual1y==81),False)
+               - nace2q82: if(ea and not employed, align_abs(nace2q1_score, N2q82, filter=nace1y==2 and qual1y==82),False)
+               - nace2q83: if(ea and not employed, align_abs(nace2q1_score, N2q83, filter=nace1y==2 and qual1y==83),False)
+               - nace2q91: if(ea and not employed, align_abs(nace2q1_score, N2q91, filter=nace1y==2 and qual1y==91),False)
+               - nace2q92: if(ea and not employed, align_abs(nace2q1_score, N2q92, filter=nace1y==2 and qual1y==92),False)
+               - nace2q93: if(ea and not employed, align_abs(nace2q1_score, N2q93, filter=nace1y==2 and qual1y==93),False)
+               - nace2q94: if(ea and not employed, align_abs(nace2q1_score, N2q94, filter=nace1y==2 and qual1y==94),False)
+               - nace2q95: if(ea and not employed, align_abs(nace2q1_score, N2q95, filter=nace1y==2 and qual1y==95),False)
+               - nace2q96: if(ea and not employed, align_abs(nace2q1_score, N2q96, filter=nace1y==2 and qual1y==96),False)
+               - employed: if(nace2q1,True, employed) 
+               - employed: if(nace2q11,True, employed) 
+               - employed: if(nace2q12,True, employed) 
+               - employed: if(nace2q13,True, employed) 
+               - employed: if(nace2q14,True, employed) 
+               - employed: if(nace2q21,True, employed) 
+               - employed: if(nace2q22,True, employed) 
+               - employed: if(nace2q23,True, employed) 
+               - employed: if(nace2q24,True, employed) 
+               - employed: if(nace2q25,True, employed) 
+               - employed: if(nace2q26,True, employed) 
+               - employed: if(nace2q31,True, employed) 
+               - employed: if(nace2q32,True, employed) 
+               - employed: if(nace2q33,True, employed) 
+               - employed: if(nace2q34,True, employed) 
+               - employed: if(nace2q35,True, employed) 
+               - employed: if(nace2q41,True, employed) 
+               - employed: if(nace2q42,True, employed) 
+               - employed: if(nace2q43,True, employed) 
+               - employed: if(nace2q44,True, employed) 
+               - employed: if(nace2q51,True, employed) 
+               - employed: if(nace2q52,True, employed) 
+               - employed: if(nace2q53,True, employed) 
+               - employed: if(nace2q54,True, employed) 
+               - employed: if(nace2q61,True, employed) 
+               - employed: if(nace2q62,True, employed) 
+               - employed: if(nace2q63,True, employed) 
+               - employed: if(nace2q71,True, employed) 
+               - employed: if(nace2q72,True, employed) 
+               - employed: if(nace2q73,True, employed) 
+               - employed: if(nace2q74,True, employed) 
+               - employed: if(nace2q75,True, employed) 
+               - employed: if(nace2q81,True, employed) 
+               - employed: if(nace2q82,True, employed) 
+               - employed: if(nace2q83,True, employed) 
+               - employed: if(nace2q91,True, employed) 
+               - employed: if(nace2q92,True, employed) 
+               - employed: if(nace2q93,True, employed) 
+               - employed: if(nace2q94,True, employed) 
+               - employed: if(nace2q95,True, employed) 
+               - employed: if(nace2q96,True, employed) 
+               
+# Nace 4               
+               - nace4q1: if(ea and not employed, align_abs(nace4q1_score, N4q1, filter=nace1y==4 and qual1y==1),False)
+               - nace4q11: if(ea and not employed, align_abs(nace4q1_score, N4q11, filter=nace1y==4 and qual1y==11),False)
+               - nace4q12: if(ea and not employed, align_abs(nace4q1_score, N4q12, filter=nace1y==4 and qual1y==12),False)
+               - nace4q13: if(ea and not employed, align_abs(nace4q1_score, N4q13, filter=nace1y==4 and qual1y==13),False)
+               - nace4q14: if(ea and not employed, align_abs(nace4q1_score, N4q14, filter=nace1y==4 and qual1y==14),False)
+               - nace4q21: if(ea and not employed, align_abs(nace4q1_score, N4q21, filter=nace1y==4 and qual1y==21),False)
+               - nace4q22: if(ea and not employed, align_abs(nace4q1_score, N4q22, filter=nace1y==4 and qual1y==22),False)
+               - nace4q23: if(ea and not employed, align_abs(nace4q1_score, N4q23, filter=nace1y==4 and qual1y==23),False)
+               - nace4q24: if(ea and not employed, align_abs(nace4q1_score, N4q24, filter=nace1y==4 and qual1y==24),False)
+               - nace4q25: if(ea and not employed, align_abs(nace4q1_score, N4q25, filter=nace1y==4 and qual1y==25),False)
+               - nace4q26: if(ea and not employed, align_abs(nace4q1_score, N4q26, filter=nace1y==4 and qual1y==26),False)
+               - nace4q31: if(ea and not employed, align_abs(nace4q1_score, N4q31, filter=nace1y==4 and qual1y==31),False)
+               - nace4q32: if(ea and not employed, align_abs(nace4q1_score, N4q32, filter=nace1y==4 and qual1y==32),False)
+               - nace4q33: if(ea and not employed, align_abs(nace4q1_score, N4q33, filter=nace1y==4 and qual1y==33),False)
+               - nace4q34: if(ea and not employed, align_abs(nace4q1_score, N4q34, filter=nace1y==4 and qual1y==34),False)
+               - nace4q35: if(ea and not employed, align_abs(nace4q1_score, N4q35, filter=nace1y==4 and qual1y==35),False)
+               - nace4q41: if(ea and not employed, align_abs(nace4q1_score, N4q41, filter=nace1y==4 and qual1y==41),False)
+               - nace4q42: if(ea and not employed, align_abs(nace4q1_score, N4q42, filter=nace1y==4 and qual1y==42),False)
+               - nace4q43: if(ea and not employed, align_abs(nace4q1_score, N4q43, filter=nace1y==4 and qual1y==43),False)
+               - nace4q44: if(ea and not employed, align_abs(nace4q1_score, N4q44, filter=nace1y==4 and qual1y==44),False)
+               - nace4q51: if(ea and not employed, align_abs(nace4q1_score, N4q51, filter=nace1y==4 and qual1y==51),False)
+               - nace4q52: if(ea and not employed, align_abs(nace4q1_score, N4q52, filter=nace1y==4 and qual1y==52),False)
+               - nace4q53: if(ea and not employed, align_abs(nace4q1_score, N4q53, filter=nace1y==4 and qual1y==53),False)
+               - nace4q54: if(ea and not employed, align_abs(nace4q1_score, N4q54, filter=nace1y==4 and qual1y==54),False)
+               - nace4q61: if(ea and not employed, align_abs(nace4q1_score, N4q61, filter=nace1y==4 and qual1y==61),False)
+               - nace4q62: if(ea and not employed, align_abs(nace4q1_score, N4q62, filter=nace1y==4 and qual1y==62),False)
+               - nace4q63: if(ea and not employed, align_abs(nace4q1_score, N4q63, filter=nace1y==4 and qual1y==63),False)
+               - nace4q71: if(ea and not employed, align_abs(nace4q1_score, N4q71, filter=nace1y==4 and qual1y==71),False)
+               - nace4q72: if(ea and not employed, align_abs(nace4q1_score, N4q72, filter=nace1y==4 and qual1y==72),False)
+               - nace4q73: if(ea and not employed, align_abs(nace4q1_score, N4q73, filter=nace1y==4 and qual1y==73),False)
+               - nace4q74: if(ea and not employed, align_abs(nace4q1_score, N4q74, filter=nace1y==4 and qual1y==74),False)
+               - nace4q75: if(ea and not employed, align_abs(nace4q1_score, N4q75, filter=nace1y==4 and qual1y==75),False)
+               - nace4q81: if(ea and not employed, align_abs(nace4q1_score, N4q81, filter=nace1y==4 and qual1y==81),False)
+               - nace4q82: if(ea and not employed, align_abs(nace4q1_score, N4q82, filter=nace1y==4 and qual1y==82),False)
+               - nace4q83: if(ea and not employed, align_abs(nace4q1_score, N4q83, filter=nace1y==4 and qual1y==83),False)
+               - nace4q91: if(ea and not employed, align_abs(nace4q1_score, N4q91, filter=nace1y==4 and qual1y==91),False)
+               - nace4q92: if(ea and not employed, align_abs(nace4q1_score, N4q92, filter=nace1y==4 and qual1y==92),False)
+               - nace4q93: if(ea and not employed, align_abs(nace4q1_score, N4q93, filter=nace1y==4 and qual1y==93),False)
+               - nace4q94: if(ea and not employed, align_abs(nace4q1_score, N4q94, filter=nace1y==4 and qual1y==94),False)
+               - nace4q95: if(ea and not employed, align_abs(nace4q1_score, N4q95, filter=nace1y==4 and qual1y==95),False)
+               - nace4q96: if(ea and not employed, align_abs(nace4q1_score, N4q96, filter=nace1y==4 and qual1y==96),False)
+               - employed: if(nace4q1,True, employed) 
+               - employed: if(nace4q11,True, employed) 
+               - employed: if(nace4q12,True, employed) 
+               - employed: if(nace4q13,True, employed) 
+               - employed: if(nace4q14,True, employed) 
+               - employed: if(nace4q21,True, employed) 
+               - employed: if(nace4q22,True, employed) 
+               - employed: if(nace4q23,True, employed) 
+               - employed: if(nace4q24,True, employed) 
+               - employed: if(nace4q25,True, employed) 
+               - employed: if(nace4q26,True, employed) 
+               - employed: if(nace4q31,True, employed) 
+               - employed: if(nace4q32,True, employed) 
+               - employed: if(nace4q33,True, employed) 
+               - employed: if(nace4q34,True, employed) 
+               - employed: if(nace4q35,True, employed) 
+               - employed: if(nace4q41,True, employed) 
+               - employed: if(nace4q42,True, employed) 
+               - employed: if(nace4q43,True, employed) 
+               - employed: if(nace4q44,True, employed) 
+               - employed: if(nace4q51,True, employed) 
+               - employed: if(nace4q52,True, employed) 
+               - employed: if(nace4q53,True, employed) 
+               - employed: if(nace4q54,True, employed) 
+               - employed: if(nace4q61,True, employed) 
+               - employed: if(nace4q62,True, employed) 
+               - employed: if(nace4q63,True, employed) 
+               - employed: if(nace4q71,True, employed) 
+               - employed: if(nace4q72,True, employed) 
+               - employed: if(nace4q73,True, employed) 
+               - employed: if(nace4q74,True, employed) 
+               - employed: if(nace4q75,True, employed) 
+               - employed: if(nace4q81,True, employed) 
+               - employed: if(nace4q82,True, employed) 
+               - employed: if(nace4q83,True, employed) 
+               - employed: if(nace4q91,True, employed) 
+               - employed: if(nace4q92,True, employed) 
+               - employed: if(nace4q93,True, employed) 
+               - employed: if(nace4q94,True, employed) 
+               - employed: if(nace4q95,True, employed) 
+               - employed: if(nace4q96,True, employed) 
+# Nace 3
+               - nace3q1: if(ea and not employed, align_abs(nace3q1_score, N3q1, filter=nace1y==3 and qual1y==1),False)
+               - nace3q11: if(ea and not employed, align_abs(nace3q1_score, N3q11, filter=nace1y==3 and qual1y==11),False)
+               - nace3q12: if(ea and not employed, align_abs(nace3q1_score, N3q12, filter=nace1y==3 and qual1y==12),False)
+               - nace3q13: if(ea and not employed, align_abs(nace3q1_score, N3q13, filter=nace1y==3 and qual1y==13),False)
+               - nace3q14: if(ea and not employed, align_abs(nace3q1_score, N3q14, filter=nace1y==3 and qual1y==14),False)
+               - nace3q21: if(ea and not employed, align_abs(nace3q1_score, N3q21, filter=nace1y==3 and qual1y==21),False)
+               - nace3q22: if(ea and not employed, align_abs(nace3q1_score, N3q22, filter=nace1y==3 and qual1y==22),False)
+               - nace3q23: if(ea and not employed, align_abs(nace3q1_score, N3q23, filter=nace1y==3 and qual1y==23),False)
+               - nace3q24: if(ea and not employed, align_abs(nace3q1_score, N3q24, filter=nace1y==3 and qual1y==24),False)
+               - nace3q25: if(ea and not employed, align_abs(nace3q1_score, N3q25, filter=nace1y==3 and qual1y==25),False)
+               - nace3q26: if(ea and not employed, align_abs(nace3q1_score, N3q26, filter=nace1y==3 and qual1y==26),False)
+               - nace3q31: if(ea and not employed, align_abs(nace3q1_score, N3q31, filter=nace1y==3 and qual1y==31),False)
+               - nace3q32: if(ea and not employed, align_abs(nace3q1_score, N3q32, filter=nace1y==3 and qual1y==32),False)
+               - nace3q33: if(ea and not employed, align_abs(nace3q1_score, N3q33, filter=nace1y==3 and qual1y==33),False)
+               - nace3q34: if(ea and not employed, align_abs(nace3q1_score, N3q34, filter=nace1y==3 and qual1y==34),False)
+               - nace3q35: if(ea and not employed, align_abs(nace3q1_score, N3q35, filter=nace1y==3 and qual1y==35),False)
+               - nace3q41: if(ea and not employed, align_abs(nace3q1_score, N3q41, filter=nace1y==3 and qual1y==41),False)
+               - nace3q42: if(ea and not employed, align_abs(nace3q1_score, N3q42, filter=nace1y==3 and qual1y==42),False)
+               - nace3q43: if(ea and not employed, align_abs(nace3q1_score, N3q43, filter=nace1y==3 and qual1y==43),False)
+               - nace3q44: if(ea and not employed, align_abs(nace3q1_score, N3q44, filter=nace1y==3 and qual1y==44),False)
+               - nace3q51: if(ea and not employed, align_abs(nace3q1_score, N3q51, filter=nace1y==3 and qual1y==51),False)
+               - nace3q52: if(ea and not employed, align_abs(nace3q1_score, N3q52, filter=nace1y==3 and qual1y==52),False)
+               - nace3q53: if(ea and not employed, align_abs(nace3q1_score, N3q53, filter=nace1y==3 and qual1y==53),False)
+               - nace3q54: if(ea and not employed, align_abs(nace3q1_score, N3q54, filter=nace1y==3 and qual1y==54),False)
+               - nace3q61: if(ea and not employed, align_abs(nace3q1_score, N3q61, filter=nace1y==3 and qual1y==61),False)
+               - nace3q62: if(ea and not employed, align_abs(nace3q1_score, N3q62, filter=nace1y==3 and qual1y==62),False)
+               - nace3q63: if(ea and not employed, align_abs(nace3q1_score, N3q63, filter=nace1y==3 and qual1y==63),False)
+               - nace3q71: if(ea and not employed, align_abs(nace3q1_score, N3q71, filter=nace1y==3 and qual1y==71),False)
+               - nace3q72: if(ea and not employed, align_abs(nace3q1_score, N3q72, filter=nace1y==3 and qual1y==72),False)
+               - nace3q73: if(ea and not employed, align_abs(nace3q1_score, N3q73, filter=nace1y==3 and qual1y==73),False)
+               - nace3q74: if(ea and not employed, align_abs(nace3q1_score, N3q74, filter=nace1y==3 and qual1y==74),False)
+               - nace3q75: if(ea and not employed, align_abs(nace3q1_score, N3q75, filter=nace1y==3 and qual1y==75),False)
+               - nace3q81: if(ea and not employed, align_abs(nace3q1_score, N3q81, filter=nace1y==3 and qual1y==81),False)
+               - nace3q82: if(ea and not employed, align_abs(nace3q1_score, N3q82, filter=nace1y==3 and qual1y==82),False)
+               - nace3q83: if(ea and not employed, align_abs(nace3q1_score, N3q83, filter=nace1y==3 and qual1y==83),False)
+               - nace3q91: if(ea and not employed, align_abs(nace3q1_score, N3q91, filter=nace1y==3 and qual1y==91),False)
+               - nace3q92: if(ea and not employed, align_abs(nace3q1_score, N3q92, filter=nace1y==3 and qual1y==92),False)
+               - nace3q93: if(ea and not employed, align_abs(nace3q1_score, N3q93, filter=nace1y==3 and qual1y==93),False)
+               - nace3q94: if(ea and not employed, align_abs(nace3q1_score, N3q94, filter=nace1y==3 and qual1y==94),False)
+               - nace3q95: if(ea and not employed, align_abs(nace3q1_score, N3q95, filter=nace1y==3 and qual1y==95),False)
+               - nace3q96: if(ea and not employed, align_abs(nace3q1_score, N3q96, filter=nace1y==3 and qual1y==96),False)
+               - employed: if(nace3q1,True, employed) 
+               - employed: if(nace3q11,True, employed) 
+               - employed: if(nace3q12,True, employed) 
+               - employed: if(nace3q13,True, employed) 
+               - employed: if(nace3q14,True, employed) 
+               - employed: if(nace3q21,True, employed) 
+               - employed: if(nace3q22,True, employed) 
+               - employed: if(nace3q23,True, employed) 
+               - employed: if(nace3q24,True, employed) 
+               - employed: if(nace3q25,True, employed) 
+               - employed: if(nace3q26,True, employed) 
+               - employed: if(nace3q31,True, employed) 
+               - employed: if(nace3q32,True, employed) 
+               - employed: if(nace3q33,True, employed) 
+               - employed: if(nace3q34,True, employed) 
+               - employed: if(nace3q35,True, employed) 
+               - employed: if(nace3q41,True, employed) 
+               - employed: if(nace3q42,True, employed) 
+               - employed: if(nace3q43,True, employed) 
+               - employed: if(nace3q44,True, employed) 
+               - employed: if(nace3q51,True, employed) 
+               - employed: if(nace3q52,True, employed) 
+               - employed: if(nace3q53,True, employed) 
+               - employed: if(nace3q54,True, employed) 
+               - employed: if(nace3q61,True, employed) 
+               - employed: if(nace3q62,True, employed) 
+               - employed: if(nace3q63,True, employed) 
+               - employed: if(nace3q71,True, employed) 
+               - employed: if(nace3q72,True, employed) 
+               - employed: if(nace3q73,True, employed) 
+               - employed: if(nace3q74,True, employed) 
+               - employed: if(nace3q75,True, employed) 
+               - employed: if(nace3q81,True, employed) 
+               - employed: if(nace3q82,True, employed) 
+               - employed: if(nace3q83,True, employed) 
+               - employed: if(nace3q91,True, employed) 
+               - employed: if(nace3q92,True, employed) 
+               - employed: if(nace3q93,True, employed) 
+               - employed: if(nace3q94,True, employed) 
+               - employed: if(nace3q95,True, employed) 
+               - employed: if(nace3q96,True, employed) 
+ 
+# Nace 5  
+               - nace5q1: if(ea and not employed, align_abs(nace5q1_score, N5q1, filter=nace1y==5 and qual1y==1),False)
+               - nace5q11: if(ea and not employed, align_abs(nace5q1_score, N5q11, filter=nace1y==5 and qual1y==11),False)
+               - nace5q12: if(ea and not employed, align_abs(nace5q1_score, N5q12, filter=nace1y==5 and qual1y==12),False)
+               - nace5q13: if(ea and not employed, align_abs(nace5q1_score, N5q13, filter=nace1y==5 and qual1y==13),False)
+               - nace5q14: if(ea and not employed, align_abs(nace5q1_score, N5q14, filter=nace1y==5 and qual1y==14),False)
+               - nace5q21: if(ea and not employed, align_abs(nace5q1_score, N5q21, filter=nace1y==5 and qual1y==21),False)
+               - nace5q22: if(ea and not employed, align_abs(nace5q1_score, N5q22, filter=nace1y==5 and qual1y==22),False)
+               - nace5q23: if(ea and not employed, align_abs(nace5q1_score, N5q23, filter=nace1y==5 and qual1y==23),False)
+               - nace5q24: if(ea and not employed, align_abs(nace5q1_score, N5q24, filter=nace1y==5 and qual1y==24),False)
+               - nace5q25: if(ea and not employed, align_abs(nace5q1_score, N5q25, filter=nace1y==5 and qual1y==25),False)
+               - nace5q26: if(ea and not employed, align_abs(nace5q1_score, N5q26, filter=nace1y==5 and qual1y==26),False)
+               - nace5q31: if(ea and not employed, align_abs(nace5q1_score, N5q31, filter=nace1y==5 and qual1y==31),False)
+               - nace5q32: if(ea and not employed, align_abs(nace5q1_score, N5q32, filter=nace1y==5 and qual1y==32),False)
+               - nace5q33: if(ea and not employed, align_abs(nace5q1_score, N5q33, filter=nace1y==5 and qual1y==33),False)
+               - nace5q34: if(ea and not employed, align_abs(nace5q1_score, N5q34, filter=nace1y==5 and qual1y==34),False)
+               - nace5q35: if(ea and not employed, align_abs(nace5q1_score, N5q35, filter=nace1y==5 and qual1y==35),False)
+               - nace5q41: if(ea and not employed, align_abs(nace5q1_score, N5q41, filter=nace1y==5 and qual1y==41),False)
+               - nace5q42: if(ea and not employed, align_abs(nace5q1_score, N5q42, filter=nace1y==5 and qual1y==42),False)
+               - nace5q43: if(ea and not employed, align_abs(nace5q1_score, N5q43, filter=nace1y==5 and qual1y==43),False)
+               - nace5q44: if(ea and not employed, align_abs(nace5q1_score, N5q44, filter=nace1y==5 and qual1y==44),False)
+               - nace5q51: if(ea and not employed, align_abs(nace5q1_score, N5q51, filter=nace1y==5 and qual1y==51),False)
+               - nace5q52: if(ea and not employed, align_abs(nace5q1_score, N5q52, filter=nace1y==5 and qual1y==52),False)
+               - nace5q53: if(ea and not employed, align_abs(nace5q1_score, N5q53, filter=nace1y==5 and qual1y==53),False)
+               - nace5q54: if(ea and not employed, align_abs(nace5q1_score, N5q54, filter=nace1y==5 and qual1y==54),False)
+               - nace5q61: if(ea and not employed, align_abs(nace5q1_score, N5q61, filter=nace1y==5 and qual1y==61),False)
+               - nace5q62: if(ea and not employed, align_abs(nace5q1_score, N5q62, filter=nace1y==5 and qual1y==62),False)
+               - nace5q63: if(ea and not employed, align_abs(nace5q1_score, N5q63, filter=nace1y==5 and qual1y==63),False)
+               - nace5q71: if(ea and not employed, align_abs(nace5q1_score, N5q71, filter=nace1y==5 and qual1y==71),False)
+               - nace5q72: if(ea and not employed, align_abs(nace5q1_score, N5q72, filter=nace1y==5 and qual1y==72),False)
+               - nace5q73: if(ea and not employed, align_abs(nace5q1_score, N5q73, filter=nace1y==5 and qual1y==73),False)
+               - nace5q74: if(ea and not employed, align_abs(nace5q1_score, N5q74, filter=nace1y==5 and qual1y==74),False)
+               - nace5q75: if(ea and not employed, align_abs(nace5q1_score, N5q75, filter=nace1y==5 and qual1y==75),False)
+               - nace5q81: if(ea and not employed, align_abs(nace5q1_score, N5q81, filter=nace1y==5 and qual1y==81),False)
+               - nace5q82: if(ea and not employed, align_abs(nace5q1_score, N5q82, filter=nace1y==5 and qual1y==82),False)
+               - nace5q83: if(ea and not employed, align_abs(nace5q1_score, N5q83, filter=nace1y==5 and qual1y==83),False)
+               - nace5q91: if(ea and not employed, align_abs(nace5q1_score, N5q91, filter=nace1y==5 and qual1y==91),False)
+               - nace5q92: if(ea and not employed, align_abs(nace5q1_score, N5q92, filter=nace1y==5 and qual1y==92),False)
+               - nace5q93: if(ea and not employed, align_abs(nace5q1_score, N5q93, filter=nace1y==5 and qual1y==93),False)
+               - nace5q94: if(ea and not employed, align_abs(nace5q1_score, N5q94, filter=nace1y==5 and qual1y==94),False)
+               - nace5q95: if(ea and not employed, align_abs(nace5q1_score, N5q95, filter=nace1y==5 and qual1y==95),False)
+               - nace5q96: if(ea and not employed, align_abs(nace5q1_score, N5q96, filter=nace1y==5 and qual1y==96),False)
+               - employed: if(nace5q1,True, employed) 
+               - employed: if(nace5q11,True, employed) 
+               - employed: if(nace5q12,True, employed) 
+               - employed: if(nace5q13,True, employed) 
+               - employed: if(nace5q14,True, employed) 
+               - employed: if(nace5q21,True, employed) 
+               - employed: if(nace5q22,True, employed) 
+               - employed: if(nace5q23,True, employed) 
+               - employed: if(nace5q24,True, employed) 
+               - employed: if(nace5q25,True, employed) 
+               - employed: if(nace5q26,True, employed) 
+               - employed: if(nace5q31,True, employed) 
+               - employed: if(nace5q32,True, employed) 
+               - employed: if(nace5q33,True, employed) 
+               - employed: if(nace5q34,True, employed) 
+               - employed: if(nace5q35,True, employed) 
+               - employed: if(nace5q41,True, employed) 
+               - employed: if(nace5q42,True, employed) 
+               - employed: if(nace5q43,True, employed) 
+               - employed: if(nace5q44,True, employed) 
+               - employed: if(nace5q51,True, employed) 
+               - employed: if(nace5q52,True, employed) 
+               - employed: if(nace5q53,True, employed) 
+               - employed: if(nace5q54,True, employed) 
+               - employed: if(nace5q61,True, employed) 
+               - employed: if(nace5q62,True, employed) 
+               - employed: if(nace5q63,True, employed) 
+               - employed: if(nace5q71,True, employed) 
+               - employed: if(nace5q72,True, employed) 
+               - employed: if(nace5q73,True, employed) 
+               - employed: if(nace5q74,True, employed) 
+               - employed: if(nace5q75,True, employed) 
+               - employed: if(nace5q81,True, employed) 
+               - employed: if(nace5q82,True, employed) 
+               - employed: if(nace5q83,True, employed) 
+               - employed: if(nace5q91,True, employed) 
+               - employed: if(nace5q92,True, employed) 
+               - employed: if(nace5q93,True, employed) 
+               - employed: if(nace5q94,True, employed) 
+               - employed: if(nace5q95,True, employed) 
+               - employed: if(nace5q96,True, employed) 
+
+# Nace 1
+               - nace1q1: if(ea and not employed, align_abs(nace1q1_score, N1q1, filter=nace1y==1 and qual1y==1),False)
+               - nace1q11: if(ea and not employed, align_abs(nace1q1_score, N1q11, filter=nace1y==1 and qual1y==11),False)
+               - nace1q12: if(ea and not employed, align_abs(nace1q1_score, N1q12, filter=nace1y==1 and qual1y==12),False)
+               - nace1q13: if(ea and not employed, align_abs(nace1q1_score, N1q13, filter=nace1y==1 and qual1y==13),False)
+               - nace1q14: if(ea and not employed, align_abs(nace1q1_score, N1q14, filter=nace1y==1 and qual1y==14),False)
+               - nace1q21: if(ea and not employed, align_abs(nace1q1_score, N1q21, filter=nace1y==1 and qual1y==21),False)
+               - nace1q22: if(ea and not employed, align_abs(nace1q1_score, N1q22, filter=nace1y==1 and qual1y==22),False)
+               - nace1q23: if(ea and not employed, align_abs(nace1q1_score, N1q23, filter=nace1y==1 and qual1y==23),False)
+               - nace1q24: if(ea and not employed, align_abs(nace1q1_score, N1q24, filter=nace1y==1 and qual1y==24),False)
+               - nace1q25: if(ea and not employed, align_abs(nace1q1_score, N1q25, filter=nace1y==1 and qual1y==25),False)
+               - nace1q26: if(ea and not employed, align_abs(nace1q1_score, N1q26, filter=nace1y==1 and qual1y==26),False)
+               - nace1q31: if(ea and not employed, align_abs(nace1q1_score, N1q31, filter=nace1y==1 and qual1y==31),False)
+               - nace1q32: if(ea and not employed, align_abs(nace1q1_score, N1q32, filter=nace1y==1 and qual1y==32),False)
+               - nace1q33: if(ea and not employed, align_abs(nace1q1_score, N1q33, filter=nace1y==1 and qual1y==33),False)
+               - nace1q34: if(ea and not employed, align_abs(nace1q1_score, N1q34, filter=nace1y==1 and qual1y==34),False)
+               - nace1q35: if(ea and not employed, align_abs(nace1q1_score, N1q35, filter=nace1y==1 and qual1y==35),False)
+               - nace1q41: if(ea and not employed, align_abs(nace1q1_score, N1q41, filter=nace1y==1 and qual1y==41),False)
+               - nace1q42: if(ea and not employed, align_abs(nace1q1_score, N1q42, filter=nace1y==1 and qual1y==42),False)
+               - nace1q43: if(ea and not employed, align_abs(nace1q1_score, N1q43, filter=nace1y==1 and qual1y==43),False)
+               - nace1q44: if(ea and not employed, align_abs(nace1q1_score, N1q44, filter=nace1y==1 and qual1y==44),False)
+               - nace1q51: if(ea and not employed, align_abs(nace1q1_score, N1q51, filter=nace1y==1 and qual1y==51),False)
+               - nace1q52: if(ea and not employed, align_abs(nace1q1_score, N1q52, filter=nace1y==1 and qual1y==52),False)
+               - nace1q53: if(ea and not employed, align_abs(nace1q1_score, N1q53, filter=nace1y==1 and qual1y==53),False)
+               - nace1q54: if(ea and not employed, align_abs(nace1q1_score, N1q54, filter=nace1y==1 and qual1y==54),False)
+               - nace1q61: if(ea and not employed, align_abs(nace1q1_score, N1q61, filter=nace1y==1 and qual1y==61),False)
+               - nace1q62: if(ea and not employed, align_abs(nace1q1_score, N1q62, filter=nace1y==1 and qual1y==62),False)
+               - nace1q63: if(ea and not employed, align_abs(nace1q1_score, N1q63, filter=nace1y==1 and qual1y==63),False)
+               - nace1q71: if(ea and not employed, align_abs(nace1q1_score, N1q71, filter=nace1y==1 and qual1y==71),False)
+               - nace1q72: if(ea and not employed, align_abs(nace1q1_score, N1q72, filter=nace1y==1 and qual1y==72),False)
+               - nace1q73: if(ea and not employed, align_abs(nace1q1_score, N1q73, filter=nace1y==1 and qual1y==73),False)
+               - nace1q74: if(ea and not employed, align_abs(nace1q1_score, N1q74, filter=nace1y==1 and qual1y==74),False)
+               - nace1q75: if(ea and not employed, align_abs(nace1q1_score, N1q75, filter=nace1y==1 and qual1y==75),False)
+               - nace1q81: if(ea and not employed, align_abs(nace1q1_score, N1q81, filter=nace1y==1 and qual1y==81),False)
+               - nace1q82: if(ea and not employed, align_abs(nace1q1_score, N1q82, filter=nace1y==1 and qual1y==82),False)
+               - nace1q83: if(ea and not employed, align_abs(nace1q1_score, N1q83, filter=nace1y==1 and qual1y==83),False)
+               - nace1q91: if(ea and not employed, align_abs(nace1q1_score, N1q91, filter=nace1y==1 and qual1y==91),False)
+               - nace1q92: if(ea and not employed, align_abs(nace1q1_score, N1q92, filter=nace1y==1 and qual1y==92),False)
+               - nace1q93: if(ea and not employed, align_abs(nace1q1_score, N1q93, filter=nace1y==1 and qual1y==93),False)
+               - nace1q94: if(ea and not employed, align_abs(nace1q1_score, N1q94, filter=nace1y==1 and qual1y==94),False)
+               - nace1q95: if(ea and not employed, align_abs(nace1q1_score, N1q95, filter=nace1y==1 and qual1y==95),False)
+               - nace1q96: if(ea and not employed, align_abs(nace1q1_score, N1q96, filter=nace1y==1 and qual1y==96),False)
+               - employed: if(nace1q1,True, employed) 
+               - employed: if(nace1q11,True, employed) 
+               - employed: if(nace1q12,True, employed) 
+               - employed: if(nace1q13,True, employed) 
+               - employed: if(nace1q14,True, employed) 
+               - employed: if(nace1q21,True, employed) 
+               - employed: if(nace1q22,True, employed) 
+               - employed: if(nace1q23,True, employed) 
+               - employed: if(nace1q24,True, employed) 
+               - employed: if(nace1q25,True, employed) 
+               - employed: if(nace1q26,True, employed) 
+               - employed: if(nace1q31,True, employed) 
+               - employed: if(nace1q32,True, employed) 
+               - employed: if(nace1q33,True, employed) 
+               - employed: if(nace1q34,True, employed) 
+               - employed: if(nace1q35,True, employed) 
+               - employed: if(nace1q41,True, employed) 
+               - employed: if(nace1q42,True, employed) 
+               - employed: if(nace1q43,True, employed) 
+               - employed: if(nace1q44,True, employed) 
+               - employed: if(nace1q51,True, employed) 
+               - employed: if(nace1q52,True, employed) 
+               - employed: if(nace1q53,True, employed) 
+               - employed: if(nace1q54,True, employed) 
+               - employed: if(nace1q61,True, employed) 
+               - employed: if(nace1q62,True, employed) 
+               - employed: if(nace1q63,True, employed) 
+               - employed: if(nace1q71,True, employed) 
+               - employed: if(nace1q72,True, employed) 
+               - employed: if(nace1q73,True, employed) 
+               - employed: if(nace1q74,True, employed) 
+               - employed: if(nace1q75,True, employed) 
+               - employed: if(nace1q81,True, employed) 
+               - employed: if(nace1q82,True, employed) 
+               - employed: if(nace1q83,True, employed) 
+               - employed: if(nace1q91,True, employed) 
+               - employed: if(nace1q92,True, employed) 
+               - employed: if(nace1q93,True, employed) 
+               - employed: if(nace1q94,True, employed) 
+               - employed: if(nace1q95,True, employed) 
+               - employed: if(nace1q96,True, employed) 
+
+ 
+               
+####################################################################
+##  In the first step the pool of unemployed is defined as the share (by "unem_rate") from all unemployed not employable in the current period. The people are sorted with logit
+##  regression by gender, education level, age, last worked job and a random variable.
+##  The score is estimated using LFS microdata with command logit and dummy variables, alike in the case of the sectoral score. The command is below. Subsequently, the individual
+##  employable in this period are set the pool of employed (attribute “employed_pool”==True).
+##  In the second step entities in the pool of employed are matched with unfilled employment spots. Matching picks the most suitable individuals in terms of education level and 
+##  field of education for specific segment using the segment scores. Economic sectors are ordered for matching based on their average wage assuring that the sectors with a higher
+##  wage are filled in first. Qualification levels are being filled based on their order from one to four assuring the more qualified spots are filled first.
+##  Matching in a vague way conserves the educational structure of employed in the segment by allowing only combinations of educational level and field in the segment which were
+##  already present there in the initial data. These segment-specific combinations of education level and field are defined in the files 'align_naceXqY.csv'. These files are
+##  calculated from LFS. The matching function repeats three times by function "while". 
+##  The order of the economic sectors relevant for matching is displayed before proces employment_nace_score.
+####################################################################     
+
+                 
+################################### EMPLOYED POOL     
+          
+               - employed_p: if(ea and not employed, True,False)
+# logit IS_UNEMPLOYED ISFEMALE PRIMARY LOWER_SECONDARY UPPER_SECONDARY POST_SECONDARY L_AGRO L_MINING L_INDUSTRY L_ENERGY L_CONSTRUCTION L_MAR_SERVICES_1 L_MAR_SERVICES_2 L_PROF_AND_ADM_SERVICES L_NMAR_SERVICES L_OTHER AGEG17 AGEG22 AGEG27 AGEG32 AGEG37 AGEG42 AGEG47 AGEG52 AGEG57, iter(10)
+#               - unemployment_score: logit_score(ISFEMALE*(-0.5819451)+PRIMARY*(0.7559215)+LOWER_SECONDARY*(1.107135)+UPPER_SECONDARY*(0.5237)+POST_SECONDARY*(0.3833598)+L_AGRO*(-3.043158)+L_MINING*(-3.409798)+L_INDUSTRY*(-2.460522)+L_ENERGY*(-3.255119)+L_CONSTRUCTION*(-2.683088)+L_MAR_SERVICES_1*(-2.530065)+L_MAR_SERVICES_2*(-2.863698)+L_PROF_AND_ADM_SERVICES*(-2.550926)+L_NMAR_SERVICES*(-2.983274)+L_OTHER*(-2.350716)+AGEG17*(3.4841)+AGEG22*(5.380104)+AGEG27*(5.977154)+AGEG32*(5.851084)+AGEG37*(5.814531)+AGEG42*(5.936027)+AGEG47*(5.798941)+AGEG52*(5.753604)+AGEG57*(4.954982)+1*(-7.068521))
+               - unemployment_score: 1
+               - unemployment_score: if(status1y==2, unemployment_score+1, unemployment_score)
+               - unemployment_score: if(status1y==3, unemployment_score-0.5, unemployment_score)
+               - unemployed_pool: if(employed_p, 
+                                    if(country_b==1,align(unemployment_score, [unem_rate, 1-unem_rate], leave=student),align(unemployment_score, [unem_rate, 1-unem_rate], leave=student)),False)
+               - unemployed_pool: if(status1y==3 and unemployed_pool, False, unemployed_pool)
+               - unemployed_pool: if(status1y==3, align(unemployment_score, [unem_rate, 1-unem_rate]), unemployed_pool)
+               - employed_pool: if(ea and not employed and not unemployed_pool, True, False)
+
+               - j: 1
+               - i: 0.6               
+               - while j<=3: 
+               
+              
+################################### NACE 2     
+                    - nace2q1p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q1.csv'), False)
+                    - nace2q1: if(ea and employed_pool and count(nace2q1)<N2q1,
+                            if(count(nace2q1p)>N2q1-count(nace2q1), align_abs(nace2_score, (N2q1-count(nace2q1))*i, leave=nace2q1p==False),align_abs(nace2_score, (N2q1-count(nace2q1))*i, take=nace2q1p==True)),nace2q1)
+                    - employed: if(nace2q1,True, employed)
+                    - employed_pool: if(nace2q1,False, employed_pool)
+                    - nace2q11p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q11.csv'), False)
+                    - nace2q11: if(ea and employed_pool and count(nace2q11)<N2q11,
+                            if(count(nace2q11p)>N2q11-count(nace2q11), align_abs(nace2_score, (N2q11-count(nace2q11))*i, leave=nace2q11p==False),align_abs(nace2_score, (N2q11-count(nace2q11))*i, take=nace2q11p==True)),nace2q11)
+                    - employed: if(nace2q11,True, employed)
+                    - employed_pool: if(nace2q11,False, employed_pool)
+                    - nace2q12p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q12.csv'), False)
+                    - nace2q12: if(ea and employed_pool and count(nace2q12)<N2q12,
+                            if(count(nace2q12p)>N2q12-count(nace2q12), align_abs(nace2_score, (N2q12-count(nace2q12))*i, leave=nace2q12p==False),align_abs(nace2_score, (N2q12-count(nace2q12))*i, take=nace2q12p==True)),nace2q12)
+                    - employed: if(nace2q12,True, employed)
+                    - employed_pool: if(nace2q12,False, employed_pool)
+                    - nace2q13p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q13.csv'), False)
+                    - nace2q13: if(ea and employed_pool and count(nace2q13)<N2q13,
+                            if(count(nace2q13p)>N2q13-count(nace2q13), align_abs(nace2_score, (N2q13-count(nace2q13))*i, leave=nace2q13p==False),align_abs(nace2_score, (N2q13-count(nace2q13))*i, take=nace2q13p==True)),nace2q13)
+                    - employed: if(nace2q13,True, employed)
+                    - employed_pool: if(nace2q13,False, employed_pool)
+                    - nace2q14p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q14.csv'), False)
+                    - nace2q14: if(ea and employed_pool and count(nace2q14)<N2q14,
+                            if(count(nace2q14p)>N2q14-count(nace2q14), align_abs(nace2_score, (N2q14-count(nace2q14))*i, leave=nace2q14p==False),align_abs(nace2_score, (N2q14-count(nace2q14))*i, take=nace2q14p==True)),nace2q14)
+                    - employed: if(nace2q14,True, employed)
+                    - employed_pool: if(nace2q14,False, employed_pool)
+                    - nace2q21p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q21.csv'), False)
+                    - nace2q21: if(ea and employed_pool and count(nace2q21)<N2q21,
+                            if(count(nace2q21p)>N2q21-count(nace2q21), align_abs(nace2_score, (N2q21-count(nace2q21))*i, leave=nace2q21p==False),align_abs(nace2_score, (N2q21-count(nace2q21))*i, take=nace2q21p==True)),nace2q21)
+                    - employed: if(nace2q21,True, employed)
+                    - employed_pool: if(nace2q21,False, employed_pool)
+                    - nace2q22p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q22.csv'), False)
+                    - nace2q22: if(ea and employed_pool and count(nace2q22)<N2q22,
+                            if(count(nace2q22p)>N2q22-count(nace2q22), align_abs(nace2_score, (N2q22-count(nace2q22))*i, leave=nace2q22p==False),align_abs(nace2_score, (N2q22-count(nace2q22))*i, take=nace2q22p==True)),nace2q22)
+                    - employed: if(nace2q22,True, employed)
+                    - employed_pool: if(nace2q22,False, employed_pool)
+                    - nace2q23p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q23.csv'), False)
+                    - nace2q23: if(ea and employed_pool and count(nace2q23)<N2q23,
+                            if(count(nace2q23p)>N2q23-count(nace2q23), align_abs(nace2_score, (N2q23-count(nace2q23))*i, leave=nace2q23p==False),align_abs(nace2_score, (N2q23-count(nace2q23))*i, take=nace2q23p==True)),nace2q23)
+                    - employed: if(nace2q23,True, employed)
+                    - employed_pool: if(nace2q23,False, employed_pool)
+                    - nace2q24p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q24.csv'), False)
+                    - nace2q24: if(ea and employed_pool and count(nace2q24)<N2q24,
+                            if(count(nace2q24p)>N2q24-count(nace2q24), align_abs(nace2_score, (N2q24-count(nace2q24))*i, leave=nace2q24p==False),align_abs(nace2_score, (N2q24-count(nace2q24))*i, take=nace2q24p==True)),nace2q24)
+                    - employed: if(nace2q24,True, employed)
+                    - employed_pool: if(nace2q24,False, employed_pool)
+                    - nace2q25p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q25.csv'), False)
+                    - nace2q25: if(ea and employed_pool and count(nace2q25)<N2q25,
+                            if(count(nace2q25p)>N2q25-count(nace2q25), align_abs(nace2_score, (N2q25-count(nace2q25))*i, leave=nace2q25p==False),align_abs(nace2_score, (N2q25-count(nace2q25))*i, take=nace2q25p==True)),nace2q25)
+                    - employed: if(nace2q25,True, employed)
+                    - employed_pool: if(nace2q25,False, employed_pool)
+                    - nace2q26p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q26.csv'), False)
+                    - nace2q26: if(ea and employed_pool and count(nace2q26)<N2q26,
+                            if(count(nace2q26p)>N2q26-count(nace2q26), align_abs(nace2_score, (N2q26-count(nace2q26))*i, leave=nace2q26p==False),align_abs(nace2_score, (N2q26-count(nace2q26))*i, take=nace2q26p==True)),nace2q26)
+                    - employed: if(nace2q26,True, employed)
+                    - employed_pool: if(nace2q26,False, employed_pool)
+                    - nace2q31p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q31.csv'), False)
+                    - nace2q31: if(ea and employed_pool and count(nace2q31)<N2q31,
+                            if(count(nace2q31p)>N2q31-count(nace2q31), align_abs(nace2_score, (N2q31-count(nace2q31))*i, leave=nace2q31p==False),align_abs(nace2_score, (N2q31-count(nace2q31))*i, take=nace2q31p==True)),nace2q31)
+                    - employed: if(nace2q31,True, employed)
+                    - employed_pool: if(nace2q31,False, employed_pool)
+                    - nace2q32p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q32.csv'), False)
+                    - nace2q32: if(ea and employed_pool and count(nace2q32)<N2q32,
+                            if(count(nace2q32p)>N2q32-count(nace2q32), align_abs(nace2_score, (N2q32-count(nace2q32))*i, leave=nace2q32p==False),align_abs(nace2_score, (N2q32-count(nace2q32))*i, take=nace2q32p==True)),nace2q32)
+                    - employed: if(nace2q32,True, employed)
+                    - employed_pool: if(nace2q32,False, employed_pool)
+                    - nace2q33p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q33.csv'), False)
+                    - nace2q33: if(ea and employed_pool and count(nace2q33)<N2q33,
+                            if(count(nace2q33p)>N2q33-count(nace2q33), align_abs(nace2_score, (N2q33-count(nace2q33))*i, leave=nace2q33p==False),align_abs(nace2_score, (N2q33-count(nace2q33))*i, take=nace2q33p==True)),nace2q33)
+                    - employed: if(nace2q33,True, employed)
+                    - employed_pool: if(nace2q33,False, employed_pool)
+                    - nace2q34p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q34.csv'), False)
+                    - nace2q34: if(ea and employed_pool and count(nace2q34)<N2q34,
+                            if(count(nace2q34p)>N2q34-count(nace2q34), align_abs(nace2_score, (N2q34-count(nace2q34))*i, leave=nace2q34p==False),align_abs(nace2_score, (N2q34-count(nace2q34))*i, take=nace2q34p==True)),nace2q34)
+                    - employed: if(nace2q34,True, employed)
+                    - employed_pool: if(nace2q34,False, employed_pool)
+                    - nace2q35p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q35.csv'), False)
+                    - nace2q35: if(ea and employed_pool and count(nace2q35)<N2q35,
+                            if(count(nace2q35p)>N2q35-count(nace2q35), align_abs(nace2_score, (N2q35-count(nace2q35))*i, leave=nace2q35p==False),align_abs(nace2_score, (N2q35-count(nace2q35))*i, take=nace2q35p==True)),nace2q35)
+                    - employed: if(nace2q35,True, employed)
+                    - employed_pool: if(nace2q35,False, employed_pool)
+                    - nace2q41p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q41.csv'), False)
+                    - nace2q41: if(ea and employed_pool and count(nace2q41)<N2q41,
+                            if(count(nace2q41p)>N2q41-count(nace2q41), align_abs(nace2_score, (N2q41-count(nace2q41))*i, leave=nace2q41p==False),align_abs(nace2_score, (N2q41-count(nace2q41))*i, take=nace2q41p==True)),nace2q41)
+                    - employed: if(nace2q41,True, employed)
+                    - employed_pool: if(nace2q41,False, employed_pool)
+                    - nace2q42p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q42.csv'), False)
+                    - nace2q42: if(ea and employed_pool and count(nace2q42)<N2q42,
+                            if(count(nace2q42p)>N2q42-count(nace2q42), align_abs(nace2_score, (N2q42-count(nace2q42))*i, leave=nace2q42p==False),align_abs(nace2_score, (N2q42-count(nace2q42))*i, take=nace2q42p==True)),nace2q42)
+                    - employed: if(nace2q42,True, employed)
+                    - employed_pool: if(nace2q42,False, employed_pool)
+                    - nace2q43p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q43.csv'), False)
+                    - nace2q43: if(ea and employed_pool and count(nace2q43)<N2q43,
+                            if(count(nace2q43p)>N2q43-count(nace2q43), align_abs(nace2_score, (N2q43-count(nace2q43))*i, leave=nace2q43p==False),align_abs(nace2_score, (N2q43-count(nace2q43))*i, take=nace2q43p==True)),nace2q43)
+                    - employed: if(nace2q43,True, employed)
+                    - employed_pool: if(nace2q43,False, employed_pool)
+                    - nace2q44p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q44.csv'), False)
+                    - nace2q44: if(ea and employed_pool and count(nace2q44)<N2q44,
+                            if(count(nace2q44p)>N2q44-count(nace2q44), align_abs(nace2_score, (N2q44-count(nace2q44))*i, leave=nace2q44p==False),align_abs(nace2_score, (N2q44-count(nace2q44))*i, take=nace2q44p==True)),nace2q44)
+                    - employed: if(nace2q44,True, employed)
+                    - employed_pool: if(nace2q44,False, employed_pool)
+                    - nace2q51p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q51.csv'), False)
+                    - nace2q51: if(ea and employed_pool and count(nace2q51)<N2q51,
+                            if(count(nace2q51p)>N2q51-count(nace2q51), align_abs(nace2_score, (N2q51-count(nace2q51))*i, leave=nace2q51p==False),align_abs(nace2_score, (N2q51-count(nace2q51))*i, take=nace2q51p==True)),nace2q51)
+                    - employed: if(nace2q51,True, employed)
+                    - employed_pool: if(nace2q51,False, employed_pool)
+                    - nace2q52p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q52.csv'), False)
+                    - nace2q52: if(ea and employed_pool and count(nace2q52)<N2q52,
+                            if(count(nace2q52p)>N2q52-count(nace2q52), align_abs(nace2_score, (N2q52-count(nace2q52))*i, leave=nace2q52p==False),align_abs(nace2_score, (N2q52-count(nace2q52))*i, take=nace2q52p==True)),nace2q52)
+                    - employed: if(nace2q52,True, employed)
+                    - employed_pool: if(nace2q52,False, employed_pool)
+                    - nace2q53p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q53.csv'), False)
+                    - nace2q53: if(ea and employed_pool and count(nace2q53)<N2q53,
+                            if(count(nace2q53p)>N2q53-count(nace2q53), align_abs(nace2_score, (N2q53-count(nace2q53))*i, leave=nace2q53p==False),align_abs(nace2_score, (N2q53-count(nace2q53))*i, take=nace2q53p==True)),nace2q53)
+                    - employed: if(nace2q53,True, employed)
+                    - employed_pool: if(nace2q53,False, employed_pool)
+                    - nace2q54p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q54.csv'), False)
+                    - nace2q54: if(ea and employed_pool and count(nace2q54)<N2q54,
+                            if(count(nace2q54p)>N2q54-count(nace2q54), align_abs(nace2_score, (N2q54-count(nace2q54))*i, leave=nace2q54p==False),align_abs(nace2_score, (N2q54-count(nace2q54))*i, take=nace2q54p==True)),nace2q54)
+                    - employed: if(nace2q54,True, employed)
+                    - employed_pool: if(nace2q54,False, employed_pool)
+                    - nace2q61p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q61.csv'), False)
+                    - nace2q61: if(ea and employed_pool and count(nace2q61)<N2q61,
+                            if(count(nace2q61p)>N2q61-count(nace2q61), align_abs(nace2_score, (N2q61-count(nace2q61))*i, leave=nace2q61p==False),align_abs(nace2_score, (N2q61-count(nace2q61))*i, take=nace2q61p==True)),nace2q61)
+                    - employed: if(nace2q61,True, employed)
+                    - employed_pool: if(nace2q61,False, employed_pool)
+                    - nace2q62p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q62.csv'), False)
+                    - nace2q62: if(ea and employed_pool and count(nace2q62)<N2q62,
+                            if(count(nace2q62p)>N2q62-count(nace2q62), align_abs(nace2_score, (N2q62-count(nace2q62))*i, leave=nace2q62p==False),align_abs(nace2_score, (N2q62-count(nace2q62))*i, take=nace2q62p==True)),nace2q62)
+                    - employed: if(nace2q62,True, employed)
+                    - employed_pool: if(nace2q62,False, employed_pool)
+                    - nace2q63p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q63.csv'), False)
+                    - nace2q63: if(ea and employed_pool and count(nace2q63)<N2q63,
+                            if(count(nace2q63p)>N2q63-count(nace2q63), align_abs(nace2_score, (N2q63-count(nace2q63))*i, leave=nace2q63p==False),align_abs(nace2_score, (N2q63-count(nace2q63))*i, take=nace2q63p==True)),nace2q63)
+                    - employed: if(nace2q63,True, employed)
+                    - employed_pool: if(nace2q63,False, employed_pool)
+                    - nace2q71p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q71.csv'), False)
+                    - nace2q71: if(ea and employed_pool and count(nace2q71)<N2q71,
+                            if(count(nace2q71p)>N2q71-count(nace2q71), align_abs(nace2_score, (N2q71-count(nace2q71))*i, leave=nace2q71p==False),align_abs(nace2_score, (N2q71-count(nace2q71))*i, take=nace2q71p==True)),nace2q71)
+                    - employed: if(nace2q71,True, employed)
+                    - employed_pool: if(nace2q71,False, employed_pool)
+                    - nace2q72p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q72.csv'), False)
+                    - nace2q72: if(ea and employed_pool and count(nace2q72)<N2q72,
+                            if(count(nace2q72p)>N2q72-count(nace2q72), align_abs(nace2_score, (N2q72-count(nace2q72))*i, leave=nace2q72p==False),align_abs(nace2_score, (N2q72-count(nace2q72))*i, take=nace2q72p==True)),nace2q72)
+                    - employed: if(nace2q72,True, employed)
+                    - employed_pool: if(nace2q72,False, employed_pool)
+                    - nace2q73p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q73.csv'), False)
+                    - nace2q73: if(ea and employed_pool and count(nace2q73)<N2q73,
+                            if(count(nace2q73p)>N2q73-count(nace2q73), align_abs(nace2_score, (N2q73-count(nace2q73))*i, leave=nace2q73p==False),align_abs(nace2_score, (N2q73-count(nace2q73))*i, take=nace2q73p==True)),nace2q73)
+                    - employed: if(nace2q73,True, employed)
+                    - employed_pool: if(nace2q73,False, employed_pool)
+                    - nace2q74p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q74.csv'), False)
+                    - nace2q74: if(ea and employed_pool and count(nace2q74)<N2q74,
+                            if(count(nace2q74p)>N2q74-count(nace2q74), align_abs(nace2_score, (N2q74-count(nace2q74))*i, leave=nace2q74p==False),align_abs(nace2_score, (N2q74-count(nace2q74))*i, take=nace2q74p==True)),nace2q74)
+                    - employed: if(nace2q74,True, employed)
+                    - employed_pool: if(nace2q74,False, employed_pool)
+                    - nace2q75p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q75.csv'), False)
+                    - nace2q75: if(ea and employed_pool and count(nace2q75)<N2q75,
+                            if(count(nace2q75p)>N2q75-count(nace2q75), align_abs(nace2_score, (N2q75-count(nace2q75))*i, leave=nace2q75p==False),align_abs(nace2_score, (N2q75-count(nace2q75))*i, take=nace2q75p==True)),nace2q75)
+                    - employed: if(nace2q75,True, employed)
+                    - employed_pool: if(nace2q75,False, employed_pool)
+                    - nace2q81p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q81.csv'), False)
+                    - nace2q81: if(ea and employed_pool and count(nace2q81)<N2q81,
+                            if(count(nace2q81p)>N2q81-count(nace2q81), align_abs(nace2_score, (N2q81-count(nace2q81))*i, leave=nace2q81p==False),align_abs(nace2_score, (N2q81-count(nace2q81))*i, take=nace2q81p==True)),nace2q81)
+                    - employed: if(nace2q81,True, employed)
+                    - employed_pool: if(nace2q81,False, employed_pool)
+                    - nace2q82p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q82.csv'), False)
+                    - nace2q82: if(ea and employed_pool and count(nace2q82)<N2q82,
+                            if(count(nace2q82p)>N2q82-count(nace2q82), align_abs(nace2_score, (N2q82-count(nace2q82))*i, leave=nace2q82p==False),align_abs(nace2_score, (N2q82-count(nace2q82))*i, take=nace2q82p==True)),nace2q82)
+                    - employed: if(nace2q82,True, employed)
+                    - employed_pool: if(nace2q82,False, employed_pool)
+                    - nace2q83p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q83.csv'), False)
+                    - nace2q83: if(ea and employed_pool and count(nace2q83)<N2q83,
+                            if(count(nace2q83p)>N2q83-count(nace2q83), align_abs(nace2_score, (N2q83-count(nace2q83))*i, leave=nace2q83p==False),align_abs(nace2_score, (N2q83-count(nace2q83))*i, take=nace2q83p==True)),nace2q83)
+                    - employed: if(nace2q83,True, employed)
+                    - employed_pool: if(nace2q83,False, employed_pool)
+                    - nace2q91p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q91.csv'), False)
+                    - nace2q91: if(ea and employed_pool and count(nace2q91)<N2q91,
+                            if(count(nace2q91p)>N2q91-count(nace2q91), align_abs(nace2_score, (N2q91-count(nace2q91))*i, leave=nace2q91p==False),align_abs(nace2_score, (N2q91-count(nace2q91))*i, take=nace2q91p==True)),nace2q91)
+                    - employed: if(nace2q91,True, employed)
+                    - employed_pool: if(nace2q91,False, employed_pool)
+                    - nace2q92p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q92.csv'), False)
+                    - nace2q92: if(ea and employed_pool and count(nace2q92)<N2q92,
+                            if(count(nace2q92p)>N2q92-count(nace2q92), align_abs(nace2_score, (N2q92-count(nace2q92))*i, leave=nace2q92p==False),align_abs(nace2_score, (N2q92-count(nace2q92))*i, take=nace2q92p==True)),nace2q92)
+                    - employed: if(nace2q92,True, employed)
+                    - employed_pool: if(nace2q92,False, employed_pool)
+                    - nace2q93p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q93.csv'), False)
+                    - nace2q93: if(ea and employed_pool and count(nace2q93)<N2q93,
+                            if(count(nace2q93p)>N2q93-count(nace2q93), align_abs(nace2_score, (N2q93-count(nace2q93))*i, leave=nace2q93p==False),align_abs(nace2_score, (N2q93-count(nace2q93))*i, take=nace2q93p==True)),nace2q93)
+                    - employed: if(nace2q93,True, employed)
+                    - employed_pool: if(nace2q93,False, employed_pool)
+                    - nace2q94p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q94.csv'), False)
+                    - nace2q94: if(ea and employed_pool and count(nace2q94)<N2q94,
+                            if(count(nace2q94p)>N2q94-count(nace2q94), align_abs(nace2_score, (N2q94-count(nace2q94))*i, leave=nace2q94p==False),align_abs(nace2_score, (N2q94-count(nace2q94))*i, take=nace2q94p==True)),nace2q94)
+                    - employed: if(nace2q94,True, employed)
+                    - employed_pool: if(nace2q94,False, employed_pool)
+                    - nace2q95p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q95.csv'), False)
+                    - nace2q95: if(ea and employed_pool and count(nace2q95)<N2q95,
+                            if(count(nace2q95p)>N2q95-count(nace2q95), align_abs(nace2_score, (N2q95-count(nace2q95))*i, leave=nace2q95p==False),align_abs(nace2_score, (N2q95-count(nace2q95))*i, take=nace2q95p==True)),nace2q95)
+                    - employed: if(nace2q95,True, employed)
+                    - employed_pool: if(nace2q95,False, employed_pool)
+                    - nace2q96p: if(ea and not employed and employed_pool, align(nace2_score, 'align_nace2q96.csv'), False)
+                    - nace2q96: if(ea and employed_pool and count(nace2q96)<N2q96,
+                            if(count(nace2q96p)>N2q96-count(nace2q96), align_abs(nace2_score, (N2q96-count(nace2q96))*i, leave=nace2q96p==False),align_abs(nace2_score, (N2q96-count(nace2q96))*i, take=nace2q96p==True)),nace2q96)
+                    - employed: if(nace2q96,True, employed)
+                    - employed_pool: if(nace2q96,False, employed_pool)
+
+################################### NACE 4
+                    - nace4q1p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q1.csv'), False) 
+                    - nace4q1: if(ea and employed_pool and count(nace4q1)<N4q1,
+                            if(count(nace4q1p)>N4q1-count(nace4q1), align_abs(nace4_score, (N4q1-count(nace4q1))*i, leave=nace4q1p==False),align_abs(nace4_score, (N4q1-count(nace4q1))*i, take=nace4q1p==True)),nace4q1)
+                    - employed: if(nace4q1,True, employed)
+                    - employed_pool: if(nace4q1,False, employed_pool)
+                    - nace4q11p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q11.csv'), False) 
+                    - nace4q11: if(ea and employed_pool and count(nace4q11)<N4q11,
+                            if(count(nace4q11p)>N4q11-count(nace4q11), align_abs(nace4_score, (N4q11-count(nace4q11))*i, leave=nace4q11p==False),align_abs(nace4_score, (N4q11-count(nace4q11))*i, take=nace4q11p==True)),nace4q11)
+                    - employed: if(nace4q11,True, employed)
+                    - employed_pool: if(nace4q11,False, employed_pool)
+                    - nace4q12p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q12.csv'), False) 
+                    - nace4q12: if(ea and employed_pool and count(nace4q12)<N4q12,
+                            if(count(nace4q12p)>N4q12-count(nace4q12), align_abs(nace4_score, (N4q12-count(nace4q12))*i, leave=nace4q12p==False),align_abs(nace4_score, (N4q12-count(nace4q12))*i, take=nace4q12p==True)),nace4q12)
+                    - employed: if(nace4q12,True, employed)
+                    - employed_pool: if(nace4q12,False, employed_pool)
+                    - nace4q13p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q13.csv'), False) 
+                    - nace4q13: if(ea and employed_pool and count(nace4q13)<N4q13,
+                            if(count(nace4q13p)>N4q13-count(nace4q13), align_abs(nace4_score, (N4q13-count(nace4q13))*i, leave=nace4q13p==False),align_abs(nace4_score, (N4q13-count(nace4q13))*i, take=nace4q13p==True)),nace4q13)
+                    - employed: if(nace4q13,True, employed)
+                    - employed_pool: if(nace4q13,False, employed_pool)
+                    - nace4q14p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q14.csv'), False) 
+                    - nace4q14: if(ea and employed_pool and count(nace4q14)<N4q14,
+                            if(count(nace4q14p)>N4q14-count(nace4q14), align_abs(nace4_score, (N4q14-count(nace4q14))*i, leave=nace4q14p==False),align_abs(nace4_score, (N4q14-count(nace4q14))*i, take=nace4q14p==True)),nace4q14)
+                    - employed: if(nace4q14,True, employed)
+                    - employed_pool: if(nace4q14,False, employed_pool)
+                    - nace4q21p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q21.csv'), False) 
+                    - nace4q21: if(ea and employed_pool and count(nace4q21)<N4q21,
+                            if(count(nace4q21p)>N4q21-count(nace4q21), align_abs(nace4_score, (N4q21-count(nace4q21))*i, leave=nace4q21p==False),align_abs(nace4_score, (N4q21-count(nace4q21))*i, take=nace4q21p==True)),nace4q21)
+                    - employed: if(nace4q21,True, employed)
+                    - employed_pool: if(nace4q21,False, employed_pool)
+                    - nace4q22p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q22.csv'), False) 
+                    - nace4q22: if(ea and employed_pool and count(nace4q22)<N4q22,
+                            if(count(nace4q22p)>N4q22-count(nace4q22), align_abs(nace4_score, (N4q22-count(nace4q22))*i, leave=nace4q22p==False),align_abs(nace4_score, (N4q22-count(nace4q22))*i, take=nace4q22p==True)),nace4q22)
+                    - employed: if(nace4q22,True, employed)
+                    - employed_pool: if(nace4q22,False, employed_pool)
+                    - nace4q23p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q23.csv'), False) 
+                    - nace4q23: if(ea and employed_pool and count(nace4q23)<N4q23,
+                            if(count(nace4q23p)>N4q23-count(nace4q23), align_abs(nace4_score, (N4q23-count(nace4q23))*i, leave=nace4q23p==False),align_abs(nace4_score, (N4q23-count(nace4q23))*i, take=nace4q23p==True)),nace4q23)
+                    - employed: if(nace4q23,True, employed)
+                    - employed_pool: if(nace4q23,False, employed_pool)
+                    - nace4q24p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q24.csv'), False) 
+                    - nace4q24: if(ea and employed_pool and count(nace4q24)<N4q24,
+                            if(count(nace4q24p)>N4q24-count(nace4q24), align_abs(nace4_score, (N4q24-count(nace4q24))*i, leave=nace4q24p==False),align_abs(nace4_score, (N4q24-count(nace4q24))*i, take=nace4q24p==True)),nace4q24)
+                    - employed: if(nace4q24,True, employed)
+                    - employed_pool: if(nace4q24,False, employed_pool)
+                    - nace4q25p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q25.csv'), False) 
+                    - nace4q25: if(ea and employed_pool and count(nace4q25)<N4q25,
+                            if(count(nace4q25p)>N4q25-count(nace4q25), align_abs(nace4_score, (N4q25-count(nace4q25))*i, leave=nace4q25p==False),align_abs(nace4_score, (N4q25-count(nace4q25))*i, take=nace4q25p==True)),nace4q25)
+                    - employed: if(nace4q25,True, employed)
+                    - employed_pool: if(nace4q25,False, employed_pool)
+                    - nace4q26p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q26.csv'), False) 
+                    - nace4q26: if(ea and employed_pool and count(nace4q26)<N4q26,
+                            if(count(nace4q26p)>N4q26-count(nace4q26), align_abs(nace4_score, (N4q26-count(nace4q26))*i, leave=nace4q26p==False),align_abs(nace4_score, (N4q26-count(nace4q26))*i, take=nace4q26p==True)),nace4q26)
+                    - employed: if(nace4q26,True, employed)
+                    - employed_pool: if(nace4q26,False, employed_pool)
+                    - nace4q31p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q31.csv'), False) 
+                    - nace4q31: if(ea and employed_pool and count(nace4q31)<N4q31,
+                            if(count(nace4q31p)>N4q31-count(nace4q31), align_abs(nace4_score, (N4q31-count(nace4q31))*i, leave=nace4q31p==False),align_abs(nace4_score, (N4q31-count(nace4q31))*i, take=nace4q31p==True)),nace4q31)
+                    - employed: if(nace4q31,True, employed)
+                    - employed_pool: if(nace4q31,False, employed_pool)
+                    - nace4q32p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q32.csv'), False) 
+                    - nace4q32: if(ea and employed_pool and count(nace4q32)<N4q32,
+                            if(count(nace4q32p)>N4q32-count(nace4q32), align_abs(nace4_score, (N4q32-count(nace4q32))*i, leave=nace4q32p==False),align_abs(nace4_score, (N4q32-count(nace4q32))*i, take=nace4q32p==True)),nace4q32)
+                    - employed: if(nace4q32,True, employed)
+                    - employed_pool: if(nace4q32,False, employed_pool)
+                    - nace4q33p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q33.csv'), False) 
+                    - nace4q33: if(ea and employed_pool and count(nace4q33)<N4q33,
+                            if(count(nace4q33p)>N4q33-count(nace4q33), align_abs(nace4_score, (N4q33-count(nace4q33))*i, leave=nace4q33p==False),align_abs(nace4_score, (N4q33-count(nace4q33))*i, take=nace4q33p==True)),nace4q33)
+                    - employed: if(nace4q33,True, employed)
+                    - employed_pool: if(nace4q33,False, employed_pool)
+                    - nace4q34p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q34.csv'), False) 
+                    - nace4q34: if(ea and employed_pool and count(nace4q34)<N4q34,
+                            if(count(nace4q34p)>N4q34-count(nace4q34), align_abs(nace4_score, (N4q34-count(nace4q34))*i, leave=nace4q34p==False),align_abs(nace4_score, (N4q34-count(nace4q34))*i, take=nace4q34p==True)),nace4q34)
+                    - employed: if(nace4q34,True, employed)
+                    - employed_pool: if(nace4q34,False, employed_pool)
+                    - nace4q35p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q35.csv'), False) 
+                    - nace4q35: if(ea and employed_pool and count(nace4q35)<N4q35,
+                            if(count(nace4q35p)>N4q35-count(nace4q35), align_abs(nace4_score, (N4q35-count(nace4q35))*i, leave=nace4q35p==False),align_abs(nace4_score, (N4q35-count(nace4q35))*i, take=nace4q35p==True)),nace4q35)
+                    - employed: if(nace4q35,True, employed)
+                    - employed_pool: if(nace4q35,False, employed_pool)
+                    - nace4q41p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q41.csv'), False) 
+                    - nace4q41: if(ea and employed_pool and count(nace4q41)<N4q41,
+                            if(count(nace4q41p)>N4q41-count(nace4q41), align_abs(nace4_score, (N4q41-count(nace4q41))*i, leave=nace4q41p==False),align_abs(nace4_score, (N4q41-count(nace4q41))*i, take=nace4q41p==True)),nace4q41)
+                    - employed: if(nace4q41,True, employed)
+                    - employed_pool: if(nace4q41,False, employed_pool)
+                    - nace4q42p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q42.csv'), False) 
+                    - nace4q42: if(ea and employed_pool and count(nace4q42)<N4q42,
+                            if(count(nace4q42p)>N4q42-count(nace4q42), align_abs(nace4_score, (N4q42-count(nace4q42))*i, leave=nace4q42p==False),align_abs(nace4_score, (N4q42-count(nace4q42))*i, take=nace4q42p==True)),nace4q42)
+                    - employed: if(nace4q42,True, employed)
+                    - employed_pool: if(nace4q42,False, employed_pool)
+                    - nace4q43p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q43.csv'), False) 
+                    - nace4q43: if(ea and employed_pool and count(nace4q43)<N4q43,
+                            if(count(nace4q43p)>N4q43-count(nace4q43), align_abs(nace4_score, (N4q43-count(nace4q43))*i, leave=nace4q43p==False),align_abs(nace4_score, (N4q43-count(nace4q43))*i, take=nace4q43p==True)),nace4q43)
+                    - employed: if(nace4q43,True, employed)
+                    - employed_pool: if(nace4q43,False, employed_pool)
+                    - nace4q44p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q44.csv'), False) 
+                    - nace4q44: if(ea and employed_pool and count(nace4q44)<N4q44,
+                            if(count(nace4q44p)>N4q44-count(nace4q44), align_abs(nace4_score, (N4q44-count(nace4q44))*i, leave=nace4q44p==False),align_abs(nace4_score, (N4q44-count(nace4q44))*i, take=nace4q44p==True)),nace4q44)
+                    - employed: if(nace4q44,True, employed)
+                    - employed_pool: if(nace4q44,False, employed_pool)
+                    - nace4q51p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q51.csv'), False) 
+                    - nace4q51: if(ea and employed_pool and count(nace4q51)<N4q51,
+                            if(count(nace4q51p)>N4q51-count(nace4q51), align_abs(nace4_score, (N4q51-count(nace4q51))*i, leave=nace4q51p==False),align_abs(nace4_score, (N4q51-count(nace4q51))*i, take=nace4q51p==True)),nace4q51)
+                    - employed: if(nace4q51,True, employed)
+                    - employed_pool: if(nace4q51,False, employed_pool)
+                    - nace4q52p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q52.csv'), False) 
+                    - nace4q52: if(ea and employed_pool and count(nace4q52)<N4q52,
+                            if(count(nace4q52p)>N4q52-count(nace4q52), align_abs(nace4_score, (N4q52-count(nace4q52))*i, leave=nace4q52p==False),align_abs(nace4_score, (N4q52-count(nace4q52))*i, take=nace4q52p==True)),nace4q52)
+                    - employed: if(nace4q52,True, employed)
+                    - employed_pool: if(nace4q52,False, employed_pool)
+                    - nace4q53p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q53.csv'), False) 
+                    - nace4q53: if(ea and employed_pool and count(nace4q53)<N4q53,
+                            if(count(nace4q53p)>N4q53-count(nace4q53), align_abs(nace4_score, (N4q53-count(nace4q53))*i, leave=nace4q53p==False),align_abs(nace4_score, (N4q53-count(nace4q53))*i, take=nace4q53p==True)),nace4q53)
+                    - employed: if(nace4q53,True, employed)
+                    - employed_pool: if(nace4q53,False, employed_pool)
+                    - nace4q54p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q54.csv'), False) 
+                    - nace4q54: if(ea and employed_pool and count(nace4q54)<N4q54,
+                            if(count(nace4q54p)>N4q54-count(nace4q54), align_abs(nace4_score, (N4q54-count(nace4q54))*i, leave=nace4q54p==False),align_abs(nace4_score, (N4q54-count(nace4q54))*i, take=nace4q54p==True)),nace4q54)
+                    - employed: if(nace4q54,True, employed)
+                    - employed_pool: if(nace4q54,False, employed_pool)
+                    - nace4q61p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q61.csv'), False) 
+                    - nace4q61: if(ea and employed_pool and count(nace4q61)<N4q61,
+                            if(count(nace4q61p)>N4q61-count(nace4q61), align_abs(nace4_score, (N4q61-count(nace4q61))*i, leave=nace4q61p==False),align_abs(nace4_score, (N4q61-count(nace4q61))*i, take=nace4q61p==True)),nace4q61)
+                    - employed: if(nace4q61,True, employed)
+                    - employed_pool: if(nace4q61,False, employed_pool)
+                    - nace4q62p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q62.csv'), False) 
+                    - nace4q62: if(ea and employed_pool and count(nace4q62)<N4q62,
+                            if(count(nace4q62p)>N4q62-count(nace4q62), align_abs(nace4_score, (N4q62-count(nace4q62))*i, leave=nace4q62p==False),align_abs(nace4_score, (N4q62-count(nace4q62))*i, take=nace4q62p==True)),nace4q62)
+                    - employed: if(nace4q62,True, employed)
+                    - employed_pool: if(nace4q62,False, employed_pool)
+                    - nace4q63p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q63.csv'), False) 
+                    - nace4q63: if(ea and employed_pool and count(nace4q63)<N4q63,
+                            if(count(nace4q63p)>N4q63-count(nace4q63), align_abs(nace4_score, (N4q63-count(nace4q63))*i, leave=nace4q63p==False),align_abs(nace4_score, (N4q63-count(nace4q63))*i, take=nace4q63p==True)),nace4q63)
+                    - employed: if(nace4q63,True, employed)
+                    - employed_pool: if(nace4q63,False, employed_pool)
+                    - nace4q71p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q71.csv'), False) 
+                    - nace4q71: if(ea and employed_pool and count(nace4q71)<N4q71,
+                            if(count(nace4q71p)>N4q71-count(nace4q71), align_abs(nace4_score, (N4q71-count(nace4q71))*i, leave=nace4q71p==False),align_abs(nace4_score, (N4q71-count(nace4q71))*i, take=nace4q71p==True)),nace4q71)
+                    - employed: if(nace4q71,True, employed)
+                    - employed_pool: if(nace4q71,False, employed_pool)
+                    - nace4q72p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q72.csv'), False) 
+                    - nace4q72: if(ea and employed_pool and count(nace4q72)<N4q72,
+                            if(count(nace4q72p)>N4q72-count(nace4q72), align_abs(nace4_score, (N4q72-count(nace4q72))*i, leave=nace4q72p==False),align_abs(nace4_score, (N4q72-count(nace4q72))*i, take=nace4q72p==True)),nace4q72)
+                    - employed: if(nace4q72,True, employed)
+                    - employed_pool: if(nace4q72,False, employed_pool)
+                    - nace4q73p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q73.csv'), False) 
+                    - nace4q73: if(ea and employed_pool and count(nace4q73)<N4q73,
+                            if(count(nace4q73p)>N4q73-count(nace4q73), align_abs(nace4_score, (N4q73-count(nace4q73))*i, leave=nace4q73p==False),align_abs(nace4_score, (N4q73-count(nace4q73))*i, take=nace4q73p==True)),nace4q73)
+                    - employed: if(nace4q73,True, employed)
+                    - employed_pool: if(nace4q73,False, employed_pool)
+                    - nace4q74p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q74.csv'), False) 
+                    - nace4q74: if(ea and employed_pool and count(nace4q74)<N4q74,
+                            if(count(nace4q74p)>N4q74-count(nace4q74), align_abs(nace4_score, (N4q74-count(nace4q74))*i, leave=nace4q74p==False),align_abs(nace4_score, (N4q74-count(nace4q74))*i, take=nace4q74p==True)),nace4q74)
+                    - employed: if(nace4q74,True, employed)
+                    - employed_pool: if(nace4q74,False, employed_pool)
+                    - nace4q75p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q75.csv'), False) 
+                    - nace4q75: if(ea and employed_pool and count(nace4q75)<N4q75,
+                            if(count(nace4q75p)>N4q75-count(nace4q75), align_abs(nace4_score, (N4q75-count(nace4q75))*i, leave=nace4q75p==False),align_abs(nace4_score, (N4q75-count(nace4q75))*i, take=nace4q75p==True)),nace4q75)
+                    - employed: if(nace4q75,True, employed)
+                    - employed_pool: if(nace4q75,False, employed_pool)
+                    - nace4q81p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q81.csv'), False) 
+                    - nace4q81: if(ea and employed_pool and count(nace4q81)<N4q81,
+                            if(count(nace4q81p)>N4q81-count(nace4q81), align_abs(nace4_score, (N4q81-count(nace4q81))*i, leave=nace4q81p==False),align_abs(nace4_score, (N4q81-count(nace4q81))*i, take=nace4q81p==True)),nace4q81)
+                    - employed: if(nace4q81,True, employed)
+                    - employed_pool: if(nace4q81,False, employed_pool)
+                    - nace4q82p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q82.csv'), False) 
+                    - nace4q82: if(ea and employed_pool and count(nace4q82)<N4q82,
+                            if(count(nace4q82p)>N4q82-count(nace4q82), align_abs(nace4_score, (N4q82-count(nace4q82))*i, leave=nace4q82p==False),align_abs(nace4_score, (N4q82-count(nace4q82))*i, take=nace4q82p==True)),nace4q82)
+                    - employed: if(nace4q82,True, employed)
+                    - employed_pool: if(nace4q82,False, employed_pool)
+                    - nace4q83p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q83.csv'), False) 
+                    - nace4q83: if(ea and employed_pool and count(nace4q83)<N4q83,
+                            if(count(nace4q83p)>N4q83-count(nace4q83), align_abs(nace4_score, (N4q83-count(nace4q83))*i, leave=nace4q83p==False),align_abs(nace4_score, (N4q83-count(nace4q83))*i, take=nace4q83p==True)),nace4q83)
+                    - employed: if(nace4q83,True, employed)
+                    - employed_pool: if(nace4q83,False, employed_pool)
+                    - nace4q91p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q91.csv'), False) 
+                    - nace4q91: if(ea and employed_pool and count(nace4q91)<N4q91,
+                            if(count(nace4q91p)>N4q91-count(nace4q91), align_abs(nace4_score, (N4q91-count(nace4q91))*i, leave=nace4q91p==False),align_abs(nace4_score, (N4q91-count(nace4q91))*i, take=nace4q91p==True)),nace4q91)
+                    - employed: if(nace4q91,True, employed)
+                    - employed_pool: if(nace4q91,False, employed_pool)
+                    - nace4q92p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q92.csv'), False) 
+                    - nace4q92: if(ea and employed_pool and count(nace4q92)<N4q92,
+                            if(count(nace4q92p)>N4q92-count(nace4q92), align_abs(nace4_score, (N4q92-count(nace4q92))*i, leave=nace4q92p==False),align_abs(nace4_score, (N4q92-count(nace4q92))*i, take=nace4q92p==True)),nace4q92)
+                    - employed: if(nace4q92,True, employed)
+                    - employed_pool: if(nace4q92,False, employed_pool)
+                    - nace4q93p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q93.csv'), False) 
+                    - nace4q93: if(ea and employed_pool and count(nace4q93)<N4q93,
+                            if(count(nace4q93p)>N4q93-count(nace4q93), align_abs(nace4_score, (N4q93-count(nace4q93))*i, leave=nace4q93p==False),align_abs(nace4_score, (N4q93-count(nace4q93))*i, take=nace4q93p==True)),nace4q93)
+                    - employed: if(nace4q93,True, employed)
+                    - employed_pool: if(nace4q93,False, employed_pool)
+                    - nace4q94p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q94.csv'), False) 
+                    - nace4q94: if(ea and employed_pool and count(nace4q94)<N4q94,
+                            if(count(nace4q94p)>N4q94-count(nace4q94), align_abs(nace4_score, (N4q94-count(nace4q94))*i, leave=nace4q94p==False),align_abs(nace4_score, (N4q94-count(nace4q94))*i, take=nace4q94p==True)),nace4q94)
+                    - employed: if(nace4q94,True, employed)
+                    - employed_pool: if(nace4q94,False, employed_pool)
+                    - nace4q95p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q95.csv'), False) 
+                    - nace4q95: if(ea and employed_pool and count(nace4q95)<N4q95,
+                            if(count(nace4q95p)>N4q95-count(nace4q95), align_abs(nace4_score, (N4q95-count(nace4q95))*i, leave=nace4q95p==False),align_abs(nace4_score, (N4q95-count(nace4q95))*i, take=nace4q95p==True)),nace4q95)
+                    - employed: if(nace4q95,True, employed)
+                    - employed_pool: if(nace4q95,False, employed_pool)
+                    - nace4q96p: if(ea and not employed and employed_pool, align(nace4_score, 'align_nace4q96.csv'), False) 
+                    - nace4q96: if(ea and employed_pool and count(nace4q96)<N4q96,
+                            if(count(nace4q96p)>N4q96-count(nace4q96), align_abs(nace4_score, (N4q96-count(nace4q96))*i, leave=nace4q96p==False),align_abs(nace4_score, (N4q96-count(nace4q96))*i, take=nace4q96p==True)),nace4q96)
+                    - employed: if(nace4q96,True, employed)
+                    - employed_pool: if(nace4q96,False, employed_pool)
+
+################################### NACE 3               
+                    - nace3q1p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q1.csv'), False) 
+                    - nace3q1: if(ea and employed_pool and count(nace3q1)<N3q1,
+                            if(count(nace3q1p)>N3q1-count(nace3q1), align_abs(nace3_score, (N3q1-count(nace3q1))*i, leave=nace3q1p==False),align_abs(nace3_score, (N3q1-count(nace3q1))*i, take=nace3q1p==True)),nace3q1)
+                    - employed: if(nace3q1,True, employed)
+                    - employed_pool: if(nace3q1,False, employed_pool)
+                    - nace3q11p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q11.csv'), False) 
+                    - nace3q11: if(ea and employed_pool and count(nace3q11)<N3q11,
+                            if(count(nace3q11p)>N3q11-count(nace3q11), align_abs(nace3_score, (N3q11-count(nace3q11))*i, leave=nace3q11p==False),align_abs(nace3_score, (N3q11-count(nace3q11))*i, take=nace3q11p==True)),nace3q11)
+                    - employed: if(nace3q11,True, employed)
+                    - employed_pool: if(nace3q11,False, employed_pool)
+                    - nace3q12p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q12.csv'), False) 
+                    - nace3q12: if(ea and employed_pool and count(nace3q12)<N3q12,
+                            if(count(nace3q12p)>N3q12-count(nace3q12), align_abs(nace3_score, (N3q12-count(nace3q12))*i, leave=nace3q12p==False),align_abs(nace3_score, (N3q12-count(nace3q12))*i, take=nace3q12p==True)),nace3q12)
+                    - employed: if(nace3q12,True, employed)
+                    - employed_pool: if(nace3q12,False, employed_pool)
+                    - nace3q13p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q13.csv'), False) 
+                    - nace3q13: if(ea and employed_pool and count(nace3q13)<N3q13,
+                            if(count(nace3q13p)>N3q13-count(nace3q13), align_abs(nace3_score, (N3q13-count(nace3q13))*i, leave=nace3q13p==False),align_abs(nace3_score, (N3q13-count(nace3q13))*i, take=nace3q13p==True)),nace3q13)
+                    - employed: if(nace3q13,True, employed)
+                    - employed_pool: if(nace3q13,False, employed_pool)
+                    - nace3q14p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q14.csv'), False) 
+                    - nace3q14: if(ea and employed_pool and count(nace3q14)<N3q14,
+                            if(count(nace3q14p)>N3q14-count(nace3q14), align_abs(nace3_score, (N3q14-count(nace3q14))*i, leave=nace3q14p==False),align_abs(nace3_score, (N3q14-count(nace3q14))*i, take=nace3q14p==True)),nace3q14)
+                    - employed: if(nace3q14,True, employed)
+                    - employed_pool: if(nace3q14,False, employed_pool)
+                    - nace3q21p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q21.csv'), False) 
+                    - nace3q21: if(ea and employed_pool and count(nace3q21)<N3q21,
+                            if(count(nace3q21p)>N3q21-count(nace3q21), align_abs(nace3_score, (N3q21-count(nace3q21))*i, leave=nace3q21p==False),align_abs(nace3_score, (N3q21-count(nace3q21))*i, take=nace3q21p==True)),nace3q21)
+                    - employed: if(nace3q21,True, employed)
+                    - employed_pool: if(nace3q21,False, employed_pool)
+                    - nace3q22p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q22.csv'), False) 
+                    - nace3q22: if(ea and employed_pool and count(nace3q22)<N3q22,
+                            if(count(nace3q22p)>N3q22-count(nace3q22), align_abs(nace3_score, (N3q22-count(nace3q22))*i, leave=nace3q22p==False),align_abs(nace3_score, (N3q22-count(nace3q22))*i, take=nace3q22p==True)),nace3q22)
+                    - employed: if(nace3q22,True, employed)
+                    - employed_pool: if(nace3q22,False, employed_pool)
+                    - nace3q23p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q23.csv'), False) 
+                    - nace3q23: if(ea and employed_pool and count(nace3q23)<N3q23,
+                            if(count(nace3q23p)>N3q23-count(nace3q23), align_abs(nace3_score, (N3q23-count(nace3q23))*i, leave=nace3q23p==False),align_abs(nace3_score, (N3q23-count(nace3q23))*i, take=nace3q23p==True)),nace3q23)
+                    - employed: if(nace3q23,True, employed)
+                    - employed_pool: if(nace3q23,False, employed_pool)
+                    - nace3q24p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q24.csv'), False) 
+                    - nace3q24: if(ea and employed_pool and count(nace3q24)<N3q24,
+                            if(count(nace3q24p)>N3q24-count(nace3q24), align_abs(nace3_score, (N3q24-count(nace3q24))*i, leave=nace3q24p==False),align_abs(nace3_score, (N3q24-count(nace3q24))*i, take=nace3q24p==True)),nace3q24)
+                    - employed: if(nace3q24,True, employed)
+                    - employed_pool: if(nace3q24,False, employed_pool)
+                    - nace3q25p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q25.csv'), False) 
+                    - nace3q25: if(ea and employed_pool and count(nace3q25)<N3q25,
+                            if(count(nace3q25p)>N3q25-count(nace3q25), align_abs(nace3_score, (N3q25-count(nace3q25))*i, leave=nace3q25p==False),align_abs(nace3_score, (N3q25-count(nace3q25))*i, take=nace3q25p==True)),nace3q25)
+                    - employed: if(nace3q25,True, employed)
+                    - employed_pool: if(nace3q25,False, employed_pool)
+                    - nace3q26p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q26.csv'), False) 
+                    - nace3q26: if(ea and employed_pool and count(nace3q26)<N3q26,
+                            if(count(nace3q26p)>N3q26-count(nace3q26), align_abs(nace3_score, (N3q26-count(nace3q26))*i, leave=nace3q26p==False),align_abs(nace3_score, (N3q26-count(nace3q26))*i, take=nace3q26p==True)),nace3q26)
+                    - employed: if(nace3q26,True, employed)
+                    - employed_pool: if(nace3q26,False, employed_pool)
+                    - nace3q31p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q31.csv'), False) 
+                    - nace3q31: if(ea and employed_pool and count(nace3q31)<N3q31,
+                            if(count(nace3q31p)>N3q31-count(nace3q31), align_abs(nace3_score, (N3q31-count(nace3q31))*i, leave=nace3q31p==False),align_abs(nace3_score, (N3q31-count(nace3q31))*i, take=nace3q31p==True)),nace3q31)
+                    - employed: if(nace3q31,True, employed)
+                    - employed_pool: if(nace3q31,False, employed_pool)
+                    - nace3q32p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q32.csv'), False) 
+                    - nace3q32: if(ea and employed_pool and count(nace3q32)<N3q32,
+                            if(count(nace3q32p)>N3q32-count(nace3q32), align_abs(nace3_score, (N3q32-count(nace3q32))*i, leave=nace3q32p==False),align_abs(nace3_score, (N3q32-count(nace3q32))*i, take=nace3q32p==True)),nace3q32)
+                    - employed: if(nace3q32,True, employed)
+                    - employed_pool: if(nace3q32,False, employed_pool)
+                    - nace3q33p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q33.csv'), False) 
+                    - nace3q33: if(ea and employed_pool and count(nace3q33)<N3q33,
+                            if(count(nace3q33p)>N3q33-count(nace3q33), align_abs(nace3_score, (N3q33-count(nace3q33))*i, leave=nace3q33p==False),align_abs(nace3_score, (N3q33-count(nace3q33))*i, take=nace3q33p==True)),nace3q33)
+                    - employed: if(nace3q33,True, employed)
+                    - employed_pool: if(nace3q33,False, employed_pool)
+                    - nace3q34p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q34.csv'), False) 
+                    - nace3q34: if(ea and employed_pool and count(nace3q34)<N3q34,
+                            if(count(nace3q34p)>N3q34-count(nace3q34), align_abs(nace3_score, (N3q34-count(nace3q34))*i, leave=nace3q34p==False),align_abs(nace3_score, (N3q34-count(nace3q34))*i, take=nace3q34p==True)),nace3q34)
+                    - employed: if(nace3q34,True, employed)
+                    - employed_pool: if(nace3q34,False, employed_pool)
+                    - nace3q35p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q35.csv'), False) 
+                    - nace3q35: if(ea and employed_pool and count(nace3q35)<N3q35,
+                            if(count(nace3q35p)>N3q35-count(nace3q35), align_abs(nace3_score, (N3q35-count(nace3q35))*i, leave=nace3q35p==False),align_abs(nace3_score, (N3q35-count(nace3q35))*i, take=nace3q35p==True)),nace3q35)
+                    - employed: if(nace3q35,True, employed)
+                    - employed_pool: if(nace3q35,False, employed_pool)
+                    - nace3q41p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q41.csv'), False) 
+                    - nace3q41: if(ea and employed_pool and count(nace3q41)<N3q41,
+                            if(count(nace3q41p)>N3q41-count(nace3q41), align_abs(nace3_score, (N3q41-count(nace3q41))*i, leave=nace3q41p==False),align_abs(nace3_score, (N3q41-count(nace3q41))*i, take=nace3q41p==True)),nace3q41)
+                    - employed: if(nace3q41,True, employed)
+                    - employed_pool: if(nace3q41,False, employed_pool)
+                    - nace3q42p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q42.csv'), False) 
+                    - nace3q42: if(ea and employed_pool and count(nace3q42)<N3q42,
+                            if(count(nace3q42p)>N3q42-count(nace3q42), align_abs(nace3_score, (N3q42-count(nace3q42))*i, leave=nace3q42p==False),align_abs(nace3_score, (N3q42-count(nace3q42))*i, take=nace3q42p==True)),nace3q42)
+                    - employed: if(nace3q42,True, employed)
+                    - employed_pool: if(nace3q42,False, employed_pool)
+                    - nace3q43p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q43.csv'), False) 
+                    - nace3q43: if(ea and employed_pool and count(nace3q43)<N3q43,
+                            if(count(nace3q43p)>N3q43-count(nace3q43), align_abs(nace3_score, (N3q43-count(nace3q43))*i, leave=nace3q43p==False),align_abs(nace3_score, (N3q43-count(nace3q43))*i, take=nace3q43p==True)),nace3q43)
+                    - employed: if(nace3q43,True, employed)
+                    - employed_pool: if(nace3q43,False, employed_pool)
+                    - nace3q44p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q44.csv'), False) 
+                    - nace3q44: if(ea and employed_pool and count(nace3q44)<N3q44,
+                            if(count(nace3q44p)>N3q44-count(nace3q44), align_abs(nace3_score, (N3q44-count(nace3q44))*i, leave=nace3q44p==False),align_abs(nace3_score, (N3q44-count(nace3q44))*i, take=nace3q44p==True)),nace3q44)
+                    - employed: if(nace3q44,True, employed)
+                    - employed_pool: if(nace3q44,False, employed_pool)
+                    - nace3q51p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q51.csv'), False) 
+                    - nace3q51: if(ea and employed_pool and count(nace3q51)<N3q51,
+                            if(count(nace3q51p)>N3q51-count(nace3q51), align_abs(nace3_score, (N3q51-count(nace3q51))*i, leave=nace3q51p==False),align_abs(nace3_score, (N3q51-count(nace3q51))*i, take=nace3q51p==True)),nace3q51)
+                    - employed: if(nace3q51,True, employed)
+                    - employed_pool: if(nace3q51,False, employed_pool)
+                    - nace3q52p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q52.csv'), False) 
+                    - nace3q52: if(ea and employed_pool and count(nace3q52)<N3q52,
+                            if(count(nace3q52p)>N3q52-count(nace3q52), align_abs(nace3_score, (N3q52-count(nace3q52))*i, leave=nace3q52p==False),align_abs(nace3_score, (N3q52-count(nace3q52))*i, take=nace3q52p==True)),nace3q52)
+                    - employed: if(nace3q52,True, employed)
+                    - employed_pool: if(nace3q52,False, employed_pool)
+                    - nace3q53p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q53.csv'), False) 
+                    - nace3q53: if(ea and employed_pool and count(nace3q53)<N3q53,
+                            if(count(nace3q53p)>N3q53-count(nace3q53), align_abs(nace3_score, (N3q53-count(nace3q53))*i, leave=nace3q53p==False),align_abs(nace3_score, (N3q53-count(nace3q53))*i, take=nace3q53p==True)),nace3q53)
+                    - employed: if(nace3q53,True, employed)
+                    - employed_pool: if(nace3q53,False, employed_pool)
+                    - nace3q54p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q54.csv'), False) 
+                    - nace3q54: if(ea and employed_pool and count(nace3q54)<N3q54,
+                            if(count(nace3q54p)>N3q54-count(nace3q54), align_abs(nace3_score, (N3q54-count(nace3q54))*i, leave=nace3q54p==False),align_abs(nace3_score, (N3q54-count(nace3q54))*i, take=nace3q54p==True)),nace3q54)
+                    - employed: if(nace3q54,True, employed)
+                    - employed_pool: if(nace3q54,False, employed_pool)
+                    - nace3q61p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q61.csv'), False) 
+                    - nace3q61: if(ea and employed_pool and count(nace3q61)<N3q61,
+                            if(count(nace3q61p)>N3q61-count(nace3q61), align_abs(nace3_score, (N3q61-count(nace3q61))*i, leave=nace3q61p==False),align_abs(nace3_score, (N3q61-count(nace3q61))*i, take=nace3q61p==True)),nace3q61)
+                    - employed: if(nace3q61,True, employed)
+                    - employed_pool: if(nace3q61,False, employed_pool)
+                    - nace3q62p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q62.csv'), False) 
+                    - nace3q62: if(ea and employed_pool and count(nace3q62)<N3q62,
+                            if(count(nace3q62p)>N3q62-count(nace3q62), align_abs(nace3_score, (N3q62-count(nace3q62))*i, leave=nace3q62p==False),align_abs(nace3_score, (N3q62-count(nace3q62))*i, take=nace3q62p==True)),nace3q62)
+                    - employed: if(nace3q62,True, employed)
+                    - employed_pool: if(nace3q62,False, employed_pool)
+                    - nace3q63p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q63.csv'), False) 
+                    - nace3q63: if(ea and employed_pool and count(nace3q63)<N3q63,
+                            if(count(nace3q63p)>N3q63-count(nace3q63), align_abs(nace3_score, (N3q63-count(nace3q63))*i, leave=nace3q63p==False),align_abs(nace3_score, (N3q63-count(nace3q63))*i, take=nace3q63p==True)),nace3q63)
+                    - employed: if(nace3q63,True, employed)
+                    - employed_pool: if(nace3q63,False, employed_pool)
+                    - nace3q71p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q71.csv'), False) 
+                    - nace3q71: if(ea and employed_pool and count(nace3q71)<N3q71,
+                            if(count(nace3q71p)>N3q71-count(nace3q71), align_abs(nace3_score, (N3q71-count(nace3q71))*i, leave=nace3q71p==False),align_abs(nace3_score, (N3q71-count(nace3q71))*i, take=nace3q71p==True)),nace3q71)
+                    - employed: if(nace3q71,True, employed)
+                    - employed_pool: if(nace3q71,False, employed_pool)
+                    - nace3q72p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q72.csv'), False) 
+                    - nace3q72: if(ea and employed_pool and count(nace3q72)<N3q72,
+                            if(count(nace3q72p)>N3q72-count(nace3q72), align_abs(nace3_score, (N3q72-count(nace3q72))*i, leave=nace3q72p==False),align_abs(nace3_score, (N3q72-count(nace3q72))*i, take=nace3q72p==True)),nace3q72)
+                    - employed: if(nace3q72,True, employed)
+                    - employed_pool: if(nace3q72,False, employed_pool)
+                    - nace3q73p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q73.csv'), False) 
+                    - nace3q73: if(ea and employed_pool and count(nace3q73)<N3q73,
+                            if(count(nace3q73p)>N3q73-count(nace3q73), align_abs(nace3_score, (N3q73-count(nace3q73))*i, leave=nace3q73p==False),align_abs(nace3_score, (N3q73-count(nace3q73))*i, take=nace3q73p==True)),nace3q73)
+                    - employed: if(nace3q73,True, employed)
+                    - employed_pool: if(nace3q73,False, employed_pool)
+                    - nace3q74p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q74.csv'), False) 
+                    - nace3q74: if(ea and employed_pool and count(nace3q74)<N3q74,
+                            if(count(nace3q74p)>N3q74-count(nace3q74), align_abs(nace3_score, (N3q74-count(nace3q74))*i, leave=nace3q74p==False),align_abs(nace3_score, (N3q74-count(nace3q74))*i, take=nace3q74p==True)),nace3q74)
+                    - employed: if(nace3q74,True, employed)
+                    - employed_pool: if(nace3q74,False, employed_pool)
+                    - nace3q75p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q75.csv'), False) 
+                    - nace3q75: if(ea and employed_pool and count(nace3q75)<N3q75,
+                            if(count(nace3q75p)>N3q75-count(nace3q75), align_abs(nace3_score, (N3q75-count(nace3q75))*i, leave=nace3q75p==False),align_abs(nace3_score, (N3q75-count(nace3q75))*i, take=nace3q75p==True)),nace3q75)
+                    - employed: if(nace3q75,True, employed)
+                    - employed_pool: if(nace3q75,False, employed_pool)
+                    - nace3q81p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q81.csv'), False) 
+                    - nace3q81: if(ea and employed_pool and count(nace3q81)<N3q81,
+                            if(count(nace3q81p)>N3q81-count(nace3q81), align_abs(nace3_score, (N3q81-count(nace3q81))*i, leave=nace3q81p==False),align_abs(nace3_score, (N3q81-count(nace3q81))*i, take=nace3q81p==True)),nace3q81)
+                    - employed: if(nace3q81,True, employed)
+                    - employed_pool: if(nace3q81,False, employed_pool)
+                    - nace3q82p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q82.csv'), False) 
+                    - nace3q82: if(ea and employed_pool and count(nace3q82)<N3q82,
+                            if(count(nace3q82p)>N3q82-count(nace3q82), align_abs(nace3_score, (N3q82-count(nace3q82))*i, leave=nace3q82p==False),align_abs(nace3_score, (N3q82-count(nace3q82))*i, take=nace3q82p==True)),nace3q82)
+                    - employed: if(nace3q82,True, employed)
+                    - employed_pool: if(nace3q82,False, employed_pool)
+                    - nace3q83p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q83.csv'), False) 
+                    - nace3q83: if(ea and employed_pool and count(nace3q83)<N3q83,
+                            if(count(nace3q83p)>N3q83-count(nace3q83), align_abs(nace3_score, (N3q83-count(nace3q83))*i, leave=nace3q83p==False),align_abs(nace3_score, (N3q83-count(nace3q83))*i, take=nace3q83p==True)),nace3q83)
+                    - employed: if(nace3q83,True, employed)
+                    - employed_pool: if(nace3q83,False, employed_pool)
+                    - nace3q91p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q91.csv'), False) 
+                    - nace3q91: if(ea and employed_pool and count(nace3q91)<N3q91,
+                            if(count(nace3q91p)>N3q91-count(nace3q91), align_abs(nace3_score, (N3q91-count(nace3q91))*i, leave=nace3q91p==False),align_abs(nace3_score, (N3q91-count(nace3q91))*i, take=nace3q91p==True)),nace3q91)
+                    - employed: if(nace3q91,True, employed)
+                    - employed_pool: if(nace3q91,False, employed_pool)
+                    - nace3q92p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q92.csv'), False) 
+                    - nace3q92: if(ea and employed_pool and count(nace3q92)<N3q92,
+                            if(count(nace3q92p)>N3q92-count(nace3q92), align_abs(nace3_score, (N3q92-count(nace3q92))*i, leave=nace3q92p==False),align_abs(nace3_score, (N3q92-count(nace3q92))*i, take=nace3q92p==True)),nace3q92)
+                    - employed: if(nace3q92,True, employed)
+                    - employed_pool: if(nace3q92,False, employed_pool)
+                    - nace3q93p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q93.csv'), False) 
+                    - nace3q93: if(ea and employed_pool and count(nace3q93)<N3q93,
+                            if(count(nace3q93p)>N3q93-count(nace3q93), align_abs(nace3_score, (N3q93-count(nace3q93))*i, leave=nace3q93p==False),align_abs(nace3_score, (N3q93-count(nace3q93))*i, take=nace3q93p==True)),nace3q93)
+                    - employed: if(nace3q93,True, employed)
+                    - employed_pool: if(nace3q93,False, employed_pool)
+                    - nace3q94p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q94.csv'), False) 
+                    - nace3q94: if(ea and employed_pool and count(nace3q94)<N3q94,
+                            if(count(nace3q94p)>N3q94-count(nace3q94), align_abs(nace3_score, (N3q94-count(nace3q94))*i, leave=nace3q94p==False),align_abs(nace3_score, (N3q94-count(nace3q94))*i, take=nace3q94p==True)),nace3q94)
+                    - employed: if(nace3q94,True, employed)
+                    - employed_pool: if(nace3q94,False, employed_pool)
+                    - nace3q95p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q95.csv'), False) 
+                    - nace3q95: if(ea and employed_pool and count(nace3q95)<N3q95,
+                            if(count(nace3q95p)>N3q95-count(nace3q95), align_abs(nace3_score, (N3q95-count(nace3q95))*i, leave=nace3q95p==False),align_abs(nace3_score, (N3q95-count(nace3q95))*i, take=nace3q95p==True)),nace3q95)
+                    - employed: if(nace3q95,True, employed)
+                    - employed_pool: if(nace3q95,False, employed_pool)
+                    - nace3q96p: if(ea and not employed and employed_pool, align(nace3_score, 'align_nace3q96.csv'), False) 
+                    - nace3q96: if(ea and employed_pool and count(nace3q96)<N3q96,
+                            if(count(nace3q96p)>N3q96-count(nace3q96), align_abs(nace3_score, (N3q96-count(nace3q96))*i, leave=nace3q96p==False),align_abs(nace3_score, (N3q96-count(nace3q96))*i, take=nace3q96p==True)),nace3q96)
+                    - employed: if(nace3q96,True, employed)
+                    - employed_pool: if(nace3q96,False, employed_pool)
+
+################################### NACE 5               
+                    - nace5q1p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q1.csv'), False) 
+                    - nace5q1: if(ea and employed_pool and count(nace5q1)<N5q1,
+                            if(count(nace5q1p)>N5q1-count(nace5q1), align_abs(nace5_score, (N5q1-count(nace5q1))*i, leave=nace5q1p==False),align_abs(nace5_score, (N5q1-count(nace5q1))*i, take=nace5q1p==True)),nace5q1)
+                    - employed: if(nace5q1,True, employed)
+                    - employed_pool: if(nace5q1,False, employed_pool)
+                    - nace5q11p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q11.csv'), False) 
+                    - nace5q11: if(ea and employed_pool and count(nace5q11)<N5q11,
+                            if(count(nace5q11p)>N5q11-count(nace5q11), align_abs(nace5_score, (N5q11-count(nace5q11))*i, leave=nace5q11p==False),align_abs(nace5_score, (N5q11-count(nace5q11))*i, take=nace5q11p==True)),nace5q11)
+                    - employed: if(nace5q11,True, employed)
+                    - employed_pool: if(nace5q11,False, employed_pool)
+                    - nace5q12p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q12.csv'), False) 
+                    - nace5q12: if(ea and employed_pool and count(nace5q12)<N5q12,
+                            if(count(nace5q12p)>N5q12-count(nace5q12), align_abs(nace5_score, (N5q12-count(nace5q12))*i, leave=nace5q12p==False),align_abs(nace5_score, (N5q12-count(nace5q12))*i, take=nace5q12p==True)),nace5q12)
+                    - employed: if(nace5q12,True, employed)
+                    - employed_pool: if(nace5q12,False, employed_pool)
+                    - nace5q13p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q13.csv'), False) 
+                    - nace5q13: if(ea and employed_pool and count(nace5q13)<N5q13,
+                            if(count(nace5q13p)>N5q13-count(nace5q13), align_abs(nace5_score, (N5q13-count(nace5q13))*i, leave=nace5q13p==False),align_abs(nace5_score, (N5q13-count(nace5q13))*i, take=nace5q13p==True)),nace5q13)
+                    - employed: if(nace5q13,True, employed)
+                    - employed_pool: if(nace5q13,False, employed_pool)
+                    - nace5q14p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q14.csv'), False) 
+                    - nace5q14: if(ea and employed_pool and count(nace5q14)<N5q14,
+                            if(count(nace5q14p)>N5q14-count(nace5q14), align_abs(nace5_score, (N5q14-count(nace5q14))*i, leave=nace5q14p==False),align_abs(nace5_score, (N5q14-count(nace5q14))*i, take=nace5q14p==True)),nace5q14)
+                    - employed: if(nace5q14,True, employed)
+                    - employed_pool: if(nace5q14,False, employed_pool)
+                    - nace5q21p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q21.csv'), False) 
+                    - nace5q21: if(ea and employed_pool and count(nace5q21)<N5q21,
+                            if(count(nace5q21p)>N5q21-count(nace5q21), align_abs(nace5_score, (N5q21-count(nace5q21))*i, leave=nace5q21p==False),align_abs(nace5_score, (N5q21-count(nace5q21))*i, take=nace5q21p==True)),nace5q21)
+                    - employed: if(nace5q21,True, employed)
+                    - employed_pool: if(nace5q21,False, employed_pool)
+                    - nace5q22p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q22.csv'), False) 
+                    - nace5q22: if(ea and employed_pool and count(nace5q22)<N5q22,
+                            if(count(nace5q22p)>N5q22-count(nace5q22), align_abs(nace5_score, (N5q22-count(nace5q22))*i, leave=nace5q22p==False),align_abs(nace5_score, (N5q22-count(nace5q22))*i, take=nace5q22p==True)),nace5q22)
+                    - employed: if(nace5q22,True, employed)
+                    - employed_pool: if(nace5q22,False, employed_pool)
+                    - nace5q23p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q23.csv'), False) 
+                    - nace5q23: if(ea and employed_pool and count(nace5q23)<N5q23,
+                            if(count(nace5q23p)>N5q23-count(nace5q23), align_abs(nace5_score, (N5q23-count(nace5q23))*i, leave=nace5q23p==False),align_abs(nace5_score, (N5q23-count(nace5q23))*i, take=nace5q23p==True)),nace5q23)
+                    - employed: if(nace5q23,True, employed)
+                    - employed_pool: if(nace5q23,False, employed_pool)
+                    - nace5q24p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q24.csv'), False) 
+                    - nace5q24: if(ea and employed_pool and count(nace5q24)<N5q24,
+                            if(count(nace5q24p)>N5q24-count(nace5q24), align_abs(nace5_score, (N5q24-count(nace5q24))*i, leave=nace5q24p==False),align_abs(nace5_score, (N5q24-count(nace5q24))*i, take=nace5q24p==True)),nace5q24)
+                    - employed: if(nace5q24,True, employed)
+                    - employed_pool: if(nace5q24,False, employed_pool)
+                    - nace5q25p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q25.csv'), False) 
+                    - nace5q25: if(ea and employed_pool and count(nace5q25)<N5q25,
+                            if(count(nace5q25p)>N5q25-count(nace5q25), align_abs(nace5_score, (N5q25-count(nace5q25))*i, leave=nace5q25p==False),align_abs(nace5_score, (N5q25-count(nace5q25))*i, take=nace5q25p==True)),nace5q25)
+                    - employed: if(nace5q25,True, employed)
+                    - employed_pool: if(nace5q25,False, employed_pool)
+                    - nace5q26p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q26.csv'), False) 
+                    - nace5q26: if(ea and employed_pool and count(nace5q26)<N5q26,
+                            if(count(nace5q26p)>N5q26-count(nace5q26), align_abs(nace5_score, (N5q26-count(nace5q26))*i, leave=nace5q26p==False),align_abs(nace5_score, (N5q26-count(nace5q26))*i, take=nace5q26p==True)),nace5q26)
+                    - employed: if(nace5q26,True, employed)
+                    - employed_pool: if(nace5q26,False, employed_pool)
+                    - nace5q31p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q31.csv'), False) 
+                    - nace5q31: if(ea and employed_pool and count(nace5q31)<N5q31,
+                            if(count(nace5q31p)>N5q31-count(nace5q31), align_abs(nace5_score, (N5q31-count(nace5q31))*i, leave=nace5q31p==False),align_abs(nace5_score, (N5q31-count(nace5q31))*i, take=nace5q31p==True)),nace5q31)
+                    - employed: if(nace5q31,True, employed)
+                    - employed_pool: if(nace5q31,False, employed_pool)
+                    - nace5q32p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q32.csv'), False) 
+                    - nace5q32: if(ea and employed_pool and count(nace5q32)<N5q32,
+                            if(count(nace5q32p)>N5q32-count(nace5q32), align_abs(nace5_score, (N5q32-count(nace5q32))*i, leave=nace5q32p==False),align_abs(nace5_score, (N5q32-count(nace5q32))*i, take=nace5q32p==True)),nace5q32)
+                    - employed: if(nace5q32,True, employed)
+                    - employed_pool: if(nace5q32,False, employed_pool)
+                    - nace5q33p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q33.csv'), False) 
+                    - nace5q33: if(ea and employed_pool and count(nace5q33)<N5q33,
+                            if(count(nace5q33p)>N5q33-count(nace5q33), align_abs(nace5_score, (N5q33-count(nace5q33))*i, leave=nace5q33p==False),align_abs(nace5_score, (N5q33-count(nace5q33))*i, take=nace5q33p==True)),nace5q33)
+                    - employed: if(nace5q33,True, employed)
+                    - employed_pool: if(nace5q33,False, employed_pool)
+                    - nace5q34p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q34.csv'), False) 
+                    - nace5q34: if(ea and employed_pool and count(nace5q34)<N5q34,
+                            if(count(nace5q34p)>N5q34-count(nace5q34), align_abs(nace5_score, (N5q34-count(nace5q34))*i, leave=nace5q34p==False),align_abs(nace5_score, (N5q34-count(nace5q34))*i, take=nace5q34p==True)),nace5q34)
+                    - employed: if(nace5q34,True, employed)
+                    - employed_pool: if(nace5q34,False, employed_pool)
+                    - nace5q35p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q35.csv'), False) 
+                    - nace5q35: if(ea and employed_pool and count(nace5q35)<N5q35,
+                            if(count(nace5q35p)>N5q35-count(nace5q35), align_abs(nace5_score, (N5q35-count(nace5q35))*i, leave=nace5q35p==False),align_abs(nace5_score, (N5q35-count(nace5q35))*i, take=nace5q35p==True)),nace5q35)
+                    - employed: if(nace5q35,True, employed)
+                    - employed_pool: if(nace5q35,False, employed_pool)
+                    - nace5q41p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q41.csv'), False) 
+                    - nace5q41: if(ea and employed_pool and count(nace5q41)<N5q41,
+                            if(count(nace5q41p)>N5q41-count(nace5q41), align_abs(nace5_score, (N5q41-count(nace5q41))*i, leave=nace5q41p==False),align_abs(nace5_score, (N5q41-count(nace5q41))*i, take=nace5q41p==True)),nace5q41)
+                    - employed: if(nace5q41,True, employed)
+                    - employed_pool: if(nace5q41,False, employed_pool)
+                    - nace5q42p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q42.csv'), False) 
+                    - nace5q42: if(ea and employed_pool and count(nace5q42)<N5q42,
+                            if(count(nace5q42p)>N5q42-count(nace5q42), align_abs(nace5_score, (N5q42-count(nace5q42))*i, leave=nace5q42p==False),align_abs(nace5_score, (N5q42-count(nace5q42))*i, take=nace5q42p==True)),nace5q42)
+                    - employed: if(nace5q42,True, employed)
+                    - employed_pool: if(nace5q42,False, employed_pool)
+                    - nace5q43p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q43.csv'), False) 
+                    - nace5q43: if(ea and employed_pool and count(nace5q43)<N5q43,
+                            if(count(nace5q43p)>N5q43-count(nace5q43), align_abs(nace5_score, (N5q43-count(nace5q43))*i, leave=nace5q43p==False),align_abs(nace5_score, (N5q43-count(nace5q43))*i, take=nace5q43p==True)),nace5q43)
+                    - employed: if(nace5q43,True, employed)
+                    - employed_pool: if(nace5q43,False, employed_pool)
+                    - nace5q44p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q44.csv'), False) 
+                    - nace5q44: if(ea and employed_pool and count(nace5q44)<N5q44,
+                            if(count(nace5q44p)>N5q44-count(nace5q44), align_abs(nace5_score, (N5q44-count(nace5q44))*i, leave=nace5q44p==False),align_abs(nace5_score, (N5q44-count(nace5q44))*i, take=nace5q44p==True)),nace5q44)
+                    - employed: if(nace5q44,True, employed)
+                    - employed_pool: if(nace5q44,False, employed_pool)
+                    - nace5q51p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q51.csv'), False) 
+                    - nace5q51: if(ea and employed_pool and count(nace5q51)<N5q51,
+                            if(count(nace5q51p)>N5q51-count(nace5q51), align_abs(nace5_score, (N5q51-count(nace5q51))*i, leave=nace5q51p==False),align_abs(nace5_score, (N5q51-count(nace5q51))*i, take=nace5q51p==True)),nace5q51)
+                    - employed: if(nace5q51,True, employed)
+                    - employed_pool: if(nace5q51,False, employed_pool)
+                    - nace5q52p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q52.csv'), False) 
+                    - nace5q52: if(ea and employed_pool and count(nace5q52)<N5q52,
+                            if(count(nace5q52p)>N5q52-count(nace5q52), align_abs(nace5_score, (N5q52-count(nace5q52))*i, leave=nace5q52p==False),align_abs(nace5_score, (N5q52-count(nace5q52))*i, take=nace5q52p==True)),nace5q52)
+                    - employed: if(nace5q52,True, employed)
+                    - employed_pool: if(nace5q52,False, employed_pool)
+                    - nace5q53p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q53.csv'), False) 
+                    - nace5q53: if(ea and employed_pool and count(nace5q53)<N5q53,
+                            if(count(nace5q53p)>N5q53-count(nace5q53), align_abs(nace5_score, (N5q53-count(nace5q53))*i, leave=nace5q53p==False),align_abs(nace5_score, (N5q53-count(nace5q53))*i, take=nace5q53p==True)),nace5q53)
+                    - employed: if(nace5q53,True, employed)
+                    - employed_pool: if(nace5q53,False, employed_pool)
+                    - nace5q54p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q54.csv'), False) 
+                    - nace5q54: if(ea and employed_pool and count(nace5q54)<N5q54,
+                            if(count(nace5q54p)>N5q54-count(nace5q54), align_abs(nace5_score, (N5q54-count(nace5q54))*i, leave=nace5q54p==False),align_abs(nace5_score, (N5q54-count(nace5q54))*i, take=nace5q54p==True)),nace5q54)
+                    - employed: if(nace5q54,True, employed)
+                    - employed_pool: if(nace5q54,False, employed_pool)
+                    - nace5q61p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q61.csv'), False) 
+                    - nace5q61: if(ea and employed_pool and count(nace5q61)<N5q61,
+                            if(count(nace5q61p)>N5q61-count(nace5q61), align_abs(nace5_score, (N5q61-count(nace5q61))*i, leave=nace5q61p==False),align_abs(nace5_score, (N5q61-count(nace5q61))*i, take=nace5q61p==True)),nace5q61)
+                    - employed: if(nace5q61,True, employed)
+                    - employed_pool: if(nace5q61,False, employed_pool)
+                    - nace5q62p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q62.csv'), False) 
+                    - nace5q62: if(ea and employed_pool and count(nace5q62)<N5q62,
+                            if(count(nace5q62p)>N5q62-count(nace5q62), align_abs(nace5_score, (N5q62-count(nace5q62))*i, leave=nace5q62p==False),align_abs(nace5_score, (N5q62-count(nace5q62))*i, take=nace5q62p==True)),nace5q62)
+                    - employed: if(nace5q62,True, employed)
+                    - employed_pool: if(nace5q62,False, employed_pool)
+                    - nace5q63p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q63.csv'), False) 
+                    - nace5q63: if(ea and employed_pool and count(nace5q63)<N5q63,
+                            if(count(nace5q63p)>N5q63-count(nace5q63), align_abs(nace5_score, (N5q63-count(nace5q63))*i, leave=nace5q63p==False),align_abs(nace5_score, (N5q63-count(nace5q63))*i, take=nace5q63p==True)),nace5q63)
+                    - employed: if(nace5q63,True, employed)
+                    - employed_pool: if(nace5q63,False, employed_pool)
+                    - nace5q71p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q71.csv'), False) 
+                    - nace5q71: if(ea and employed_pool and count(nace5q71)<N5q71,
+                            if(count(nace5q71p)>N5q71-count(nace5q71), align_abs(nace5_score, (N5q71-count(nace5q71))*i, leave=nace5q71p==False),align_abs(nace5_score, (N5q71-count(nace5q71))*i, take=nace5q71p==True)),nace5q71)
+                    - employed: if(nace5q71,True, employed)
+                    - employed_pool: if(nace5q71,False, employed_pool)
+                    - nace5q72p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q72.csv'), False) 
+                    - nace5q72: if(ea and employed_pool and count(nace5q72)<N5q72,
+                            if(count(nace5q72p)>N5q72-count(nace5q72), align_abs(nace5_score, (N5q72-count(nace5q72))*i, leave=nace5q72p==False),align_abs(nace5_score, (N5q72-count(nace5q72))*i, take=nace5q72p==True)),nace5q72)
+                    - employed: if(nace5q72,True, employed)
+                    - employed_pool: if(nace5q72,False, employed_pool)
+                    - nace5q73p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q73.csv'), False) 
+                    - nace5q73: if(ea and employed_pool and count(nace5q73)<N5q73,
+                            if(count(nace5q73p)>N5q73-count(nace5q73), align_abs(nace5_score, (N5q73-count(nace5q73))*i, leave=nace5q73p==False),align_abs(nace5_score, (N5q73-count(nace5q73))*i, take=nace5q73p==True)),nace5q73)
+                    - employed: if(nace5q73,True, employed)
+                    - employed_pool: if(nace5q73,False, employed_pool)
+                    - nace5q74p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q74.csv'), False) 
+                    - nace5q74: if(ea and employed_pool and count(nace5q74)<N5q74,
+                            if(count(nace5q74p)>N5q74-count(nace5q74), align_abs(nace5_score, (N5q74-count(nace5q74))*i, leave=nace5q74p==False),align_abs(nace5_score, (N5q74-count(nace5q74))*i, take=nace5q74p==True)),nace5q74)
+                    - employed: if(nace5q74,True, employed)
+                    - employed_pool: if(nace5q74,False, employed_pool)
+                    - nace5q75p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q75.csv'), False) 
+                    - nace5q75: if(ea and employed_pool and count(nace5q75)<N5q75,
+                            if(count(nace5q75p)>N5q75-count(nace5q75), align_abs(nace5_score, (N5q75-count(nace5q75))*i, leave=nace5q75p==False),align_abs(nace5_score, (N5q75-count(nace5q75))*i, take=nace5q75p==True)),nace5q75)
+                    - employed: if(nace5q75,True, employed)
+                    - employed_pool: if(nace5q75,False, employed_pool)
+                    - nace5q81p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q81.csv'), False) 
+                    - nace5q81: if(ea and employed_pool and count(nace5q81)<N5q81,
+                            if(count(nace5q81p)>N5q81-count(nace5q81), align_abs(nace5_score, (N5q81-count(nace5q81))*i, leave=nace5q81p==False),align_abs(nace5_score, (N5q81-count(nace5q81))*i, take=nace5q81p==True)),nace5q81)
+                    - employed: if(nace5q81,True, employed)
+                    - employed_pool: if(nace5q81,False, employed_pool)
+                    - nace5q82p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q82.csv'), False) 
+                    - nace5q82: if(ea and employed_pool and count(nace5q82)<N5q82,
+                            if(count(nace5q82p)>N5q82-count(nace5q82), align_abs(nace5_score, (N5q82-count(nace5q82))*i, leave=nace5q82p==False),align_abs(nace5_score, (N5q82-count(nace5q82))*i, take=nace5q82p==True)),nace5q82)
+                    - employed: if(nace5q82,True, employed)
+                    - employed_pool: if(nace5q82,False, employed_pool)
+                    - nace5q83p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q83.csv'), False) 
+                    - nace5q83: if(ea and employed_pool and count(nace5q83)<N5q83,
+                            if(count(nace5q83p)>N5q83-count(nace5q83), align_abs(nace5_score, (N5q83-count(nace5q83))*i, leave=nace5q83p==False),align_abs(nace5_score, (N5q83-count(nace5q83))*i, take=nace5q83p==True)),nace5q83)
+                    - employed: if(nace5q83,True, employed)
+                    - employed_pool: if(nace5q83,False, employed_pool)
+                    - nace5q91p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q91.csv'), False) 
+                    - nace5q91: if(ea and employed_pool and count(nace5q91)<N5q91,
+                            if(count(nace5q91p)>N5q91-count(nace5q91), align_abs(nace5_score, (N5q91-count(nace5q91))*i, leave=nace5q91p==False),align_abs(nace5_score, (N5q91-count(nace5q91))*i, take=nace5q91p==True)),nace5q91)
+                    - employed: if(nace5q91,True, employed)
+                    - employed_pool: if(nace5q91,False, employed_pool)
+                    - nace5q92p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q92.csv'), False) 
+                    - nace5q92: if(ea and employed_pool and count(nace5q92)<N5q92,
+                            if(count(nace5q92p)>N5q92-count(nace5q92), align_abs(nace5_score, (N5q92-count(nace5q92))*i, leave=nace5q92p==False),align_abs(nace5_score, (N5q92-count(nace5q92))*i, take=nace5q92p==True)),nace5q92)
+                    - employed: if(nace5q92,True, employed)
+                    - employed_pool: if(nace5q92,False, employed_pool)
+                    - nace5q93p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q93.csv'), False) 
+                    - nace5q93: if(ea and employed_pool and count(nace5q93)<N5q93,
+                            if(count(nace5q93p)>N5q93-count(nace5q93), align_abs(nace5_score, (N5q93-count(nace5q93))*i, leave=nace5q93p==False),align_abs(nace5_score, (N5q93-count(nace5q93))*i, take=nace5q93p==True)),nace5q93)
+                    - employed: if(nace5q93,True, employed)
+                    - employed_pool: if(nace5q93,False, employed_pool)
+                    - nace5q94p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q94.csv'), False) 
+                    - nace5q94: if(ea and employed_pool and count(nace5q94)<N5q94,
+                            if(count(nace5q94p)>N5q94-count(nace5q94), align_abs(nace5_score, (N5q94-count(nace5q94))*i, leave=nace5q94p==False),align_abs(nace5_score, (N5q94-count(nace5q94))*i, take=nace5q94p==True)),nace5q94)
+                    - employed: if(nace5q94,True, employed)
+                    - employed_pool: if(nace5q94,False, employed_pool)
+                    - nace5q95p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q95.csv'), False) 
+                    - nace5q95: if(ea and employed_pool and count(nace5q95)<N5q95,
+                            if(count(nace5q95p)>N5q95-count(nace5q95), align_abs(nace5_score, (N5q95-count(nace5q95))*i, leave=nace5q95p==False),align_abs(nace5_score, (N5q95-count(nace5q95))*i, take=nace5q95p==True)),nace5q95)
+                    - employed: if(nace5q95,True, employed)
+                    - employed_pool: if(nace5q95,False, employed_pool)
+                    - nace5q96p: if(ea and not employed and employed_pool, align(nace5_score, 'align_nace5q96.csv'), False) 
+                    - nace5q96: if(ea and employed_pool and count(nace5q96)<N5q96,
+                            if(count(nace5q96p)>N5q96-count(nace5q96), align_abs(nace5_score, (N5q96-count(nace5q96))*i, leave=nace5q96p==False),align_abs(nace5_score, (N5q96-count(nace5q96))*i, take=nace5q96p==True)),nace5q96)
+                    - employed: if(nace5q96,True, employed)
+                    - employed_pool: if(nace5q96,False, employed_pool)
+
+############################### NACE 1
+                    - nace1q1p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q1.csv'), False) 
+                    - nace1q1: if(ea and employed_pool and count(nace1q1)<N1q1,
+                            if(count(nace1q1p)>N1q1-count(nace1q1), align_abs(nace1_score, (N1q1-count(nace1q1))*i, leave=nace1q1p==False),align_abs(nace1_score, (N1q1-count(nace1q1))*i, take=nace1q1p==True)),nace1q1)
+                    - employed: if(nace1q1,True, employed)
+                    - employed_pool: if(nace1q1,False, employed_pool)
+                    - nace1q11p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q11.csv'), False) 
+                    - nace1q11: if(ea and employed_pool and count(nace1q11)<N1q11,
+                            if(count(nace1q11p)>N1q11-count(nace1q11), align_abs(nace1_score, (N1q11-count(nace1q11))*i, leave=nace1q11p==False),align_abs(nace1_score, (N1q11-count(nace1q11))*i, take=nace1q11p==True)),nace1q11)
+                    - employed: if(nace1q11,True, employed)
+                    - employed_pool: if(nace1q11,False, employed_pool)
+                    - nace1q12p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q12.csv'), False) 
+                    - nace1q12: if(ea and employed_pool and count(nace1q12)<N1q12,
+                            if(count(nace1q12p)>N1q12-count(nace1q12), align_abs(nace1_score, (N1q12-count(nace1q12))*i, leave=nace1q12p==False),align_abs(nace1_score, (N1q12-count(nace1q12))*i, take=nace1q12p==True)),nace1q12)
+                    - employed: if(nace1q12,True, employed)
+                    - employed_pool: if(nace1q12,False, employed_pool)
+                    - nace1q13p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q13.csv'), False) 
+                    - nace1q13: if(ea and employed_pool and count(nace1q13)<N1q13,
+                            if(count(nace1q13p)>N1q13-count(nace1q13), align_abs(nace1_score, (N1q13-count(nace1q13))*i, leave=nace1q13p==False),align_abs(nace1_score, (N1q13-count(nace1q13))*i, take=nace1q13p==True)),nace1q13)
+                    - employed: if(nace1q13,True, employed)
+                    - employed_pool: if(nace1q13,False, employed_pool)
+                    - nace1q14p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q14.csv'), False) 
+                    - nace1q14: if(ea and employed_pool and count(nace1q14)<N1q14,
+                            if(count(nace1q14p)>N1q14-count(nace1q14), align_abs(nace1_score, (N1q14-count(nace1q14))*i, leave=nace1q14p==False),align_abs(nace1_score, (N1q14-count(nace1q14))*i, take=nace1q14p==True)),nace1q14)
+                    - employed: if(nace1q14,True, employed)
+                    - employed_pool: if(nace1q14,False, employed_pool)
+                    - nace1q21p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q21.csv'), False) 
+                    - nace1q21: if(ea and employed_pool and count(nace1q21)<N1q21,
+                            if(count(nace1q21p)>N1q21-count(nace1q21), align_abs(nace1_score, (N1q21-count(nace1q21))*i, leave=nace1q21p==False),align_abs(nace1_score, (N1q21-count(nace1q21))*i, take=nace1q21p==True)),nace1q21)
+                    - employed: if(nace1q21,True, employed)
+                    - employed_pool: if(nace1q21,False, employed_pool)
+                    - nace1q22p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q22.csv'), False) 
+                    - nace1q22: if(ea and employed_pool and count(nace1q22)<N1q22,
+                            if(count(nace1q22p)>N1q22-count(nace1q22), align_abs(nace1_score, (N1q22-count(nace1q22))*i, leave=nace1q22p==False),align_abs(nace1_score, (N1q22-count(nace1q22))*i, take=nace1q22p==True)),nace1q22)
+                    - employed: if(nace1q22,True, employed)
+                    - employed_pool: if(nace1q22,False, employed_pool)
+                    - nace1q23p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q23.csv'), False) 
+                    - nace1q23: if(ea and employed_pool and count(nace1q23)<N1q23,
+                            if(count(nace1q23p)>N1q23-count(nace1q23), align_abs(nace1_score, (N1q23-count(nace1q23))*i, leave=nace1q23p==False),align_abs(nace1_score, (N1q23-count(nace1q23))*i, take=nace1q23p==True)),nace1q23)
+                    - employed: if(nace1q23,True, employed)
+                    - employed_pool: if(nace1q23,False, employed_pool)
+                    - nace1q24p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q24.csv'), False) 
+                    - nace1q24: if(ea and employed_pool and count(nace1q24)<N1q24,
+                            if(count(nace1q24p)>N1q24-count(nace1q24), align_abs(nace1_score, (N1q24-count(nace1q24))*i, leave=nace1q24p==False),align_abs(nace1_score, (N1q24-count(nace1q24))*i, take=nace1q24p==True)),nace1q24)
+                    - employed: if(nace1q24,True, employed)
+                    - employed_pool: if(nace1q24,False, employed_pool)
+                    - nace1q25p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q25.csv'), False) 
+                    - nace1q25: if(ea and employed_pool and count(nace1q25)<N1q25,
+                            if(count(nace1q25p)>N1q25-count(nace1q25), align_abs(nace1_score, (N1q25-count(nace1q25))*i, leave=nace1q25p==False),align_abs(nace1_score, (N1q25-count(nace1q25))*i, take=nace1q25p==True)),nace1q25)
+                    - employed: if(nace1q25,True, employed)
+                    - employed_pool: if(nace1q25,False, employed_pool)
+                    - nace1q26p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q26.csv'), False) 
+                    - nace1q26: if(ea and employed_pool and count(nace1q26)<N1q26,
+                            if(count(nace1q26p)>N1q26-count(nace1q26), align_abs(nace1_score, (N1q26-count(nace1q26))*i, leave=nace1q26p==False),align_abs(nace1_score, (N1q26-count(nace1q26))*i, take=nace1q26p==True)),nace1q26)
+                    - employed: if(nace1q26,True, employed)
+                    - employed_pool: if(nace1q26,False, employed_pool)
+                    - nace1q31p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q31.csv'), False) 
+                    - nace1q31: if(ea and employed_pool and count(nace1q31)<N1q31,
+                            if(count(nace1q31p)>N1q31-count(nace1q31), align_abs(nace1_score, (N1q31-count(nace1q31))*i, leave=nace1q31p==False),align_abs(nace1_score, (N1q31-count(nace1q31))*i, take=nace1q31p==True)),nace1q31)
+                    - employed: if(nace1q31,True, employed)
+                    - employed_pool: if(nace1q31,False, employed_pool)
+                    - nace1q32p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q32.csv'), False) 
+                    - nace1q32: if(ea and employed_pool and count(nace1q32)<N1q32,
+                            if(count(nace1q32p)>N1q32-count(nace1q32), align_abs(nace1_score, (N1q32-count(nace1q32))*i, leave=nace1q32p==False),align_abs(nace1_score, (N1q32-count(nace1q32))*i, take=nace1q32p==True)),nace1q32)
+                    - employed: if(nace1q32,True, employed)
+                    - employed_pool: if(nace1q32,False, employed_pool)
+                    - nace1q33p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q33.csv'), False) 
+                    - nace1q33: if(ea and employed_pool and count(nace1q33)<N1q33,
+                            if(count(nace1q33p)>N1q33-count(nace1q33), align_abs(nace1_score, (N1q33-count(nace1q33))*i, leave=nace1q33p==False),align_abs(nace1_score, (N1q33-count(nace1q33))*i, take=nace1q33p==True)),nace1q33)
+                    - employed: if(nace1q33,True, employed)
+                    - employed_pool: if(nace1q33,False, employed_pool)
+                    - nace1q34p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q34.csv'), False) 
+                    - nace1q34: if(ea and employed_pool and count(nace1q34)<N1q34,
+                            if(count(nace1q34p)>N1q34-count(nace1q34), align_abs(nace1_score, (N1q34-count(nace1q34))*i, leave=nace1q34p==False),align_abs(nace1_score, (N1q34-count(nace1q34))*i, take=nace1q34p==True)),nace1q34)
+                    - employed: if(nace1q34,True, employed)
+                    - employed_pool: if(nace1q34,False, employed_pool)
+                    - nace1q35p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q35.csv'), False) 
+                    - nace1q35: if(ea and employed_pool and count(nace1q35)<N1q35,
+                            if(count(nace1q35p)>N1q35-count(nace1q35), align_abs(nace1_score, (N1q35-count(nace1q35))*i, leave=nace1q35p==False),align_abs(nace1_score, (N1q35-count(nace1q35))*i, take=nace1q35p==True)),nace1q35)
+                    - employed: if(nace1q35,True, employed)
+                    - employed_pool: if(nace1q35,False, employed_pool)
+                    - nace1q41p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q41.csv'), False) 
+                    - nace1q41: if(ea and employed_pool and count(nace1q41)<N1q41,
+                            if(count(nace1q41p)>N1q41-count(nace1q41), align_abs(nace1_score, (N1q41-count(nace1q41))*i, leave=nace1q41p==False),align_abs(nace1_score, (N1q41-count(nace1q41))*i, take=nace1q41p==True)),nace1q41)
+                    - employed: if(nace1q41,True, employed)
+                    - employed_pool: if(nace1q41,False, employed_pool)
+                    - nace1q42p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q42.csv'), False) 
+                    - nace1q42: if(ea and employed_pool and count(nace1q42)<N1q42,
+                            if(count(nace1q42p)>N1q42-count(nace1q42), align_abs(nace1_score, (N1q42-count(nace1q42))*i, leave=nace1q42p==False),align_abs(nace1_score, (N1q42-count(nace1q42))*i, take=nace1q42p==True)),nace1q42)
+                    - employed: if(nace1q42,True, employed)
+                    - employed_pool: if(nace1q42,False, employed_pool)
+                    - nace1q43p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q43.csv'), False) 
+                    - nace1q43: if(ea and employed_pool and count(nace1q43)<N1q43,
+                            if(count(nace1q43p)>N1q43-count(nace1q43), align_abs(nace1_score, (N1q43-count(nace1q43))*i, leave=nace1q43p==False),align_abs(nace1_score, (N1q43-count(nace1q43))*i, take=nace1q43p==True)),nace1q43)
+                    - employed: if(nace1q43,True, employed)
+                    - employed_pool: if(nace1q43,False, employed_pool)
+                    - nace1q44p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q44.csv'), False) 
+                    - nace1q44: if(ea and employed_pool and count(nace1q44)<N1q44,
+                            if(count(nace1q44p)>N1q44-count(nace1q44), align_abs(nace1_score, (N1q44-count(nace1q44))*i, leave=nace1q44p==False),align_abs(nace1_score, (N1q44-count(nace1q44))*i, take=nace1q44p==True)),nace1q44)
+                    - employed: if(nace1q44,True, employed)
+                    - employed_pool: if(nace1q44,False, employed_pool)
+                    - nace1q51p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q51.csv'), False) 
+                    - nace1q51: if(ea and employed_pool and count(nace1q51)<N1q51,
+                            if(count(nace1q51p)>N1q51-count(nace1q51), align_abs(nace1_score, (N1q51-count(nace1q51))*i, leave=nace1q51p==False),align_abs(nace1_score, (N1q51-count(nace1q51))*i, take=nace1q51p==True)),nace1q51)
+                    - employed: if(nace1q51,True, employed)
+                    - employed_pool: if(nace1q51,False, employed_pool)
+                    - nace1q52p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q52.csv'), False) 
+                    - nace1q52: if(ea and employed_pool and count(nace1q52)<N1q52,
+                            if(count(nace1q52p)>N1q52-count(nace1q52), align_abs(nace1_score, (N1q52-count(nace1q52))*i, leave=nace1q52p==False),align_abs(nace1_score, (N1q52-count(nace1q52))*i, take=nace1q52p==True)),nace1q52)
+                    - employed: if(nace1q52,True, employed)
+                    - employed_pool: if(nace1q52,False, employed_pool)
+                    - nace1q53p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q53.csv'), False) 
+                    - nace1q53: if(ea and employed_pool and count(nace1q53)<N1q53,
+                            if(count(nace1q53p)>N1q53-count(nace1q53), align_abs(nace1_score, (N1q53-count(nace1q53))*i, leave=nace1q53p==False),align_abs(nace1_score, (N1q53-count(nace1q53))*i, take=nace1q53p==True)),nace1q53)
+                    - employed: if(nace1q53,True, employed)
+                    - employed_pool: if(nace1q53,False, employed_pool)
+                    - nace1q54p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q54.csv'), False) 
+                    - nace1q54: if(ea and employed_pool and count(nace1q54)<N1q54,
+                            if(count(nace1q54p)>N1q54-count(nace1q54), align_abs(nace1_score, (N1q54-count(nace1q54))*i, leave=nace1q54p==False),align_abs(nace1_score, (N1q54-count(nace1q54))*i, take=nace1q54p==True)),nace1q54)
+                    - employed: if(nace1q54,True, employed)
+                    - employed_pool: if(nace1q54,False, employed_pool)
+                    - nace1q61p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q61.csv'), False) 
+                    - nace1q61: if(ea and employed_pool and count(nace1q61)<N1q61,
+                            if(count(nace1q61p)>N1q61-count(nace1q61), align_abs(nace1_score, (N1q61-count(nace1q61))*i, leave=nace1q61p==False),align_abs(nace1_score, (N1q61-count(nace1q61))*i, take=nace1q61p==True)),nace1q61)
+                    - employed: if(nace1q61,True, employed)
+                    - employed_pool: if(nace1q61,False, employed_pool)
+                    - nace1q62p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q62.csv'), False) 
+                    - nace1q62: if(ea and employed_pool and count(nace1q62)<N1q62,
+                            if(count(nace1q62p)>N1q62-count(nace1q62), align_abs(nace1_score, (N1q62-count(nace1q62))*i, leave=nace1q62p==False),align_abs(nace1_score, (N1q62-count(nace1q62))*i, take=nace1q62p==True)),nace1q62)
+                    - employed: if(nace1q62,True, employed)
+                    - employed_pool: if(nace1q62,False, employed_pool)
+                    - nace1q63p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q63.csv'), False) 
+                    - nace1q63: if(ea and employed_pool and count(nace1q63)<N1q63,
+                            if(count(nace1q63p)>N1q63-count(nace1q63), align_abs(nace1_score, (N1q63-count(nace1q63))*i, leave=nace1q63p==False),align_abs(nace1_score, (N1q63-count(nace1q63))*i, take=nace1q63p==True)),nace1q63)
+                    - employed: if(nace1q63,True, employed)
+                    - employed_pool: if(nace1q63,False, employed_pool)
+                    - nace1q71p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q71.csv'), False) 
+                    - nace1q71: if(ea and employed_pool and count(nace1q71)<N1q71,
+                            if(count(nace1q71p)>N1q71-count(nace1q71), align_abs(nace1_score, (N1q71-count(nace1q71))*i, leave=nace1q71p==False),align_abs(nace1_score, (N1q71-count(nace1q71))*i, take=nace1q71p==True)),nace1q71)
+                    - employed: if(nace1q71,True, employed)
+                    - employed_pool: if(nace1q71,False, employed_pool)
+                    - nace1q72p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q72.csv'), False) 
+                    - nace1q72: if(ea and employed_pool and count(nace1q72)<N1q72,
+                            if(count(nace1q72p)>N1q72-count(nace1q72), align_abs(nace1_score, (N1q72-count(nace1q72))*i, leave=nace1q72p==False),align_abs(nace1_score, (N1q72-count(nace1q72))*i, take=nace1q72p==True)),nace1q72)
+                    - employed: if(nace1q72,True, employed)
+                    - employed_pool: if(nace1q72,False, employed_pool)
+                    - nace1q73p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q73.csv'), False) 
+                    - nace1q73: if(ea and employed_pool and count(nace1q73)<N1q73,
+                            if(count(nace1q73p)>N1q73-count(nace1q73), align_abs(nace1_score, (N1q73-count(nace1q73))*i, leave=nace1q73p==False),align_abs(nace1_score, (N1q73-count(nace1q73))*i, take=nace1q73p==True)),nace1q73)
+                    - employed: if(nace1q73,True, employed)
+                    - employed_pool: if(nace1q73,False, employed_pool)
+                    - nace1q74p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q74.csv'), False) 
+                    - nace1q74: if(ea and employed_pool and count(nace1q74)<N1q74,
+                            if(count(nace1q74p)>N1q74-count(nace1q74), align_abs(nace1_score, (N1q74-count(nace1q74))*i, leave=nace1q74p==False),align_abs(nace1_score, (N1q74-count(nace1q74))*i, take=nace1q74p==True)),nace1q74)
+                    - employed: if(nace1q74,True, employed)
+                    - employed_pool: if(nace1q74,False, employed_pool)
+                    - nace1q75p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q75.csv'), False) 
+                    - nace1q75: if(ea and employed_pool and count(nace1q75)<N1q75,
+                            if(count(nace1q75p)>N1q75-count(nace1q75), align_abs(nace1_score, (N1q75-count(nace1q75))*i, leave=nace1q75p==False),align_abs(nace1_score, (N1q75-count(nace1q75))*i, take=nace1q75p==True)),nace1q75)
+                    - employed: if(nace1q75,True, employed)
+                    - employed_pool: if(nace1q75,False, employed_pool)
+                    - nace1q81p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q81.csv'), False) 
+                    - nace1q81: if(ea and employed_pool and count(nace1q81)<N1q81,
+                            if(count(nace1q81p)>N1q81-count(nace1q81), align_abs(nace1_score, (N1q81-count(nace1q81))*i, leave=nace1q81p==False),align_abs(nace1_score, (N1q81-count(nace1q81))*i, take=nace1q81p==True)),nace1q81)
+                    - employed: if(nace1q81,True, employed)
+                    - employed_pool: if(nace1q81,False, employed_pool)
+                    - nace1q82p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q82.csv'), False) 
+                    - nace1q82: if(ea and employed_pool and count(nace1q82)<N1q82,
+                            if(count(nace1q82p)>N1q82-count(nace1q82), align_abs(nace1_score, (N1q82-count(nace1q82))*i, leave=nace1q82p==False),align_abs(nace1_score, (N1q82-count(nace1q82))*i, take=nace1q82p==True)),nace1q82)
+                    - employed: if(nace1q82,True, employed)
+                    - employed_pool: if(nace1q82,False, employed_pool)
+                    - nace1q83p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q83.csv'), False) 
+                    - nace1q83: if(ea and employed_pool and count(nace1q83)<N1q83,
+                            if(count(nace1q83p)>N1q83-count(nace1q83), align_abs(nace1_score, (N1q83-count(nace1q83))*i, leave=nace1q83p==False),align_abs(nace1_score, (N1q83-count(nace1q83))*i, take=nace1q83p==True)),nace1q83)
+                    - employed: if(nace1q83,True, employed)
+                    - employed_pool: if(nace1q83,False, employed_pool)
+                    - nace1q91p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q91.csv'), False) 
+                    - nace1q91: if(ea and employed_pool and count(nace1q91)<N1q91,
+                            if(count(nace1q91p)>N1q91-count(nace1q91), align_abs(nace1_score, (N1q91-count(nace1q91))*i, leave=nace1q91p==False),align_abs(nace1_score, (N1q91-count(nace1q91))*i, take=nace1q91p==True)),nace1q91)
+                    - employed: if(nace1q91,True, employed)
+                    - employed_pool: if(nace1q91,False, employed_pool)
+                    - nace1q92p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q92.csv'), False) 
+                    - nace1q92: if(ea and employed_pool and count(nace1q92)<N1q92,
+                            if(count(nace1q92p)>N1q92-count(nace1q92), align_abs(nace1_score, (N1q92-count(nace1q92))*i, leave=nace1q92p==False),align_abs(nace1_score, (N1q92-count(nace1q92))*i, take=nace1q92p==True)),nace1q92)
+                    - employed: if(nace1q92,True, employed)
+                    - employed_pool: if(nace1q92,False, employed_pool)
+                    - nace1q93p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q93.csv'), False) 
+                    - nace1q93: if(ea and employed_pool and count(nace1q93)<N1q93,
+                            if(count(nace1q93p)>N1q93-count(nace1q93), align_abs(nace1_score, (N1q93-count(nace1q93))*i, leave=nace1q93p==False),align_abs(nace1_score, (N1q93-count(nace1q93))*i, take=nace1q93p==True)),nace1q93)
+                    - employed: if(nace1q93,True, employed)
+                    - employed_pool: if(nace1q93,False, employed_pool)
+                    - nace1q94p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q94.csv'), False) 
+                    - nace1q94: if(ea and employed_pool and count(nace1q94)<N1q94,
+                            if(count(nace1q94p)>N1q94-count(nace1q94), align_abs(nace1_score, (N1q94-count(nace1q94))*i, leave=nace1q94p==False),align_abs(nace1_score, (N1q94-count(nace1q94))*i, take=nace1q94p==True)),nace1q94)
+                    - employed: if(nace1q94,True, employed)
+                    - employed_pool: if(nace1q94,False, employed_pool)
+                    - nace1q95p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q95.csv'), False) 
+                    - nace1q95: if(ea and employed_pool and count(nace1q95)<N1q95,
+                            if(count(nace1q95p)>N1q95-count(nace1q95), align_abs(nace1_score, (N1q95-count(nace1q95))*i, leave=nace1q95p==False),align_abs(nace1_score, (N1q95-count(nace1q95))*i, take=nace1q95p==True)),nace1q95)
+                    - employed: if(nace1q95,True, employed)
+                    - employed_pool: if(nace1q95,False, employed_pool)
+                    - nace1q96p: if(ea and not employed and employed_pool, align(nace1_score, 'align_nace1q96.csv'), False) 
+                    - nace1q96: if(ea and employed_pool and count(nace1q96)<N1q96,
+                            if(count(nace1q96p)>N1q96-count(nace1q96), align_abs(nace1_score, (N1q96-count(nace1q96))*i, leave=nace1q96p==False),align_abs(nace1_score, (N1q96-count(nace1q96))*i, take=nace1q96p==True)),nace1q96)
+                    - employed: if(nace1q96,True, employed)
+                    - employed_pool: if(nace1q96,False, employed_pool)
+
+                    
+                    - i: i + 0.2     
+                    - j: j + 1             
+               
+####################################################################                    
+##  The whole matching so far was only done using Slovak labour supply (born in Slovakia or already present in the country during the previous periods). In segments where, up to 
+##  this point empty jobs still remain, the process “employed_immigrants” clones new workers out of those already employed in the segment. For cloning, immigrants already 
+##  employed in the segment are preferred. Subsequently important attributes of the cloned immigrants, age and country of origin, are simulated assuming segment- specific 
+##  distributions of these attributes. The age structure of inflowing immigrants is imported into the model via the table “imi_age”. The country of origin is imputed based on 
+##  the segment specific distributions defined in the exogenous table “global_country”. Defining these attributes by an external table allows for easy scenario setup.                  
+####################################################################                  
+               
+
+               
+            employment_nace_qual():              
+              
+               - nace: -1
+               - qual: -1
+
+ 
+               - nace: if(nace1q1 or nace1q11 or nace1q12 or nace1q13 or nace1q14 or nace1q21 or nace1q22 or nace1q23 or nace1q24 or nace1q25 or nace1q26 or nace1q31 or nace1q32 or nace1q33 or nace1q34 or nace1q35 or nace1q41 or nace1q42 or nace1q43 or nace1q44, 1, nace)
+               - nace: if(nace1q51 or nace1q52 or nace1q53 or nace1q54 or nace1q61 or nace1q62 or nace1q63 or nace1q71 or nace1q72 or nace1q73 or nace1q74 or nace1q75 or nace1q81 or nace1q82 or nace1q83 or nace1q91 or nace1q92 or nace1q93 or nace1q94 or nace1q95 or nace1q96, 1, nace)
+               - nace: if(nace2q1 or nace2q11 or nace2q12 or nace2q13 or nace2q14 or nace2q21 or nace2q22 or nace2q23 or nace2q24 or nace2q25 or nace2q26 or nace2q31 or nace2q32 or nace2q33 or nace2q34 or nace2q35 or nace2q41 or nace2q42 or nace2q43 or nace2q44, 2, nace)
+               - nace: if(nace2q51 or nace2q52 or nace2q53 or nace2q54 or nace2q61 or nace2q62 or nace2q63 or nace2q71 or nace2q72 or nace2q73 or nace2q74 or nace2q75 or nace2q81 or nace2q82 or nace2q83 or nace2q91 or nace2q92 or nace2q93 or nace2q94 or nace2q95 or nace2q96, 2, nace)
+               - nace: if(nace3q1 or nace3q11 or nace3q12 or nace3q13 or nace3q14 or nace3q21 or nace3q22 or nace3q23 or nace3q24 or nace3q25 or nace3q26 or nace3q31 or nace3q32 or nace3q33 or nace3q34 or nace3q35 or nace3q41 or nace3q42 or nace3q43 or nace3q44, 3, nace)
+               - nace: if(nace3q51 or nace3q52 or nace3q53 or nace3q54 or nace3q61 or nace3q62 or nace3q63 or nace3q71 or nace3q72 or nace3q73 or nace3q74 or nace3q75 or nace3q81 or nace3q82 or nace3q83 or nace3q91 or nace3q92 or nace3q93 or nace3q94 or nace3q95 or nace3q96, 3, nace)
+               - nace: if(nace4q1 or nace4q11 or nace4q12 or nace4q13 or nace4q14 or nace4q21 or nace4q22 or nace4q23 or nace4q24 or nace4q25 or nace4q26 or nace4q31 or nace4q32 or nace4q33 or nace4q34 or nace4q35 or nace4q41 or nace4q42 or nace4q43 or nace4q44, 4, nace)
+               - nace: if(nace4q51 or nace4q52 or nace4q53 or nace4q54 or nace4q61 or nace4q62 or nace4q63 or nace4q71 or nace4q72 or nace4q73 or nace4q74 or nace4q75 or nace4q81 or nace4q82 or nace4q83 or nace4q91 or nace4q92 or nace4q93 or nace4q94 or nace4q95 or nace4q96, 4, nace)
+               - nace: if(nace5q1 or nace5q11 or nace5q12 or nace5q13 or nace5q14 or nace5q21 or nace5q22 or nace5q23 or nace5q24 or nace5q25 or nace5q26 or nace5q31 or nace5q32 or nace5q33 or nace5q34 or nace5q35 or nace5q41 or nace5q42 or nace5q43 or nace5q44, 5, nace)
+               - nace: if(nace5q51 or nace5q52 or nace5q53 or nace5q54 or nace5q61 or nace5q62 or nace5q63 or nace5q71 or nace5q72 or nace5q73 or nace5q74 or nace5q75 or nace5q81 or nace5q82 or nace5q83 or nace5q91 or nace5q92 or nace5q93 or nace5q94 or nace5q95 or nace5q96, 5, nace)
+
+               - qual: if(nace1q1 or nace2q1 or nace3q1 or nace4q1 or nace5q1 , 1, qual)
+               - qual: if(nace1q11 or nace2q11 or nace3q11 or nace4q11 or nace5q11 , 11, qual)
+               - qual: if(nace1q12 or nace2q12 or nace3q12 or nace4q12 or nace5q12 , 12, qual)
+               - qual: if(nace1q13 or nace2q13 or nace3q13 or nace4q13 or nace5q13 , 13, qual)
+               - qual: if(nace1q14 or nace2q14 or nace3q14 or nace4q14 or nace5q14 , 14, qual)
+               - qual: if(nace1q21 or nace2q21 or nace3q21 or nace4q21 or nace5q21 , 21, qual)
+               - qual: if(nace1q22 or nace2q22 or nace3q22 or nace4q22 or nace5q22 , 22, qual)
+               - qual: if(nace1q23 or nace2q23 or nace3q23 or nace4q23 or nace5q23 , 23, qual)
+               - qual: if(nace1q24 or nace2q24 or nace3q24 or nace4q24 or nace5q24 , 24, qual)
+               - qual: if(nace1q25 or nace2q25 or nace3q25 or nace4q25 or nace5q25 , 25, qual)
+               - qual: if(nace1q26 or nace2q26 or nace3q26 or nace4q26 or nace5q26 , 26, qual)
+               - qual: if(nace1q31 or nace2q31 or nace3q31 or nace4q31 or nace5q31 , 31, qual)
+               - qual: if(nace1q32 or nace2q32 or nace3q32 or nace4q32 or nace5q32 , 32, qual)
+               - qual: if(nace1q33 or nace2q33 or nace3q33 or nace4q33 or nace5q33 , 33, qual)
+               - qual: if(nace1q34 or nace2q34 or nace3q34 or nace4q34 or nace5q34 , 34, qual)
+               - qual: if(nace1q35 or nace2q35 or nace3q35 or nace4q35 or nace5q35 , 35, qual)
+               - qual: if(nace1q41 or nace2q41 or nace3q41 or nace4q41 or nace5q41 , 41, qual)
+               - qual: if(nace1q42 or nace2q42 or nace3q42 or nace4q42 or nace5q42 , 42, qual)
+               - qual: if(nace1q43 or nace2q43 or nace3q43 or nace4q43 or nace5q43 , 43, qual)
+               - qual: if(nace1q44 or nace2q44 or nace3q44 or nace4q44 or nace5q44 , 44, qual)
+               - qual: if(nace1q51 or nace2q51 or nace3q51 or nace4q51 or nace5q51 , 51, qual)
+               - qual: if(nace1q52 or nace2q52 or nace3q52 or nace4q52 or nace5q52 , 52, qual)
+               - qual: if(nace1q53 or nace2q53 or nace3q53 or nace4q53 or nace5q53 , 53, qual)
+               - qual: if(nace1q54 or nace2q54 or nace3q54 or nace4q54 or nace5q54 , 54, qual)
+               - qual: if(nace1q61 or nace2q61 or nace3q61 or nace4q61 or nace5q61 , 61, qual)
+               - qual: if(nace1q62 or nace2q62 or nace3q62 or nace4q62 or nace5q62 , 62, qual)
+               - qual: if(nace1q63 or nace2q63 or nace3q63 or nace4q63 or nace5q63 , 63, qual)
+               - qual: if(nace1q71 or nace2q71 or nace3q71 or nace4q71 or nace5q71 , 71, qual)
+               - qual: if(nace1q72 or nace2q72 or nace3q72 or nace4q72 or nace5q72 , 72, qual)
+               - qual: if(nace1q73 or nace2q73 or nace3q73 or nace4q73 or nace5q73 , 73, qual)
+               - qual: if(nace1q74 or nace2q74 or nace3q74 or nace4q74 or nace5q74 , 74, qual)
+               - qual: if(nace1q75 or nace2q75 or nace3q75 or nace4q75 or nace5q75 , 75, qual)
+               - qual: if(nace1q81 or nace2q81 or nace3q81 or nace4q81 or nace5q81 , 81, qual)
+               - qual: if(nace1q82 or nace2q82 or nace3q82 or nace4q82 or nace5q82 , 82, qual)
+               - qual: if(nace1q83 or nace2q83 or nace3q83 or nace4q83 or nace5q83 , 83, qual)
+               - qual: if(nace1q91 or nace2q91 or nace3q91 or nace4q91 or nace5q91 , 91, qual)
+               - qual: if(nace1q92 or nace2q92 or nace3q92 or nace4q92 or nace5q92 , 92, qual)
+               - qual: if(nace1q93 or nace2q93 or nace3q93 or nace4q93 or nace5q93 , 93, qual)
+               - qual: if(nace1q94 or nace2q94 or nace3q94 or nace4q94 or nace5q94 , 94, qual)
+               - qual: if(nace1q95 or nace2q95 or nace3q95 or nace4q95 or nace5q95 , 95, qual)
+               - qual: if(nace1q96 or nace2q96 or nace3q96 or nace4q96 or nace5q96 , 96, qual)
+    
+              
+               - ea: if(nace==-1 and working_retired==True and destination==1, False, ea)
+               - status: if(status==-1 and working_retired==True and nace==-1 and destination==1 and not disabled, RETIRED, status)                
+               - working_retired: if(working_retired==True and nace==-1, False, working_retired)
+
+####################################################################               
+##  Those, assigned as economically active in the EA module, but not assigned as employed by the matching in the EMPL module are considered to be unemployed and their status 
+##  is being changed accordingly. 
+####################################################################       
+               
+            unemployment():               
+               # From 2023 onward disabled pensioners enter economic activity
+               # through the AWG participation alignment. The ordinary NACE
+               # matching above determines whether they are employed; only a
+               # matched disabled person is flagged as disabled_working.
+               # The first two assignments preserve the legacy 2022 logic.
+               - employed: if(period < 2023 and disabled_working, True, employed)
+               - status: if(period < 2023 and disabled_working, EMPLOYED, status)
+               - disabled_working: if(period >= 2023 and disabled, ea and employed and nace != -1, disabled_working)
+               - employed: if(retired_early, False, employed)
+               - nace: if(period <= base_year + 1 and ea and status1y == EMPLOYED and nace == -1 and nace1y > 0 and not disabled,
+                          nace1y,
+                          nace)
+               - qual: if(period <= base_year + 1 and ea and status1y == EMPLOYED and qual == -1 and qual1y > 0 and not disabled,
+                          qual1y,
+                          qual)
+               - employed: if(period <= base_year + 1 and ea and status1y == EMPLOYED and nace != -1 and not disabled,
+                              True,
+                              employed)
+               - status: if(ea and nace==-1, UNEMPLOYED, status)
+               - status: if(ea and not nace==-1, EMPLOYED, status)
+               # Preserve the pre-change condition because process assignments
+               # are sequential: a non-working person reclassified as retired
+               # must no longer remain economically active.
+               - becomes_nonworking_retired: ea and status==UNEMPLOYED and toret>=0 and not disabled
+               - status: if(becomes_nonworking_retired, RETIRED, status)
+               - ea: if(becomes_nonworking_retired, False, ea)
+               - status: if(retired_early, RETIRED, status)
+
+###################################################################
+##  After all the simulation processes are performed, in the very last step, the results of the simulation are recorded in a spreadsheet format. This final process named 
+##  “csv_output” used a LIAM2 build in function ”csv”. This function saves a spreadsheet file in CSV format following the structure predefined in the attributes of the command,
+##  defines the name of the file saved file (the default location for saving these files is the “OUTPUT_DATA” defined in the Simulation section of the script.
+##  Before the creating the csv files, working variables (replacement and matched) are defined. Some of them are going to be used in the csv exports. The only csv file being 
+##  created by the documented version of the script is the follows :
+##  csv (period, groupby(period, sex, status, period), fname='status.csv', mode='a'), where
+##  Where: 
+##  period – indicate year of simulation to be used in the first (left) column of the newly created table (A column, when opened in MS Excel)
+##  groupby – saves counts by the categories defined in the brackets (period, sex, status, period)
+##  fname – allows defining the exact file name of the saved file. 
+##  mode – allows appending results of subsequent simulations (mode=’a’) to a csv file, or overwriting it (mode=’b’ by default). Mode=’a’ allows, for example, to store the value
+##  of some expression for all periods in the same file (instead of one file per period by default).
+####################################################################
+
+               
+            csv_output():
+               - replacement: if(status1y==1 and status>=4, True, False)
+               - replacement_inflow: if(status==1 and status1y>=4, True, False)
+               - matched: if(status==EMPLOYED and ((hatlev5==5 and qual==1) or (hatlev5==4 and qual==2) or (hatlev5==3 and qual==3) or (hatlev5==4 and qual==3) or (hatlev5==1 and qual==4)), True, False)
+               - csv(period, groupby(period, sex, status, age, immigrant, destination, immigrant_new, period), fname='lab_supply_age.csv', mode='a')
+               - csv(period, groupby(period, sex, status, nace, destination, qual, immigrant, immigrant_new, period), fname='nace_immigrant.csv', mode='a')
+               - csv(period, groupby(period, sex, lag(nace), destination, hatlev5, replacement, status,status1y, period), fname='replacement_hatlev_1.csv', mode='a')
+               - csv(period, groupby(period, sex, immigrant, replacement, status,qual, nace, period), fname='replacement_hatlev_2.csv', mode='a')
+#               - csv(period, groupby(period, age, status, immigrant, destination, period), fname='age_status.csv', mode='a')
+               - csv(period, groupby(period, age, status, hatlev5, destination, period), fname='age_hatlev.csv', mode='a')
+               - csv(period, groupby(period, sex, lag(nace), nace, replacement, status, period), fname='replacement_nace.csv', mode='a')
+#               - csv(period, groupby(period, sex, lag(nace), hatfield, replacement,status1y, status, period), fname='replacement_hatfield.csv', mode='a')
+               - csv(period, groupby(period, sex, status, qual, replacement, hatlev5,status1y, period), fname='age.csv', mode='a')
+               - csv(period, groupby(period, sex, status, status1y, hatlev5, replacement, hatfield,period), fname='replacement_hatlev_hatfield.csv', mode='a')
+
+               - csv(period, groupby(period, sex, status, hatlev5, destination, qual, immigrant, immigrant_new, period), fname='verifikacia.csv', mode='a')
+#               - csv(period, groupby(period, sex, status, hatlev5, destination, immigrant_sim, immigrant, zah_student, period), fname='inflow.csv', mode='a')
+#               - csv(period, groupby(period, age, status, hatlev5, destination, immigrant, zah_student, period), fname='inflow2.csv', mode='a')
+               
+#               - csv(period, groupby(period, status, qual, nace, status1y, lag(nace), region), fname='status.csv', mode='a')
+#               - csv(groupby(lag(nace, qual), nace, qual), fname='nace.csv', mode='a')
+#               - csv(period, groupby(period, lag(nace), nace, lag(qual), qual, age, replacement, working_retired, hatlev5), fname='o6_JPM_replacement.csv', mode='a')
+#               - csv(period, groupby(period, hatlev5, hatfield1, status, nace, qual, region, filter=ea), fname='scenario1_edu.csv', mode='a')
+#               - csv(period, groupby(period, country_b, qual, nace, hatlev3, status, immigrant), fname='o7_JPM__immigrant.csv', mode='a')                
+#               - csv(period, groupby(period, lag(nace_compl), replacement, status_compl, nace_compl, qual_compl, region), fname='base_compl_replacement_nace2.csv', mode='a')             
+#               - csv(period, groupby(period, lag(nace), replacement, status, nace, qual, region), fname='scenario1_replacement_nace1.csv', mode='a')             
+#               - csv(period, groupby(period, nace, nace_compl, status_compl, status, qual, qual_compl, region), fname='base_compl_status.csv', mode='a')               
+#               - csv(period, groupby(lag(nace_compl), lag(qual_compl), status), fname='replacement_ret_nace.csv', mode='a')              
+#               - csv(period, groupby(lag(hatlev5), lag(hatfield1), status), fname='replacement_ret_edu.csv', mode='a')              
+#               - csv(groupby(lag(nace), status, period), fname='replacement_status.csv', mode='a')              
+#               - csv(period, groupby(lag(nace), working_retired), fname='working_retired.csv', mode='a')
+#               - csv(period, groupby(lag(nace), retired_early), fname='retired early.csv', mode='a')  
+#               - csv(period, groupby (period, age, working_retired, nace_compl, region, filter=age>=60), fname='working_retired.csv', mode='a')
+               - csv(period, dump(period, sex, age, status, status1y, disabled, disabled_working, employed), fname='simulation_prospective_emp.csv', mode='a')
+
+
+simulation: 
+    init: 
+        - person: [init_variable, init_define, time_to_leave1, edulev_init, init_disab]  
+    processes:
+#        - person: [ageing, birth, death, awg_migration, immigration, edulev, edufield, statusing, study, retirement, inactivity, disability, economic_activity, employment, employment_nace_score, employment_nace, employment_nace_immigrants, employment_nace_qual ,unemployment, csv_output]
+        - person: [ageing, birth, death, awg_migration, immigration, edulev, edufield, later_studying, statusing, study, disability, retirement, inactivity,  economic_activity, employment, employment_nace_score, employment_nace, employment_nace_qual ,unemployment, csv_output]
+    input:
+        path:   "INPUT_DATA"
+        file:   "prospective_input.h5"
+
+    output:
+        path:   "OUTPUT_DATA"
+        file:   "simulation.h5"
+        
+    start_period: 2022
+    
+    periods: 3
+  
+    random_seed: 1  
+     
+     
+     
+     
+     
+     

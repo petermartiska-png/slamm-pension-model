@@ -1,0 +1,454 @@
+# input global variables - demand by nace and qualifications 
+globals:
+     periodic:
+         fields:
+            - N1q1: int    
+            - N1q11: int    
+            - N1q12: int    
+            - N1q13: int    
+            - N1q14: int    
+            - N1q21: int    
+            - N1q22: int    
+            - N1q23: int    
+            - N1q24: int    
+            - N1q25: int    
+            - N1q26: int    
+            - N1q31: int    
+            - N1q32: int    
+            - N1q33: int    
+            - N1q34: int    
+            - N1q35: int    
+            - N1q41: int    
+            - N1q42: int    
+            - N1q43: int    
+            - N1q44: int    
+            - N1q51: int    
+            - N1q52: int    
+            - N1q53: int    
+            - N1q54: int    
+            - N1q61: int    
+            - N1q62: int    
+            - N1q63: int    
+            - N1q71: int    
+            - N1q72: int    
+            - N1q73: int    
+            - N1q74: int    
+            - N1q75: int    
+            - N1q81: int    
+            - N1q82: int    
+            - N1q83: int    
+            - N1q91: int    
+            - N1q92: int    
+            - N1q93: int    
+            - N1q94: int    
+            - N1q95: int    
+            - N1q96: int    
+            - N2q1: int    
+            - N2q11: int    
+            - N2q12: int    
+            - N2q13: int    
+            - N2q14: int    
+            - N2q21: int    
+            - N2q22: int    
+            - N2q23: int    
+            - N2q24: int    
+            - N2q25: int    
+            - N2q26: int    
+            - N2q31: int    
+            - N2q32: int    
+            - N2q33: int    
+            - N2q34: int    
+            - N2q35: int    
+            - N2q41: int    
+            - N2q42: int    
+            - N2q43: int    
+            - N2q44: int    
+            - N2q51: int    
+            - N2q52: int    
+            - N2q53: int    
+            - N2q54: int    
+            - N2q61: int    
+            - N2q62: int    
+            - N2q63: int    
+            - N2q71: int    
+            - N2q72: int    
+            - N2q73: int    
+            - N2q74: int    
+            - N2q75: int    
+            - N2q81: int    
+            - N2q82: int    
+            - N2q83: int    
+            - N2q91: int    
+            - N2q92: int    
+            - N2q93: int    
+            - N2q94: int    
+            - N2q95: int    
+            - N2q96: int    
+            - N3q1: int    
+            - N3q11: int    
+            - N3q12: int    
+            - N3q13: int    
+            - N3q14: int    
+            - N3q21: int    
+            - N3q22: int    
+            - N3q23: int    
+            - N3q24: int    
+            - N3q25: int    
+            - N3q26: int    
+            - N3q31: int    
+            - N3q32: int    
+            - N3q33: int    
+            - N3q34: int    
+            - N3q35: int    
+            - N3q41: int    
+            - N3q42: int    
+            - N3q43: int    
+            - N3q44: int    
+            - N3q51: int    
+            - N3q52: int    
+            - N3q53: int    
+            - N3q54: int    
+            - N3q61: int    
+            - N3q62: int    
+            - N3q63: int    
+            - N3q71: int    
+            - N3q72: int    
+            - N3q73: int    
+            - N3q74: int    
+            - N3q75: int    
+            - N3q81: int    
+            - N3q82: int    
+            - N3q83: int    
+            - N3q91: int    
+            - N3q92: int    
+            - N3q93: int    
+            - N3q94: int    
+            - N3q95: int    
+            - N3q96: int    
+            - N4q1: int    
+            - N4q11: int    
+            - N4q12: int    
+            - N4q13: int    
+            - N4q14: int    
+            - N4q21: int    
+            - N4q22: int    
+            - N4q23: int    
+            - N4q24: int    
+            - N4q25: int    
+            - N4q26: int    
+            - N4q31: int    
+            - N4q32: int    
+            - N4q33: int    
+            - N4q34: int    
+            - N4q35: int    
+            - N4q41: int    
+            - N4q42: int    
+            - N4q43: int    
+            - N4q44: int    
+            - N4q51: int    
+            - N4q52: int    
+            - N4q53: int    
+            - N4q54: int    
+            - N4q61: int    
+            - N4q62: int    
+            - N4q63: int    
+            - N4q71: int    
+            - N4q72: int    
+            - N4q73: int    
+            - N4q74: int    
+            - N4q75: int    
+            - N4q81: int    
+            - N4q82: int    
+            - N4q83: int    
+            - N4q91: int    
+            - N4q92: int    
+            - N4q93: int    
+            - N4q94: int    
+            - N4q95: int    
+            - N4q96: int    
+            - N5q1: int    
+            - N5q11: int    
+            - N5q12: int    
+            - N5q13: int    
+            - N5q14: int    
+            - N5q21: int    
+            - N5q22: int    
+            - N5q23: int    
+            - N5q24: int    
+            - N5q25: int    
+            - N5q26: int    
+            - N5q31: int    
+            - N5q32: int    
+            - N5q33: int    
+            - N5q34: int    
+            - N5q35: int    
+            - N5q41: int    
+            - N5q42: int    
+            - N5q43: int    
+            - N5q44: int    
+            - N5q51: int    
+            - N5q52: int    
+            - N5q53: int    
+            - N5q54: int    
+            - N5q61: int    
+            - N5q62: int    
+            - N5q63: int    
+            - N5q71: int    
+            - N5q72: int    
+            - N5q73: int    
+            - N5q74: int    
+            - N5q75: int    
+            - N5q81: int    
+            - N5q82: int    
+            - N5q83: int    
+            - N5q91: int    
+            - N5q92: int    
+            - N5q93: int    
+            - N5q94: int    
+            - N5q95: int    
+            - N5q96: int    
+entities: 
+     person: 
+         fields: 
+#naceq creating 
+            - nace1q1: {type: bool, initialdata: False}
+            - nace1q11: {type: bool, initialdata: False}
+            - nace1q12: {type: bool, initialdata: False}
+            - nace1q13: {type: bool, initialdata: False}
+            - nace1q14: {type: bool, initialdata: False}
+            - nace1q21: {type: bool, initialdata: False}
+            - nace1q22: {type: bool, initialdata: False}
+            - nace1q23: {type: bool, initialdata: False}
+            - nace1q24: {type: bool, initialdata: False}
+            - nace1q25: {type: bool, initialdata: False}
+            - nace1q26: {type: bool, initialdata: False}
+            - nace1q31: {type: bool, initialdata: False}
+            - nace1q32: {type: bool, initialdata: False}
+            - nace1q33: {type: bool, initialdata: False}
+            - nace1q34: {type: bool, initialdata: False}
+            - nace1q35: {type: bool, initialdata: False}
+            - nace1q41: {type: bool, initialdata: False}
+            - nace1q42: {type: bool, initialdata: False}
+            - nace1q43: {type: bool, initialdata: False}
+            - nace1q44: {type: bool, initialdata: False}
+            - nace1q51: {type: bool, initialdata: False}
+            - nace1q52: {type: bool, initialdata: False}
+            - nace1q53: {type: bool, initialdata: False}
+            - nace1q54: {type: bool, initialdata: False}
+            - nace1q61: {type: bool, initialdata: False}
+            - nace1q62: {type: bool, initialdata: False}
+            - nace1q63: {type: bool, initialdata: False}
+            - nace1q71: {type: bool, initialdata: False}
+            - nace1q72: {type: bool, initialdata: False}
+            - nace1q73: {type: bool, initialdata: False}
+            - nace1q74: {type: bool, initialdata: False}
+            - nace1q75: {type: bool, initialdata: False}
+            - nace1q81: {type: bool, initialdata: False}
+            - nace1q82: {type: bool, initialdata: False}
+            - nace1q83: {type: bool, initialdata: False}
+            - nace1q91: {type: bool, initialdata: False}
+            - nace1q92: {type: bool, initialdata: False}
+            - nace1q93: {type: bool, initialdata: False}
+            - nace1q94: {type: bool, initialdata: False}
+            - nace1q95: {type: bool, initialdata: False}
+            - nace1q96: {type: bool, initialdata: False}
+            - nace2q1: {type: bool, initialdata: False}
+            - nace2q11: {type: bool, initialdata: False}
+            - nace2q12: {type: bool, initialdata: False}
+            - nace2q13: {type: bool, initialdata: False}
+            - nace2q14: {type: bool, initialdata: False}
+            - nace2q21: {type: bool, initialdata: False}
+            - nace2q22: {type: bool, initialdata: False}
+            - nace2q23: {type: bool, initialdata: False}
+            - nace2q24: {type: bool, initialdata: False}
+            - nace2q25: {type: bool, initialdata: False}
+            - nace2q26: {type: bool, initialdata: False}
+            - nace2q31: {type: bool, initialdata: False}
+            - nace2q32: {type: bool, initialdata: False}
+            - nace2q33: {type: bool, initialdata: False}
+            - nace2q34: {type: bool, initialdata: False}
+            - nace2q35: {type: bool, initialdata: False}
+            - nace2q41: {type: bool, initialdata: False}
+            - nace2q42: {type: bool, initialdata: False}
+            - nace2q43: {type: bool, initialdata: False}
+            - nace2q44: {type: bool, initialdata: False}
+            - nace2q51: {type: bool, initialdata: False}
+            - nace2q52: {type: bool, initialdata: False}
+            - nace2q53: {type: bool, initialdata: False}
+            - nace2q54: {type: bool, initialdata: False}
+            - nace2q61: {type: bool, initialdata: False}
+            - nace2q62: {type: bool, initialdata: False}
+            - nace2q63: {type: bool, initialdata: False}
+            - nace2q71: {type: bool, initialdata: False}
+            - nace2q72: {type: bool, initialdata: False}
+            - nace2q73: {type: bool, initialdata: False}
+            - nace2q74: {type: bool, initialdata: False}
+            - nace2q75: {type: bool, initialdata: False}
+            - nace2q81: {type: bool, initialdata: False}
+            - nace2q82: {type: bool, initialdata: False}
+            - nace2q83: {type: bool, initialdata: False}
+            - nace2q91: {type: bool, initialdata: False}
+            - nace2q92: {type: bool, initialdata: False}
+            - nace2q93: {type: bool, initialdata: False}
+            - nace2q94: {type: bool, initialdata: False}
+            - nace2q95: {type: bool, initialdata: False}
+            - nace2q96: {type: bool, initialdata: False}
+            - nace3q1: {type: bool, initialdata: False}
+            - nace3q11: {type: bool, initialdata: False}
+            - nace3q12: {type: bool, initialdata: False}
+            - nace3q13: {type: bool, initialdata: False}
+            - nace3q14: {type: bool, initialdata: False}
+            - nace3q21: {type: bool, initialdata: False}
+            - nace3q22: {type: bool, initialdata: False}
+            - nace3q23: {type: bool, initialdata: False}
+            - nace3q24: {type: bool, initialdata: False}
+            - nace3q25: {type: bool, initialdata: False}
+            - nace3q26: {type: bool, initialdata: False}
+            - nace3q31: {type: bool, initialdata: False}
+            - nace3q32: {type: bool, initialdata: False}
+            - nace3q33: {type: bool, initialdata: False}
+            - nace3q34: {type: bool, initialdata: False}
+            - nace3q35: {type: bool, initialdata: False}
+            - nace3q41: {type: bool, initialdata: False}
+            - nace3q42: {type: bool, initialdata: False}
+            - nace3q43: {type: bool, initialdata: False}
+            - nace3q44: {type: bool, initialdata: False}
+            - nace3q51: {type: bool, initialdata: False}
+            - nace3q52: {type: bool, initialdata: False}
+            - nace3q53: {type: bool, initialdata: False}
+            - nace3q54: {type: bool, initialdata: False}
+            - nace3q61: {type: bool, initialdata: False}
+            - nace3q62: {type: bool, initialdata: False}
+            - nace3q63: {type: bool, initialdata: False}
+            - nace3q71: {type: bool, initialdata: False}
+            - nace3q72: {type: bool, initialdata: False}
+            - nace3q73: {type: bool, initialdata: False}
+            - nace3q74: {type: bool, initialdata: False}
+            - nace3q75: {type: bool, initialdata: False}
+            - nace3q81: {type: bool, initialdata: False}
+            - nace3q82: {type: bool, initialdata: False}
+            - nace3q83: {type: bool, initialdata: False}
+            - nace3q91: {type: bool, initialdata: False}
+            - nace3q92: {type: bool, initialdata: False}
+            - nace3q93: {type: bool, initialdata: False}
+            - nace3q94: {type: bool, initialdata: False}
+            - nace3q95: {type: bool, initialdata: False}
+            - nace3q96: {type: bool, initialdata: False}
+            - nace4q1: {type: bool, initialdata: False}
+            - nace4q11: {type: bool, initialdata: False}
+            - nace4q12: {type: bool, initialdata: False}
+            - nace4q13: {type: bool, initialdata: False}
+            - nace4q14: {type: bool, initialdata: False}
+            - nace4q21: {type: bool, initialdata: False}
+            - nace4q22: {type: bool, initialdata: False}
+            - nace4q23: {type: bool, initialdata: False}
+            - nace4q24: {type: bool, initialdata: False}
+            - nace4q25: {type: bool, initialdata: False}
+            - nace4q26: {type: bool, initialdata: False}
+            - nace4q31: {type: bool, initialdata: False}
+            - nace4q32: {type: bool, initialdata: False}
+            - nace4q33: {type: bool, initialdata: False}
+            - nace4q34: {type: bool, initialdata: False}
+            - nace4q35: {type: bool, initialdata: False}
+            - nace4q41: {type: bool, initialdata: False}
+            - nace4q42: {type: bool, initialdata: False}
+            - nace4q43: {type: bool, initialdata: False}
+            - nace4q44: {type: bool, initialdata: False}
+            - nace4q51: {type: bool, initialdata: False}
+            - nace4q52: {type: bool, initialdata: False}
+            - nace4q53: {type: bool, initialdata: False}
+            - nace4q54: {type: bool, initialdata: False}
+            - nace4q61: {type: bool, initialdata: False}
+            - nace4q62: {type: bool, initialdata: False}
+            - nace4q63: {type: bool, initialdata: False}
+            - nace4q71: {type: bool, initialdata: False}
+            - nace4q72: {type: bool, initialdata: False}
+            - nace4q73: {type: bool, initialdata: False}
+            - nace4q74: {type: bool, initialdata: False}
+            - nace4q75: {type: bool, initialdata: False}
+            - nace4q81: {type: bool, initialdata: False}
+            - nace4q82: {type: bool, initialdata: False}
+            - nace4q83: {type: bool, initialdata: False}
+            - nace4q91: {type: bool, initialdata: False}
+            - nace4q92: {type: bool, initialdata: False}
+            - nace4q93: {type: bool, initialdata: False}
+            - nace4q94: {type: bool, initialdata: False}
+            - nace4q95: {type: bool, initialdata: False}
+            - nace4q96: {type: bool, initialdata: False}
+            - nace5q1: {type: bool, initialdata: False}
+            - nace5q11: {type: bool, initialdata: False}
+            - nace5q12: {type: bool, initialdata: False}
+            - nace5q13: {type: bool, initialdata: False}
+            - nace5q14: {type: bool, initialdata: False}
+            - nace5q21: {type: bool, initialdata: False}
+            - nace5q22: {type: bool, initialdata: False}
+            - nace5q23: {type: bool, initialdata: False}
+            - nace5q24: {type: bool, initialdata: False}
+            - nace5q25: {type: bool, initialdata: False}
+            - nace5q26: {type: bool, initialdata: False}
+            - nace5q31: {type: bool, initialdata: False}
+            - nace5q32: {type: bool, initialdata: False}
+            - nace5q33: {type: bool, initialdata: False}
+            - nace5q34: {type: bool, initialdata: False}
+            - nace5q35: {type: bool, initialdata: False}
+            - nace5q41: {type: bool, initialdata: False}
+            - nace5q42: {type: bool, initialdata: False}
+            - nace5q43: {type: bool, initialdata: False}
+            - nace5q44: {type: bool, initialdata: False}
+            - nace5q51: {type: bool, initialdata: False}
+            - nace5q52: {type: bool, initialdata: False}
+            - nace5q53: {type: bool, initialdata: False}
+            - nace5q54: {type: bool, initialdata: False}
+            - nace5q61: {type: bool, initialdata: False}
+            - nace5q62: {type: bool, initialdata: False}
+            - nace5q63: {type: bool, initialdata: False}
+            - nace5q71: {type: bool, initialdata: False}
+            - nace5q72: {type: bool, initialdata: False}
+            - nace5q73: {type: bool, initialdata: False}
+            - nace5q74: {type: bool, initialdata: False}
+            - nace5q75: {type: bool, initialdata: False}
+            - nace5q81: {type: bool, initialdata: False}
+            - nace5q82: {type: bool, initialdata: False}
+            - nace5q83: {type: bool, initialdata: False}
+            - nace5q91: {type: bool, initialdata: False}
+            - nace5q92: {type: bool, initialdata: False}
+            - nace5q93: {type: bool, initialdata: False}
+            - nace5q94: {type: bool, initialdata: False}
+            - nace5q95: {type: bool, initialdata: False}
+            - nace5q96: {type: bool, initialdata: False}
+   
+
+            - nace1_score: {type: float, initialdata: False}
+            - nace2_score: {type: float, initialdata: False}
+            - nace3_score: {type: float, initialdata: False}
+            - nace4_score: {type: float, initialdata: False}
+            - nace5_score: {type: float, initialdata: False}
+
+
+            - nace1q1_score: {type: float, initialdata: False}
+            - nace2q1_score: {type: float, initialdata: False}
+            - nace3q1_score: {type: float, initialdata: False}
+            - nace4q1_score: {type: float, initialdata: False}
+            - nace5q1_score: {type: float, initialdata: False}
+
+               
+            - nace1q2_score: {type: float, initialdata: False}
+            - nace2q2_score: {type: float, initialdata: False}
+            - nace3q2_score: {type: float, initialdata: False}
+            - nace4q2_score: {type: float, initialdata: False}
+            - nace5q2_score: {type: float, initialdata: False}
+
+               
+            - nace1q3_score: {type: float, initialdata: False}
+            - nace2q3_score: {type: float, initialdata: False}
+            - nace3q3_score: {type: float, initialdata: False}
+            - nace4q3_score: {type: float, initialdata: False}
+            - nace5q3_score: {type: float, initialdata: False}
+  
+
+            - nace1q4_score: {type: float, initialdata: False}
+            - nace2q4_score: {type: float, initialdata: False}
+            - nace3q4_score: {type: float, initialdata: False}
+            - nace4q4_score: {type: float, initialdata: False}
+            - nace5q4_score: {type: float, initialdata: False}
+         

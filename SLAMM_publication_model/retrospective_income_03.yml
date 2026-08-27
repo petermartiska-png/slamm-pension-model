@@ -1,0 +1,1481 @@
+
+################################################################################
+# Retrospective simulation #####################################################
+################################################################################
+
+globals: 
+     base_year: 2022
+
+     align_omb:
+         path: align_omb.csv
+         fields:
+         - PERIOD: int
+         - MEAN_OMB: float
+     
+     edutable:
+         path: edu_level.csv
+         fields:
+         - PERIOD: int
+         - PL: float
+         - LSL: float
+         - HSL: float
+         - PSL: float
+         - TL: float
+         # input global variables - retirement age, average wage, share of unemployment rate and elasticity of inactivity              
+     globaltable:
+         path: globaltable_retro.csv 
+         transposed: True 
+         fields:
+            - PERIOD: int
+            - N1: int
+            - N2: int 
+            - N3: int 
+            - N4: int 
+            - N5: int 
+            - UR: float 
+            - inac_elas: float
+            - MALE_RA: float
+            - FEMALE_RA_0: float 
+            - FEMALE_RA_1: float 
+            - FEMALE_RA_2: float 
+            - FEMALE_RA_3_4: float 
+            - FEMALE_RA_5: float            
+            - W_avg: float
+            - unem_rate: float              
+
+
+entities:
+    person:
+        fields:
+            # Present in input file
+            - pohlavie: int
+            - vek: int
+            - ekon_status: int
+            - nace: int
+            - isco: int
+            - vzdelanie: int
+            - country_b: int
+            
+            # Statuses
+            - status: {type: int, initialdata: False}
+            - status1y: {type: int, initialdata: False}
+            - ea: {type: bool, initialdata: False}
+            - student: {type: bool, initialdata: False}
+            - unemployed: {type: bool, initialdata: False}
+            - employed: {type: bool, initialdata: False}
+            - working_retired: {type: bool, initialdata: False}
+            - destination: {type: int, initialdata: False}
+            - retired: {type: bool, initialdata: False}
+            - disabled: {type: bool, initialdata: False}
+            - to_immigrate: {type: bool, initialdata: False}
+            - immigrant_sim: {type: bool, initialdata: False}
+            - immigrant_score: {type: float, initialdata: False}
+            - immigrant: {type: bool, initialdata: False}
+            - immigrant_new: {type: bool, initialdata: False}
+            - toret: {type: int, initialdata: False} 
+            - init_disab: {type: bool, initialdata: False}
+            
+            - sex: {type: int, initialdata: False}
+            - age: {type: int, initialdata: False}
+            - age_float: {type: float, initialdata: 0}
+            - days: {type: float, initialdata: 0}
+            - pocet_deti: {type: int, initialdata: False}
+            - unborn: {type: bool, initialdata: False}
+            - to_rebirth_male: {type: bool, initialdata: False}
+            - to_rebirth_female: {type: bool, initialdata: False}
+            - to_rebirth: {type: bool, initialdata: False}
+            - maternity: {type: bool, initialdata: False}
+            
+            # Statistical Classification of Economic Activities - NACE
+            - nace5: {type: int, initialdata: False}
+            - nace_1: {type: int, initialdata: False}
+            - nace_2: {type: int, initialdata: False}
+            - nace_3: {type: int, initialdata: False}
+            - nace_4: {type: int, initialdata: False}
+            - nace_5: {type: int, initialdata: False}
+            - nace1_score: {type: float, initialdata: False}
+            - nace2_score: {type: float, initialdata: False}
+            - nace3_score: {type: float, initialdata: False}
+            - nace4_score: {type: float, initialdata: False}
+            - nace5_score: {type: float, initialdata: False}
+            - nace1y: {type: int, initialdata: False}
+            
+            # Education
+            - hatlev5: {type: int, initialdata: False}
+            - hatfield: {type: int, initialdata: False}
+            - hatfield1: {type: int, initialdata: False}
+
+            # Pension rights
+            - historical_year: {type: int, initialdata: False}
+            - omb_m: {type: float, initialdata: False}
+            - omb_f: {type: float, initialdata: False}
+            - omb: {type: float, initialdata: False}
+            - cumulative_omb: {type: float, initialdata: False}
+            - odp: {type: int, initialdata: False}
+            - roky_pomb: {type: int, initialdata: False}
+            - mean_omb_temp: {type: float, initialdata: False}
+            - rok_priz: {type: int, initialdata: False}
+            
+        macros:
+            UNSET: -1
+
+            ISMALE: sex == 1
+            ISFEMALE: sex == 2 
+
+            AGEG16: age>=16 and age<=19
+            AGEG17: age>=15 and age<=19
+            AGEG22: age>=20 and age<=24
+            AGEG27: age>=25 and age<=29
+            AGEG32: age>=30 and age<=34
+            AGEG37: age>=35 and age<=39
+            AGEG42: age>=40 and age<=44
+            AGEG47: age>=45 and age<=49
+            AGEG52: age>=50 and age<=54
+            AGEG57: age>=55 and age<=59
+            AGEG62: age>=60 and age<=64
+            AGEG67: age>=65 and age<=69
+            AGEGALL: age>=16 and age<=100
+
+            AGE_M_16_19:  age>=16  and age<=19  and pohlavie==1
+            AGE_M_20_24:  age>=20  and age<=24  and pohlavie==1
+            AGE_M_25_29:  age>=25  and age<=29  and pohlavie==1
+            AGE_M_30_34:  age>=30  and age<=34  and pohlavie==1
+            AGE_M_35_39:  age>=35  and age<=39  and pohlavie==1
+            AGE_M_40_44:  age>=40  and age<=44  and pohlavie==1
+            AGE_M_45_49:  age>=45  and age<=49  and pohlavie==1
+            AGE_M_50_54:  age>=50  and age<=54  and pohlavie==1
+            AGE_M_55_59:  age>=55  and age<=59  and pohlavie==1
+            AGE_M_60_64:  age>=60  and age<=64  and pohlavie==1
+
+            AGE_M_65:     age==65               and pohlavie==1
+            AGE_M_66:     age==66               and pohlavie==1
+            AGE_M_67:     age==67               and pohlavie==1
+            AGE_M_68:     age==68               and pohlavie==1
+            AGE_M_69:     age==69               and pohlavie==1
+
+            AGE_M_70_71:  age>=70  and age<=71  and pohlavie==1
+            AGE_M_72_73:  age>=72  and age<=73  and pohlavie==1
+            AGE_M_74_75:  age>=74  and age<=75  and pohlavie==1
+            AGE_M_76_77:  age>=76  and age<=77  and pohlavie==1
+            AGE_M_78_79:  age>=78  and age<=79  and pohlavie==1
+
+            AGE_M_80_84:  age>=80  and age<=84  and pohlavie==1
+            AGE_M_85_89:  age>=85  and age<=89  and pohlavie==1
+            AGE_M_90_94:  age>=90  and age<=94  and pohlavie==1
+            AGE_M_95_100: age>=95  and age<=100 and pohlavie==1
+
+            AGE_F_16_19:  age>=16  and age<=19  and pohlavie==2
+            AGE_F_20_24:  age>=20  and age<=24  and pohlavie==2
+            AGE_F_25_29:  age>=25  and age<=29  and pohlavie==2
+            AGE_F_30_34:  age>=30  and age<=34  and pohlavie==2
+            AGE_F_35_39:  age>=35  and age<=39  and pohlavie==2
+            AGE_F_40_44:  age>=40  and age<=44  and pohlavie==2
+            AGE_F_45_49:  age>=45  and age<=49  and pohlavie==2
+            AGE_F_50_54:  age>=50  and age<=54  and pohlavie==2
+            AGE_F_55_59:  age>=55  and age<=59  and pohlavie==2
+
+            AGE_F_60:     age==60               and pohlavie==2
+            AGE_F_61:     age==61               and pohlavie==2
+            AGE_F_62:     age==62               and pohlavie==2
+            AGE_F_63:     age==63               and pohlavie==2
+            AGE_F_64:     age==64               and pohlavie==2
+            AGE_F_65:     age==65               and pohlavie==2
+            AGE_F_66:     age==66               and pohlavie==2
+            AGE_F_67:     age==67               and pohlavie==2
+            AGE_F_68:     age==68               and pohlavie==2
+            AGE_F_69:     age==69               and pohlavie==2
+
+            AGE_F_70_71:  age>=70  and age<=71  and pohlavie==2
+            AGE_F_72_73:  age>=72  and age<=73  and pohlavie==2
+            AGE_F_74_75:  age>=74  and age<=75  and pohlavie==2
+            AGE_F_76_77:  age>=76  and age<=77  and pohlavie==2
+            AGE_F_78_79:  age>=78  and age<=79  and pohlavie==2
+
+            AGE_F_80_84:  age>=80  and age<=84  and pohlavie==2
+            AGE_F_85_89:  age>=85  and age<=89  and pohlavie==2
+            AGE_F_90_94:  age>=90  and age<=94  and pohlavie==2
+            AGE_F_95_100: age>=95  and age<=100 and pohlavie==2
+
+            AGE19: age==19
+            AGE20: age==20
+            AGE21: age==21
+            AGE22: age==22
+            AGE23: age==23
+            AGE24: age==24
+            AGE25: age==25
+            AGE26: age==26
+            AGE27: age==27
+            AGE28: age==28
+            AGE29: age==29
+            AGE30: age==30
+            AGE31: age==31
+            AGE32: age==32
+            AGE33: age==33
+            AGE34: age==34
+            AGE35: age==35
+            AGE36: age==36
+            AGE37: age==37
+            AGE38: age==38
+            AGE39: age==39
+            AGE40: age==40
+            AGE41: age==41
+            AGE42: age==42
+            AGE43: age==43
+            AGE44: age==44
+            AGE45: age==45
+            AGE46: age==46
+            AGE47: age==47
+            AGE48: age==48
+            AGE49: age==49
+            AGE50: age==50
+            AGE51: age==51
+            AGE52: age==52
+            AGE53: age==53
+            AGE54: age==54
+            AGE55: age==55
+            AGE56: age==56
+            AGE57: age==57
+            AGE58: age==58
+            AGE59: age==59
+            AGE60: age==60
+            AGE61: age==61
+            AGE62: age==62
+            AGE63: age==63
+            AGE64: age==64
+            AGE65: age==65
+            AGE66: age==66
+            AGE67: age==67
+            AGE68: age==68
+            AGE69: age==69
+
+            PRIMARY: hatlev5==1
+            LOWER_SECONDARY: hatlev5==2
+            UPPER_SECONDARY: hatlev5==3
+            POST_SECONDARY: hatlev5==4
+            TERTIARY: hatlev5==5
+
+            GRADUATIONAGE_P: 15   
+            GRADUATIONAGE_LS: 15
+            GRADUATIONAGE_US: 20
+            GRADUATIONAGE_PS: 20
+            GRADUATIONAGE_T: 26    
+            
+            EMPLOYED: 1
+            UNEMPLOYED: 2
+            STUDENT: 3
+            RETIRED: 4
+            INACTIVE: 5
+            DISABLED: 6
+
+            IS_EMPLOYED: status==1
+            IS_UNEMPLOYED: status==2
+            IS_STUDENT: status==3
+            IS_RETIRED: status==4
+            IS_INACTIVE: status==5 
+            IS_DISABLED: status==6
+
+            WAS_EMPLOYED: status1y==1
+            WAS_UNEMPLOYED: status1y==2
+            WAS_STUDENT: status1y==3
+            WAS_RETIRED: status1y==4
+            WAS_INACTIVE: status1y==5   
+            WAS_DISABLED: status1y==6            
+            
+            FIELD0: hatfield==0 or hatfield==99
+            FIELD1: hatfield==1
+            FIELD2: hatfield==2
+            FIELD3: hatfield==3
+            FIELD4: hatfield==4
+            FIELD5: hatfield==5
+            FIELD6: hatfield==6
+            FIELD7: hatfield==7
+            FIELD8: hatfield==8
+            FIELD9: hatfield==9
+            FIELD10: hatfield==10
+            
+            AGRO: nace5==1 
+            INDUSTRY: nace5==2
+            CONSTRUCTION: nace5==3
+            MAR_SERVICES: nace5==4
+            NMAR_SERVICES: nace5==5
+
+            W_avg: globaltable.W_avg[period]
+            unem_rate: globaltable.unem_rate[period]
+            inac_elas: globaltable.inac_elas[period]
+            N1: globaltable.N1[period]
+            N2: globaltable.N2[period] 
+            N3: globaltable.N3[period]
+            N4: globaltable.N4[period]
+            N5: globaltable.N5[period] 
+            MALE_RA: globaltable.MALE_RA[period]
+            FEMALE_RA_0: globaltable.FEMALE_RA_0[period]
+            FEMALE_RA_1: globaltable.FEMALE_RA_1[period]
+            FEMALE_RA_2: globaltable.FEMALE_RA_2[period]
+            FEMALE_RA_3_4: globaltable.FEMALE_RA_3_4[period]
+            FEMALE_RA_5: globaltable.FEMALE_RA_5[period]            
+            
+            DETI1: pocet_deti==1 
+            DETI2: pocet_deti==2
+            DETI3: pocet_deti==3
+            DETI4: pocet_deti==4
+            DETI5: pocet_deti==5
+            DETI6: pocet_deti==6
+            
+            ZENA2040: age>=20 and age<=40 and sex == 2 
+            AGEG4044: age>=20 and age<=40
+            AGEG4549: age>=20 and age<=40
+            
+            #MEAN_OMB: align_omb.MEAN_OMB[period]
+
+            AGE_M_16_19_AGR:  age>=16  and age<=19  and pohlavie==1 and nace5==1
+            AGE_M_20_24_AGR:  age>=20  and age<=24  and pohlavie==1 and nace5==1
+            AGE_M_25_29_AGR:  age>=25  and age<=29  and pohlavie==1 and nace5==1
+            AGE_M_30_34_AGR:  age>=30  and age<=34  and pohlavie==1 and nace5==1
+            AGE_M_35_39_AGR:  age>=35  and age<=39  and pohlavie==1 and nace5==1
+            AGE_M_40_44_AGR:  age>=40  and age<=44  and pohlavie==1 and nace5==1
+            AGE_M_45_49_AGR:  age>=45  and age<=49  and pohlavie==1 and nace5==1
+            AGE_M_50_54_AGR:  age>=50  and age<=54  and pohlavie==1 and nace5==1
+            AGE_M_55_59_AGR:  age>=55  and age<=59  and pohlavie==1 and nace5==1
+            AGE_M_60_64_AGR:  age>=60  and age<=64  and pohlavie==1 and nace5==1
+            AGE_M_65_AGR:     age==65               and pohlavie==1 and nace5==1
+            AGE_M_66_AGR:     age==66               and pohlavie==1 and nace5==1
+            AGE_M_67_AGR:     age==67               and pohlavie==1 and nace5==1
+            AGE_M_68_AGR:     age==68               and pohlavie==1 and nace5==1
+            AGE_M_69_AGR:     age==69               and pohlavie==1 and nace5==1
+            AGE_M_70_71_AGR:  age>=70  and age<=71  and pohlavie==1 and nace5==1
+            AGE_M_72_73_AGR:  age>=72  and age<=73  and pohlavie==1 and nace5==1
+            AGE_M_74_75_AGR:  age>=74  and age<=75  and pohlavie==1 and nace5==1
+            AGE_M_76_77_AGR:  age>=76  and age<=77  and pohlavie==1 and nace5==1
+            AGE_M_78_79_AGR:  age>=78  and age<=79  and pohlavie==1 and nace5==1
+            AGE_M_80_84_AGR:  age>=80  and age<=84  and pohlavie==1 and nace5==1
+            AGE_M_85_89_AGR:  age>=85  and age<=89  and pohlavie==1 and nace5==1
+            AGE_M_90_94_AGR:  age>=90  and age<=94  and pohlavie==1 and nace5==1
+            AGE_M_95_100_AGR: age>=95  and age<=100 and pohlavie==1 and nace5==1
+
+            AGE_F_16_19_AGR:  age>=16  and age<=19  and pohlavie==2 and nace5==1
+            AGE_F_20_24_AGR:  age>=20  and age<=24  and pohlavie==2 and nace5==1
+            AGE_F_25_29_AGR:  age>=25  and age<=29  and pohlavie==2 and nace5==1
+            AGE_F_30_34_AGR:  age>=30  and age<=34  and pohlavie==2 and nace5==1
+            AGE_F_35_39_AGR:  age>=35  and age<=39  and pohlavie==2 and nace5==1
+            AGE_F_40_44_AGR:  age>=40  and age<=44  and pohlavie==2 and nace5==1
+            AGE_F_45_49_AGR:  age>=45  and age<=49  and pohlavie==2 and nace5==1
+            AGE_F_50_54_AGR:  age>=50  and age<=54  and pohlavie==2 and nace5==1
+            AGE_F_55_59_AGR:  age>=55  and age<=59  and pohlavie==2 and nace5==1
+            AGE_F_60_AGR:     age==60               and pohlavie==2 and nace5==1
+            AGE_F_61_AGR:     age==61               and pohlavie==2 and nace5==1
+            AGE_F_62_AGR:     age==62               and pohlavie==2 and nace5==1
+            AGE_F_63_AGR:     age==63               and pohlavie==2 and nace5==1
+            AGE_F_64_AGR:     age==64               and pohlavie==2 and nace5==1
+            AGE_F_65_AGR:     age==65               and pohlavie==2 and nace5==1
+            AGE_F_66_AGR:     age==66               and pohlavie==2 and nace5==1
+            AGE_F_67_AGR:     age==67               and pohlavie==2 and nace5==1
+            AGE_F_68_AGR:     age==68               and pohlavie==2 and nace5==1
+            AGE_F_69_AGR:     age==69               and pohlavie==2 and nace5==1
+            AGE_F_70_71_AGR:  age>=70  and age<=71  and pohlavie==2 and nace5==1
+            AGE_F_72_73_AGR:  age>=72  and age<=73  and pohlavie==2 and nace5==1
+            AGE_F_74_75_AGR:  age>=74  and age<=75  and pohlavie==2 and nace5==1
+            AGE_F_76_77_AGR:  age>=76  and age<=77  and pohlavie==2 and nace5==1
+            AGE_F_78_79_AGR:  age>=78  and age<=79  and pohlavie==2 and nace5==1
+            AGE_F_80_84_AGR:  age>=80  and age<=84  and pohlavie==2 and nace5==1
+            AGE_F_85_89_AGR:  age>=85  and age<=89  and pohlavie==2 and nace5==1
+            AGE_F_90_94_AGR:  age>=90  and age<=94  and pohlavie==2 and nace5==1
+            AGE_F_95_100_AGR: age>=95  and age<=100 and pohlavie==2 and nace5==1
+
+            AGE_M_16_19_IND:  age>=16  and age<=19  and pohlavie==1 and nace5==2
+            AGE_M_20_24_IND:  age>=20  and age<=24  and pohlavie==1 and nace5==2
+            AGE_M_25_29_IND:  age>=25  and age<=29  and pohlavie==1 and nace5==2
+            AGE_M_30_34_IND:  age>=30  and age<=34  and pohlavie==1 and nace5==2
+            AGE_M_35_39_IND:  age>=35  and age<=39  and pohlavie==1 and nace5==2
+            AGE_M_40_44_IND:  age>=40  and age<=44  and pohlavie==1 and nace5==2
+            AGE_M_45_49_IND:  age>=45  and age<=49  and pohlavie==1 and nace5==2
+            AGE_M_50_54_IND:  age>=50  and age<=54  and pohlavie==1 and nace5==2
+            AGE_M_55_59_IND:  age>=55  and age<=59  and pohlavie==1 and nace5==2
+            AGE_M_60_64_IND:  age>=60  and age<=64  and pohlavie==1 and nace5==2
+            AGE_M_65_IND:     age==65               and pohlavie==1 and nace5==2
+            AGE_M_66_IND:     age==66               and pohlavie==1 and nace5==2
+            AGE_M_67_IND:     age==67               and pohlavie==1 and nace5==2
+            AGE_M_68_IND:     age==68               and pohlavie==1 and nace5==2
+            AGE_M_69_IND:     age==69               and pohlavie==1 and nace5==2
+            AGE_M_70_71_IND:  age>=70  and age<=71  and pohlavie==1 and nace5==2
+            AGE_M_72_73_IND:  age>=72  and age<=73  and pohlavie==1 and nace5==2
+            AGE_M_74_75_IND:  age>=74  and age<=75  and pohlavie==1 and nace5==2
+            AGE_M_76_77_IND:  age>=76  and age<=77  and pohlavie==1 and nace5==2
+            AGE_M_78_79_IND:  age>=78  and age<=79  and pohlavie==1 and nace5==2
+            AGE_M_80_84_IND:  age>=80  and age<=84  and pohlavie==1 and nace5==2
+            AGE_M_85_89_IND:  age>=85  and age<=89  and pohlavie==1 and nace5==2
+            AGE_M_90_94_IND:  age>=90  and age<=94  and pohlavie==1 and nace5==2
+            AGE_M_95_100_IND: age>=95  and age<=100 and pohlavie==1 and nace5==2
+
+            AGE_F_16_19_IND:  age>=16  and age<=19  and pohlavie==2 and nace5==2
+            AGE_F_20_24_IND:  age>=20  and age<=24  and pohlavie==2 and nace5==2
+            AGE_F_25_29_IND:  age>=25  and age<=29  and pohlavie==2 and nace5==2
+            AGE_F_30_34_IND:  age>=30  and age<=34  and pohlavie==2 and nace5==2
+            AGE_F_35_39_IND:  age>=35  and age<=39  and pohlavie==2 and nace5==2
+            AGE_F_40_44_IND:  age>=40  and age<=44  and pohlavie==2 and nace5==2
+            AGE_F_45_49_IND:  age>=45  and age<=49  and pohlavie==2 and nace5==2
+            AGE_F_50_54_IND:  age>=50  and age<=54  and pohlavie==2 and nace5==2
+            AGE_F_55_59_IND:  age>=55  and age<=59  and pohlavie==2 and nace5==2
+            AGE_F_60_IND:     age==60               and pohlavie==2 and nace5==2
+            AGE_F_61_IND:     age==61               and pohlavie==2 and nace5==2
+            AGE_F_62_IND:     age==62               and pohlavie==2 and nace5==2
+            AGE_F_63_IND:     age==63               and pohlavie==2 and nace5==2
+            AGE_F_64_IND:     age==64               and pohlavie==2 and nace5==2
+            AGE_F_65_IND:     age==65               and pohlavie==2 and nace5==2
+            AGE_F_66_IND:     age==66               and pohlavie==2 and nace5==2
+            AGE_F_67_IND:     age==67               and pohlavie==2 and nace5==2
+            AGE_F_68_IND:     age==68               and pohlavie==2 and nace5==2
+            AGE_F_69_IND:     age==69               and pohlavie==2 and nace5==2
+            AGE_F_70_71_IND:  age>=70  and age<=71  and pohlavie==2 and nace5==2
+            AGE_F_72_73_IND:  age>=72  and age<=73  and pohlavie==2 and nace5==2
+            AGE_F_74_75_IND:  age>=74  and age<=75  and pohlavie==2 and nace5==2
+            AGE_F_76_77_IND:  age>=76  and age<=77  and pohlavie==2 and nace5==2
+            AGE_F_78_79_IND:  age>=78  and age<=79  and pohlavie==2 and nace5==2
+            AGE_F_80_84_IND:  age>=80  and age<=84  and pohlavie==2 and nace5==2
+            AGE_F_85_89_IND:  age>=85  and age<=89  and pohlavie==2 and nace5==2
+            AGE_F_90_94_IND:  age>=90  and age<=94  and pohlavie==2 and nace5==2
+            AGE_F_95_100_IND: age>=95  and age<=100 and pohlavie==2 and nace5==2
+
+            AGE_M_16_19_CON:  age>=16  and age<=19  and pohlavie==1 and nace5==3
+            AGE_M_20_24_CON:  age>=20  and age<=24  and pohlavie==1 and nace5==3
+            AGE_M_25_29_CON:  age>=25  and age<=29  and pohlavie==1 and nace5==3
+            AGE_M_30_34_CON:  age>=30  and age<=34  and pohlavie==1 and nace5==3
+            AGE_M_35_39_CON:  age>=35  and age<=39  and pohlavie==1 and nace5==3
+            AGE_M_40_44_CON:  age>=40  and age<=44  and pohlavie==1 and nace5==3
+            AGE_M_45_49_CON:  age>=45  and age<=49  and pohlavie==1 and nace5==3
+            AGE_M_50_54_CON:  age>=50  and age<=54  and pohlavie==1 and nace5==3
+            AGE_M_55_59_CON:  age>=55  and age<=59  and pohlavie==1 and nace5==3
+            AGE_M_60_64_CON:  age>=60  and age<=64  and pohlavie==1 and nace5==3
+            AGE_M_65_CON:     age==65               and pohlavie==1 and nace5==3
+            AGE_M_66_CON:     age==66               and pohlavie==1 and nace5==3
+            AGE_M_67_CON:     age==67               and pohlavie==1 and nace5==3
+            AGE_M_68_CON:     age==68               and pohlavie==1 and nace5==3
+            AGE_M_69_CON:     age==69               and pohlavie==1 and nace5==3
+            AGE_M_70_71_CON:  age>=70  and age<=71  and pohlavie==1 and nace5==3
+            AGE_M_72_73_CON:  age>=72  and age<=73  and pohlavie==1 and nace5==3
+            AGE_M_74_75_CON:  age>=74  and age<=75  and pohlavie==1 and nace5==3
+            AGE_M_76_77_CON:  age>=76  and age<=77  and pohlavie==1 and nace5==3
+            AGE_M_78_79_CON:  age>=78  and age<=79  and pohlavie==1 and nace5==3
+            AGE_M_80_84_CON:  age>=80  and age<=84  and pohlavie==1 and nace5==3
+            AGE_M_85_89_CON:  age>=85  and age<=89  and pohlavie==1 and nace5==3
+            AGE_M_90_94_CON:  age>=90  and age<=94  and pohlavie==1 and nace5==3
+            AGE_M_95_100_CON: age>=95  and age<=100 and pohlavie==1 and nace5==3
+
+            AGE_F_16_19_CON:  age>=16  and age<=19  and pohlavie==2 and nace5==3
+            AGE_F_20_24_CON:  age>=20  and age<=24  and pohlavie==2 and nace5==3
+            AGE_F_25_29_CON:  age>=25  and age<=29  and pohlavie==2 and nace5==3
+            AGE_F_30_34_CON:  age>=30  and age<=34  and pohlavie==2 and nace5==3
+            AGE_F_35_39_CON:  age>=35  and age<=39  and pohlavie==2 and nace5==3
+            AGE_F_40_44_CON:  age>=40  and age<=44  and pohlavie==2 and nace5==3
+            AGE_F_45_49_CON:  age>=45  and age<=49  and pohlavie==2 and nace5==3
+            AGE_F_50_54_CON:  age>=50  and age<=54  and pohlavie==2 and nace5==3
+            AGE_F_55_59_CON:  age>=55  and age<=59  and pohlavie==2 and nace5==3
+            AGE_F_60_CON:     age==60               and pohlavie==2 and nace5==3
+            AGE_F_61_CON:     age==61               and pohlavie==2 and nace5==3
+            AGE_F_62_CON:     age==62               and pohlavie==2 and nace5==3
+            AGE_F_63_CON:     age==63               and pohlavie==2 and nace5==3
+            AGE_F_64_CON:     age==64               and pohlavie==2 and nace5==3
+            AGE_F_65_CON:     age==65               and pohlavie==2 and nace5==3
+            AGE_F_66_CON:     age==66               and pohlavie==2 and nace5==3
+            AGE_F_67_CON:     age==67               and pohlavie==2 and nace5==3
+            AGE_F_68_CON:     age==68               and pohlavie==2 and nace5==3
+            AGE_F_69_CON:     age==69               and pohlavie==2 and nace5==3
+            AGE_F_70_71_CON:  age>=70  and age<=71  and pohlavie==2 and nace5==3
+            AGE_F_72_73_CON:  age>=72  and age<=73  and pohlavie==2 and nace5==3
+            AGE_F_74_75_CON:  age>=74  and age<=75  and pohlavie==2 and nace5==3
+            AGE_F_76_77_CON:  age>=76  and age<=77  and pohlavie==2 and nace5==3
+            AGE_F_78_79_CON:  age>=78  and age<=79  and pohlavie==2 and nace5==3
+            AGE_F_80_84_CON:  age>=80  and age<=84  and pohlavie==2 and nace5==3
+            AGE_F_85_89_CON:  age>=85  and age<=89  and pohlavie==2 and nace5==3
+            AGE_F_90_94_CON:  age>=90  and age<=94  and pohlavie==2 and nace5==3
+            AGE_F_95_100_CON: age>=95  and age<=100 and pohlavie==2 and nace5==3
+
+            AGE_M_16_19_MAR:  age>=16  and age<=19  and pohlavie==1 and nace5==4
+            AGE_M_20_24_MAR:  age>=20  and age<=24  and pohlavie==1 and nace5==4
+            AGE_M_25_29_MAR:  age>=25  and age<=29  and pohlavie==1 and nace5==4
+            AGE_M_30_34_MAR:  age>=30  and age<=34  and pohlavie==1 and nace5==4
+            AGE_M_35_39_MAR:  age>=35  and age<=39  and pohlavie==1 and nace5==4
+            AGE_M_40_44_MAR:  age>=40  and age<=44  and pohlavie==1 and nace5==4
+            AGE_M_45_49_MAR:  age>=45  and age<=49  and pohlavie==1 and nace5==4
+            AGE_M_50_54_MAR:  age>=50  and age<=54  and pohlavie==1 and nace5==4
+            AGE_M_55_59_MAR:  age>=55  and age<=59  and pohlavie==1 and nace5==4
+            AGE_M_60_64_MAR:  age>=60  and age<=64  and pohlavie==1 and nace5==4
+            AGE_M_65_MAR:     age==65               and pohlavie==1 and nace5==4
+            AGE_M_66_MAR:     age==66               and pohlavie==1 and nace5==4
+            AGE_M_67_MAR:     age==67               and pohlavie==1 and nace5==4
+            AGE_M_68_MAR:     age==68               and pohlavie==1 and nace5==4
+            AGE_M_69_MAR:     age==69               and pohlavie==1 and nace5==4
+            AGE_M_70_71_MAR:  age>=70  and age<=71  and pohlavie==1 and nace5==4
+            AGE_M_72_73_MAR:  age>=72  and age<=73  and pohlavie==1 and nace5==4
+            AGE_M_74_75_MAR:  age>=74  and age<=75  and pohlavie==1 and nace5==4
+            AGE_M_76_77_MAR:  age>=76  and age<=77  and pohlavie==1 and nace5==4
+            AGE_M_78_79_MAR:  age>=78  and age<=79  and pohlavie==1 and nace5==4
+            AGE_M_80_84_MAR:  age>=80  and age<=84  and pohlavie==1 and nace5==4
+            AGE_M_85_89_MAR:  age>=85  and age<=89  and pohlavie==1 and nace5==4
+            AGE_M_90_94_MAR:  age>=90  and age<=94  and pohlavie==1 and nace5==4
+            AGE_M_95_100_MAR: age>=95  and age<=100 and pohlavie==1 and nace5==4
+
+            AGE_F_16_19_MAR:  age>=16  and age<=19  and pohlavie==2 and nace5==4
+            AGE_F_20_24_MAR:  age>=20  and age<=24  and pohlavie==2 and nace5==4
+            AGE_F_25_29_MAR:  age>=25  and age<=29  and pohlavie==2 and nace5==4
+            AGE_F_30_34_MAR:  age>=30  and age<=34  and pohlavie==2 and nace5==4
+            AGE_F_35_39_MAR:  age>=35  and age<=39  and pohlavie==2 and nace5==4
+            AGE_F_40_44_MAR:  age>=40  and age<=44  and pohlavie==2 and nace5==4
+            AGE_F_45_49_MAR:  age>=45  and age<=49  and pohlavie==2 and nace5==4
+            AGE_F_50_54_MAR:  age>=50  and age<=54  and pohlavie==2 and nace5==4
+            AGE_F_55_59_MAR:  age>=55  and age<=59  and pohlavie==2 and nace5==4
+            AGE_F_60_MAR:     age==60               and pohlavie==2 and nace5==4
+            AGE_F_61_MAR:     age==61               and pohlavie==2 and nace5==4
+            AGE_F_62_MAR:     age==62               and pohlavie==2 and nace5==4
+            AGE_F_63_MAR:     age==63               and pohlavie==2 and nace5==4
+            AGE_F_64_MAR:     age==64               and pohlavie==2 and nace5==4
+            AGE_F_65_MAR:     age==65               and pohlavie==2 and nace5==4
+            AGE_F_66_MAR:     age==66               and pohlavie==2 and nace5==4
+            AGE_F_67_MAR:     age==67               and pohlavie==2 and nace5==4
+            AGE_F_68_MAR:     age==68               and pohlavie==2 and nace5==4
+            AGE_F_69_MAR:     age==69               and pohlavie==2 and nace5==4
+            AGE_F_70_71_MAR:  age>=70  and age<=71  and pohlavie==2 and nace5==4
+            AGE_F_72_73_MAR:  age>=72  and age<=73  and pohlavie==2 and nace5==4
+            AGE_F_74_75_MAR:  age>=74  and age<=75  and pohlavie==2 and nace5==4
+            AGE_F_76_77_MAR:  age>=76  and age<=77  and pohlavie==2 and nace5==4
+            AGE_F_78_79_MAR:  age>=78  and age<=79  and pohlavie==2 and nace5==4
+            AGE_F_80_84_MAR:  age>=80  and age<=84  and pohlavie==2 and nace5==4
+            AGE_F_85_89_MAR:  age>=85  and age<=89  and pohlavie==2 and nace5==4
+            AGE_F_90_94_MAR:  age>=90  and age<=94  and pohlavie==2 and nace5==4
+            AGE_F_95_100_MAR: age>=95  and age<=100 and pohlavie==2 and nace5==4
+
+            AGE_M_16_19_NMAR:  age>=16  and age<=19  and pohlavie==1 and nace5==5
+            AGE_M_20_24_NMAR:  age>=20  and age<=24  and pohlavie==1 and nace5==5
+            AGE_M_25_29_NMAR:  age>=25  and age<=29  and pohlavie==1 and nace5==5
+            AGE_M_30_34_NMAR:  age>=30  and age<=34  and pohlavie==1 and nace5==5
+            AGE_M_35_39_NMAR:  age>=35  and age<=39  and pohlavie==1 and nace5==5
+            AGE_M_40_44_NMAR:  age>=40  and age<=44  and pohlavie==1 and nace5==5
+            AGE_M_45_49_NMAR:  age>=45  and age<=49  and pohlavie==1 and nace5==5
+            AGE_M_50_54_NMAR:  age>=50  and age<=54  and pohlavie==1 and nace5==5
+            AGE_M_55_59_NMAR:  age>=55  and age<=59  and pohlavie==1 and nace5==5
+            AGE_M_60_64_NMAR:  age>=60  and age<=64  and pohlavie==1 and nace5==5
+            AGE_M_65_NMAR:     age==65               and pohlavie==1 and nace5==5
+            AGE_M_66_NMAR:     age==66               and pohlavie==1 and nace5==5
+            AGE_M_67_NMAR:     age==67               and pohlavie==1 and nace5==5
+            AGE_M_68_NMAR:     age==68               and pohlavie==1 and nace5==5
+            AGE_M_69_NMAR:     age==69               and pohlavie==1 and nace5==5
+            AGE_M_70_71_NMAR:  age>=70  and age<=71  and pohlavie==1 and nace5==5
+            AGE_M_72_73_NMAR:  age>=72  and age<=73  and pohlavie==1 and nace5==5
+            AGE_M_74_75_NMAR:  age>=74  and age<=75  and pohlavie==1 and nace5==5
+            AGE_M_76_77_NMAR:  age>=76  and age<=77  and pohlavie==1 and nace5==5
+            AGE_M_78_79_NMAR:  age>=78  and age<=79  and pohlavie==1 and nace5==5
+            AGE_M_80_84_NMAR:  age>=80  and age<=84  and pohlavie==1 and nace5==5
+            AGE_M_85_89_NMAR:  age>=85  and age<=89  and pohlavie==1 and nace5==5
+            AGE_M_90_94_NMAR:  age>=90  and age<=94  and pohlavie==1 and nace5==5
+            AGE_M_95_100_NMAR: age>=95  and age<=100 and pohlavie==1 and nace5==5
+
+            AGE_F_16_19_NMAR:  age>=16  and age<=19  and pohlavie==2 and nace5==5
+            AGE_F_20_24_NMAR:  age>=20  and age<=24  and pohlavie==2 and nace5==5
+            AGE_F_25_29_NMAR:  age>=25  and age<=29  and pohlavie==2 and nace5==5
+            AGE_F_30_34_NMAR:  age>=30  and age<=34  and pohlavie==2 and nace5==5
+            AGE_F_35_39_NMAR:  age>=35  and age<=39  and pohlavie==2 and nace5==5
+            AGE_F_40_44_NMAR:  age>=40  and age<=44  and pohlavie==2 and nace5==5
+            AGE_F_45_49_NMAR:  age>=45  and age<=49  and pohlavie==2 and nace5==5
+            AGE_F_50_54_NMAR:  age>=50  and age<=54  and pohlavie==2 and nace5==5
+            AGE_F_55_59_NMAR:  age>=55  and age<=59  and pohlavie==2 and nace5==5
+            AGE_F_60_NMAR:     age==60               and pohlavie==2 and nace5==5
+            AGE_F_61_NMAR:     age==61               and pohlavie==2 and nace5==5
+            AGE_F_62_NMAR:     age==62               and pohlavie==2 and nace5==5
+            AGE_F_63_NMAR:     age==63               and pohlavie==2 and nace5==5
+            AGE_F_64_NMAR:     age==64               and pohlavie==2 and nace5==5
+            AGE_F_65_NMAR:     age==65               and pohlavie==2 and nace5==5
+            AGE_F_66_NMAR:     age==66               and pohlavie==2 and nace5==5
+            AGE_F_67_NMAR:     age==67               and pohlavie==2 and nace5==5
+            AGE_F_68_NMAR:     age==68               and pohlavie==2 and nace5==5
+            AGE_F_69_NMAR:     age==69               and pohlavie==2 and nace5==5
+            AGE_F_70_71_NMAR:  age>=70  and age<=71  and pohlavie==2 and nace5==5
+            AGE_F_72_73_NMAR:  age>=72  and age<=73  and pohlavie==2 and nace5==5
+            AGE_F_74_75_NMAR:  age>=74  and age<=75  and pohlavie==2 and nace5==5
+            AGE_F_76_77_NMAR:  age>=76  and age<=77  and pohlavie==2 and nace5==5
+            AGE_F_78_79_NMAR:  age>=78  and age<=79  and pohlavie==2 and nace5==5
+            AGE_F_80_84_NMAR:  age>=80  and age<=84  and pohlavie==2 and nace5==5
+            AGE_F_85_89_NMAR:  age>=85  and age<=89  and pohlavie==2 and nace5==5
+            AGE_F_90_94_NMAR:  age>=90  and age<=94  and pohlavie==2 and nace5==5
+            AGE_F_95_100_NMAR: age>=95  and age<=100 and pohlavie==2 and nace5==5
+
+            AGE_M_16_19_PR:  age>=16  and age<=19  and pohlavie==1 and hatlev5==1
+            AGE_M_20_24_PR:  age>=20  and age<=24  and pohlavie==1 and hatlev5==1
+            AGE_M_25_29_PR:  age>=25  and age<=29  and pohlavie==1 and hatlev5==1
+            AGE_M_30_34_PR:  age>=30  and age<=34  and pohlavie==1 and hatlev5==1
+            AGE_M_35_39_PR:  age>=35  and age<=39  and pohlavie==1 and hatlev5==1
+            AGE_M_40_44_PR:  age>=40  and age<=44  and pohlavie==1 and hatlev5==1
+            AGE_M_45_49_PR:  age>=45  and age<=49  and pohlavie==1 and hatlev5==1
+            AGE_M_50_54_PR:  age>=50  and age<=54  and pohlavie==1 and hatlev5==1
+            AGE_M_55_59_PR:  age>=55  and age<=59  and pohlavie==1 and hatlev5==1
+            AGE_M_60_64_PR:  age>=60  and age<=64  and pohlavie==1 and hatlev5==1
+            AGE_M_65_PR:     age==65               and pohlavie==1 and hatlev5==1
+            AGE_M_66_PR:     age==66               and pohlavie==1 and hatlev5==1
+            AGE_M_67_PR:     age==67               and pohlavie==1 and hatlev5==1
+            AGE_M_68_PR:     age==68               and pohlavie==1 and hatlev5==1
+            AGE_M_69_PR:     age==69               and pohlavie==1 and hatlev5==1
+            AGE_M_70_71_PR:  age>=70  and age<=71  and pohlavie==1 and hatlev5==1
+            AGE_M_72_73_PR:  age>=72  and age<=73  and pohlavie==1 and hatlev5==1
+            AGE_M_74_75_PR:  age>=74  and age<=75  and pohlavie==1 and hatlev5==1
+            AGE_M_76_77_PR:  age>=76  and age<=77  and pohlavie==1 and hatlev5==1
+            AGE_M_78_79_PR:  age>=78  and age<=79  and pohlavie==1 and hatlev5==1
+            AGE_M_80_84_PR:  age>=80  and age<=84  and pohlavie==1 and hatlev5==1
+            AGE_M_85_89_PR:  age>=85  and age<=89  and pohlavie==1 and hatlev5==1
+            AGE_M_90_94_PR:  age>=90  and age<=94  and pohlavie==1 and hatlev5==1
+            AGE_M_95_100_PR: age>=95  and age<=100 and pohlavie==1 and hatlev5==1
+
+            AGE_F_16_19_PR:  age>=16  and age<=19  and pohlavie==2 and hatlev5==1
+            AGE_F_20_24_PR:  age>=20  and age<=24  and pohlavie==2 and hatlev5==1
+            AGE_F_25_29_PR:  age>=25  and age<=29  and pohlavie==2 and hatlev5==1
+            AGE_F_30_34_PR:  age>=30  and age<=34  and pohlavie==2 and hatlev5==1
+            AGE_F_35_39_PR:  age>=35  and age<=39  and pohlavie==2 and hatlev5==1
+            AGE_F_40_44_PR:  age>=40  and age<=44  and pohlavie==2 and hatlev5==1
+            AGE_F_45_49_PR:  age>=45  and age<=49  and pohlavie==2 and hatlev5==1
+            AGE_F_50_54_PR:  age>=50  and age<=54  and pohlavie==2 and hatlev5==1
+            AGE_F_55_59_PR:  age>=55  and age<=59  and pohlavie==2 and hatlev5==1
+            AGE_F_60_PR:     age==60               and pohlavie==2 and hatlev5==1
+            AGE_F_61_PR:     age==61               and pohlavie==2 and hatlev5==1
+            AGE_F_62_PR:     age==62               and pohlavie==2 and hatlev5==1
+            AGE_F_63_PR:     age==63               and pohlavie==2 and hatlev5==1
+            AGE_F_64_PR:     age==64               and pohlavie==2 and hatlev5==1
+            AGE_F_65_PR:     age==65               and pohlavie==2 and hatlev5==1
+            AGE_F_66_PR:     age==66               and pohlavie==2 and hatlev5==1
+            AGE_F_67_PR:     age==67               and pohlavie==2 and hatlev5==1
+            AGE_F_68_PR:     age==68               and pohlavie==2 and hatlev5==1
+            AGE_F_69_PR:     age==69               and pohlavie==2 and hatlev5==1
+            AGE_F_70_71_PR:  age>=70  and age<=71  and pohlavie==2 and hatlev5==1
+            AGE_F_72_73_PR:  age>=72  and age<=73  and pohlavie==2 and hatlev5==1
+            AGE_F_74_75_PR:  age>=74  and age<=75  and pohlavie==2 and hatlev5==1
+            AGE_F_76_77_PR:  age>=76  and age<=77  and pohlavie==2 and hatlev5==1
+            AGE_F_78_79_PR:  age>=78  and age<=79  and pohlavie==2 and hatlev5==1
+            AGE_F_80_84_PR:  age>=80  and age<=84  and pohlavie==2 and hatlev5==1
+            AGE_F_85_89_PR:  age>=85  and age<=89  and pohlavie==2 and hatlev5==1
+            AGE_F_90_94_PR:  age>=90  and age<=94  and pohlavie==2 and hatlev5==1
+            AGE_F_95_100_PR: age>=95  and age<=100 and pohlavie==2 and hatlev5==1
+
+            AGE_M_16_19_LS:  age>=16  and age<=19  and pohlavie==1 and hatlev5==2
+            AGE_M_20_24_LS:  age>=20  and age<=24  and pohlavie==1 and hatlev5==2
+            AGE_M_25_29_LS:  age>=25  and age<=29  and pohlavie==1 and hatlev5==2
+            AGE_M_30_34_LS:  age>=30  and age<=34  and pohlavie==1 and hatlev5==2
+            AGE_M_35_39_LS:  age>=35  and age<=39  and pohlavie==1 and hatlev5==2
+            AGE_M_40_44_LS:  age>=40  and age<=44  and pohlavie==1 and hatlev5==2
+            AGE_M_45_49_LS:  age>=45  and age<=49  and pohlavie==1 and hatlev5==2
+            AGE_M_50_54_LS:  age>=50  and age<=54  and pohlavie==1 and hatlev5==2
+            AGE_M_55_59_LS:  age>=55  and age<=59  and pohlavie==1 and hatlev5==2
+            AGE_M_60_64_LS:  age>=60  and age<=64  and pohlavie==1 and hatlev5==2
+            AGE_M_65_LS:     age==65               and pohlavie==1 and hatlev5==2
+            AGE_M_66_LS:     age==66               and pohlavie==1 and hatlev5==2
+            AGE_M_67_LS:     age==67               and pohlavie==1 and hatlev5==2
+            AGE_M_68_LS:     age==68               and pohlavie==1 and hatlev5==2
+            AGE_M_69_LS:     age==69               and pohlavie==1 and hatlev5==2
+            AGE_M_70_71_LS:  age>=70  and age<=71  and pohlavie==1 and hatlev5==2
+            AGE_M_72_73_LS:  age>=72  and age<=73  and pohlavie==1 and hatlev5==2
+            AGE_M_74_75_LS:  age>=74  and age<=75  and pohlavie==1 and hatlev5==2
+            AGE_M_76_77_LS:  age>=76  and age<=77  and pohlavie==1 and hatlev5==2
+            AGE_M_78_79_LS:  age>=78  and age<=79  and pohlavie==1 and hatlev5==2
+            AGE_M_80_84_LS:  age>=80  and age<=84  and pohlavie==1 and hatlev5==2
+            AGE_M_85_89_LS:  age>=85  and age<=89  and pohlavie==1 and hatlev5==2
+            AGE_M_90_94_LS:  age>=90  and age<=94  and pohlavie==1 and hatlev5==2
+            AGE_M_95_100_LS: age>=95  and age<=100 and pohlavie==1 and hatlev5==2
+
+            AGE_F_16_19_LS:  age>=16  and age<=19  and pohlavie==2 and hatlev5==2
+            AGE_F_20_24_LS:  age>=20  and age<=24  and pohlavie==2 and hatlev5==2
+            AGE_F_25_29_LS:  age>=25  and age<=29  and pohlavie==2 and hatlev5==2
+            AGE_F_30_34_LS:  age>=30  and age<=34  and pohlavie==2 and hatlev5==2
+            AGE_F_35_39_LS:  age>=35  and age<=39  and pohlavie==2 and hatlev5==2
+            AGE_F_40_44_LS:  age>=40  and age<=44  and pohlavie==2 and hatlev5==2
+            AGE_F_45_49_LS:  age>=45  and age<=49  and pohlavie==2 and hatlev5==2
+            AGE_F_50_54_LS:  age>=50  and age<=54  and pohlavie==2 and hatlev5==2
+            AGE_F_55_59_LS:  age>=55  and age<=59  and pohlavie==2 and hatlev5==2
+            AGE_F_60_LS:     age==60               and pohlavie==2 and hatlev5==2
+            AGE_F_61_LS:     age==61               and pohlavie==2 and hatlev5==2
+            AGE_F_62_LS:     age==62               and pohlavie==2 and hatlev5==2
+            AGE_F_63_LS:     age==63               and pohlavie==2 and hatlev5==2
+            AGE_F_64_LS:     age==64               and pohlavie==2 and hatlev5==2
+            AGE_F_65_LS:     age==65               and pohlavie==2 and hatlev5==2
+            AGE_F_66_LS:     age==66               and pohlavie==2 and hatlev5==2
+            AGE_F_67_LS:     age==67               and pohlavie==2 and hatlev5==2
+            AGE_F_68_LS:     age==68               and pohlavie==2 and hatlev5==2
+            AGE_F_69_LS:     age==69               and pohlavie==2 and hatlev5==2
+            AGE_F_70_71_LS:  age>=70  and age<=71  and pohlavie==2 and hatlev5==2
+            AGE_F_72_73_LS:  age>=72  and age<=73  and pohlavie==2 and hatlev5==2
+            AGE_F_74_75_LS:  age>=74  and age<=75  and pohlavie==2 and hatlev5==2
+            AGE_F_76_77_LS:  age>=76  and age<=77  and pohlavie==2 and hatlev5==2
+            AGE_F_78_79_LS:  age>=78  and age<=79  and pohlavie==2 and hatlev5==2
+            AGE_F_80_84_LS:  age>=80  and age<=84  and pohlavie==2 and hatlev5==2
+            AGE_F_85_89_LS:  age>=85  and age<=89  and pohlavie==2 and hatlev5==2
+            AGE_F_90_94_LS:  age>=90  and age<=94  and pohlavie==2 and hatlev5==2
+            AGE_F_95_100_LS: age>=95  and age<=100 and pohlavie==2 and hatlev5==2
+
+            AGE_M_16_19_US:  age>=16  and age<=19  and pohlavie==1 and hatlev5==3
+            AGE_M_20_24_US:  age>=20  and age<=24  and pohlavie==1 and hatlev5==3
+            AGE_M_25_29_US:  age>=25  and age<=29  and pohlavie==1 and hatlev5==3
+            AGE_M_30_34_US:  age>=30  and age<=34  and pohlavie==1 and hatlev5==3
+            AGE_M_35_39_US:  age>=35  and age<=39  and pohlavie==1 and hatlev5==3
+            AGE_M_40_44_US:  age>=40  and age<=44  and pohlavie==1 and hatlev5==3
+            AGE_M_45_49_US:  age>=45  and age<=49  and pohlavie==1 and hatlev5==3
+            AGE_M_50_54_US:  age>=50  and age<=54  and pohlavie==1 and hatlev5==3
+            AGE_M_55_59_US:  age>=55  and age<=59  and pohlavie==1 and hatlev5==3
+            AGE_M_60_64_US:  age>=60  and age<=64  and pohlavie==1 and hatlev5==3
+            AGE_M_65_US:     age==65               and pohlavie==1 and hatlev5==3
+            AGE_M_66_US:     age==66               and pohlavie==1 and hatlev5==3
+            AGE_M_67_US:     age==67               and pohlavie==1 and hatlev5==3
+            AGE_M_68_US:     age==68               and pohlavie==1 and hatlev5==3
+            AGE_M_69_US:     age==69               and pohlavie==1 and hatlev5==3
+            AGE_M_70_71_US:  age>=70  and age<=71  and pohlavie==1 and hatlev5==3
+            AGE_M_72_73_US:  age>=72  and age<=73  and pohlavie==1 and hatlev5==3
+            AGE_M_74_75_US:  age>=74  and age<=75  and pohlavie==1 and hatlev5==3
+            AGE_M_76_77_US:  age>=76  and age<=77  and pohlavie==1 and hatlev5==3
+            AGE_M_78_79_US:  age>=78  and age<=79  and pohlavie==1 and hatlev5==3
+            AGE_M_80_84_US:  age>=80  and age<=84  and pohlavie==1 and hatlev5==3
+            AGE_M_85_89_US:  age>=85  and age<=89  and pohlavie==1 and hatlev5==3
+            AGE_M_90_94_US:  age>=90  and age<=94  and pohlavie==1 and hatlev5==3
+            AGE_M_95_100_US: age>=95  and age<=100 and pohlavie==1 and hatlev5==3
+
+            AGE_F_16_19_US:  age>=16  and age<=19  and pohlavie==2 and hatlev5==3
+            AGE_F_20_24_US:  age>=20  and age<=24  and pohlavie==2 and hatlev5==3
+            AGE_F_25_29_US:  age>=25  and age<=29  and pohlavie==2 and hatlev5==3
+            AGE_F_30_34_US:  age>=30  and age<=34  and pohlavie==2 and hatlev5==3
+            AGE_F_35_39_US:  age>=35  and age<=39  and pohlavie==2 and hatlev5==3
+            AGE_F_40_44_US:  age>=40  and age<=44  and pohlavie==2 and hatlev5==3
+            AGE_F_45_49_US:  age>=45  and age<=49  and pohlavie==2 and hatlev5==3
+            AGE_F_50_54_US:  age>=50  and age<=54  and pohlavie==2 and hatlev5==3
+            AGE_F_55_59_US:  age>=55  and age<=59  and pohlavie==2 and hatlev5==3
+            AGE_F_60_US:     age==60               and pohlavie==2 and hatlev5==3
+            AGE_F_61_US:     age==61               and pohlavie==2 and hatlev5==3
+            AGE_F_62_US:     age==62               and pohlavie==2 and hatlev5==3
+            AGE_F_63_US:     age==63               and pohlavie==2 and hatlev5==3
+            AGE_F_64_US:     age==64               and pohlavie==2 and hatlev5==3
+            AGE_F_65_US:     age==65               and pohlavie==2 and hatlev5==3
+            AGE_F_66_US:     age==66               and pohlavie==2 and hatlev5==3
+            AGE_F_67_US:     age==67               and pohlavie==2 and hatlev5==3
+            AGE_F_68_US:     age==68               and pohlavie==2 and hatlev5==3
+            AGE_F_69_US:     age==69               and pohlavie==2 and hatlev5==3
+            AGE_F_70_71_US:  age>=70  and age<=71  and pohlavie==2 and hatlev5==3
+            AGE_F_72_73_US:  age>=72  and age<=73  and pohlavie==2 and hatlev5==3
+            AGE_F_74_75_US:  age>=74  and age<=75  and pohlavie==2 and hatlev5==3
+            AGE_F_76_77_US:  age>=76  and age<=77  and pohlavie==2 and hatlev5==3
+            AGE_F_78_79_US:  age>=78  and age<=79  and pohlavie==2 and hatlev5==3
+            AGE_F_80_84_US:  age>=80  and age<=84  and pohlavie==2 and hatlev5==3
+            AGE_F_85_89_US:  age>=85  and age<=89  and pohlavie==2 and hatlev5==3
+            AGE_F_90_94_US:  age>=90  and age<=94  and pohlavie==2 and hatlev5==3
+            AGE_F_95_100_US: age>=95  and age<=100 and pohlavie==2 and hatlev5==3
+
+            AGE_M_16_19_PS:  age>=16  and age<=19  and pohlavie==1 and hatlev5==4
+            AGE_M_20_24_PS:  age>=20  and age<=24  and pohlavie==1 and hatlev5==4
+            AGE_M_25_29_PS:  age>=25  and age<=29  and pohlavie==1 and hatlev5==4
+            AGE_M_30_34_PS:  age>=30  and age<=34  and pohlavie==1 and hatlev5==4
+            AGE_M_35_39_PS:  age>=35  and age<=39  and pohlavie==1 and hatlev5==4
+            AGE_M_40_44_PS:  age>=40  and age<=44  and pohlavie==1 and hatlev5==4
+            AGE_M_45_49_PS:  age>=45  and age<=49  and pohlavie==1 and hatlev5==4
+            AGE_M_50_54_PS:  age>=50  and age<=54  and pohlavie==1 and hatlev5==4
+            AGE_M_55_59_PS:  age>=55  and age<=59  and pohlavie==1 and hatlev5==4
+            AGE_M_60_64_PS:  age>=60  and age<=64  and pohlavie==1 and hatlev5==4
+            AGE_M_65_PS:     age==65               and pohlavie==1 and hatlev5==4
+            AGE_M_66_PS:     age==66               and pohlavie==1 and hatlev5==4
+            AGE_M_67_PS:     age==67               and pohlavie==1 and hatlev5==4
+            AGE_M_68_PS:     age==68               and pohlavie==1 and hatlev5==4
+            AGE_M_69_PS:     age==69               and pohlavie==1 and hatlev5==4
+            AGE_M_70_71_PS:  age>=70  and age<=71  and pohlavie==1 and hatlev5==4
+            AGE_M_72_73_PS:  age>=72  and age<=73  and pohlavie==1 and hatlev5==4
+            AGE_M_74_75_PS:  age>=74  and age<=75  and pohlavie==1 and hatlev5==4
+            AGE_M_76_77_PS:  age>=76  and age<=77  and pohlavie==1 and hatlev5==4
+            AGE_M_78_79_PS:  age>=78  and age<=79  and pohlavie==1 and hatlev5==4
+            AGE_M_80_84_PS:  age>=80  and age<=84  and pohlavie==1 and hatlev5==4
+            AGE_M_85_89_PS:  age>=85  and age<=89  and pohlavie==1 and hatlev5==4
+            AGE_M_90_94_PS:  age>=90  and age<=94  and pohlavie==1 and hatlev5==4
+            AGE_M_95_100_PS: age>=95  and age<=100 and pohlavie==1 and hatlev5==4
+
+            AGE_F_16_19_PS:  age>=16  and age<=19  and pohlavie==2 and hatlev5==4
+            AGE_F_20_24_PS:  age>=20  and age<=24  and pohlavie==2 and hatlev5==4
+            AGE_F_25_29_PS:  age>=25  and age<=29  and pohlavie==2 and hatlev5==4
+            AGE_F_30_34_PS:  age>=30  and age<=34  and pohlavie==2 and hatlev5==4
+            AGE_F_35_39_PS:  age>=35  and age<=39  and pohlavie==2 and hatlev5==4
+            AGE_F_40_44_PS:  age>=40  and age<=44  and pohlavie==2 and hatlev5==4
+            AGE_F_45_49_PS:  age>=45  and age<=49  and pohlavie==2 and hatlev5==4
+            AGE_F_50_54_PS:  age>=50  and age<=54  and pohlavie==2 and hatlev5==4
+            AGE_F_55_59_PS:  age>=55  and age<=59  and pohlavie==2 and hatlev5==4
+            AGE_F_60_PS:     age==60               and pohlavie==2 and hatlev5==4
+            AGE_F_61_PS:     age==61               and pohlavie==2 and hatlev5==4
+            AGE_F_62_PS:     age==62               and pohlavie==2 and hatlev5==4
+            AGE_F_63_PS:     age==63               and pohlavie==2 and hatlev5==4
+            AGE_F_64_PS:     age==64               and pohlavie==2 and hatlev5==4
+            AGE_F_65_PS:     age==65               and pohlavie==2 and hatlev5==4
+            AGE_F_66_PS:     age==66               and pohlavie==2 and hatlev5==4
+            AGE_F_67_PS:     age==67               and pohlavie==2 and hatlev5==4
+            AGE_F_68_PS:     age==68               and pohlavie==2 and hatlev5==4
+            AGE_F_69_PS:     age==69               and pohlavie==2 and hatlev5==4
+            AGE_F_70_71_PS:  age>=70  and age<=71  and pohlavie==2 and hatlev5==4
+            AGE_F_72_73_PS:  age>=72  and age<=73  and pohlavie==2 and hatlev5==4
+            AGE_F_74_75_PS:  age>=74  and age<=75  and pohlavie==2 and hatlev5==4
+            AGE_F_76_77_PS:  age>=76  and age<=77  and pohlavie==2 and hatlev5==4
+            AGE_F_78_79_PS:  age>=78  and age<=79  and pohlavie==2 and hatlev5==4
+            AGE_F_80_84_PS:  age>=80  and age<=84  and pohlavie==2 and hatlev5==4
+            AGE_F_85_89_PS:  age>=85  and age<=89  and pohlavie==2 and hatlev5==4
+            AGE_F_90_94_PS:  age>=90  and age<=94  and pohlavie==2 and hatlev5==4
+            AGE_F_95_100_PS: age>=95  and age<=100 and pohlavie==2 and hatlev5==4
+
+            AGE_M_16_19_TR:  age>=16  and age<=19  and pohlavie==1 and hatlev5==5
+            AGE_M_20_24_TR:  age>=20  and age<=24  and pohlavie==1 and hatlev5==5
+            AGE_M_25_29_TR:  age>=25  and age<=29  and pohlavie==1 and hatlev5==5
+            AGE_M_30_34_TR:  age>=30  and age<=34  and pohlavie==1 and hatlev5==5
+            AGE_M_35_39_TR:  age>=35  and age<=39  and pohlavie==1 and hatlev5==5
+            AGE_M_40_44_TR:  age>=40  and age<=44  and pohlavie==1 and hatlev5==5
+            AGE_M_45_49_TR:  age>=45  and age<=49  and pohlavie==1 and hatlev5==5
+            AGE_M_50_54_TR:  age>=50  and age<=54  and pohlavie==1 and hatlev5==5
+            AGE_M_55_59_TR:  age>=55  and age<=59  and pohlavie==1 and hatlev5==5
+            AGE_M_60_64_TR:  age>=60  and age<=64  and pohlavie==1 and hatlev5==5
+            AGE_M_65_TR:     age==65               and pohlavie==1 and hatlev5==5
+            AGE_M_66_TR:     age==66               and pohlavie==1 and hatlev5==5
+            AGE_M_67_TR:     age==67               and pohlavie==1 and hatlev5==5
+            AGE_M_68_TR:     age==68               and pohlavie==1 and hatlev5==5
+            AGE_M_69_TR:     age==69               and pohlavie==1 and hatlev5==5
+            AGE_M_70_71_TR:  age>=70  and age<=71  and pohlavie==1 and hatlev5==5
+            AGE_M_72_73_TR:  age>=72  and age<=73  and pohlavie==1 and hatlev5==5
+            AGE_M_74_75_TR:  age>=74  and age<=75  and pohlavie==1 and hatlev5==5
+            AGE_M_76_77_TR:  age>=76  and age<=77  and pohlavie==1 and hatlev5==5
+            AGE_M_78_79_TR:  age>=78  and age<=79  and pohlavie==1 and hatlev5==5
+            AGE_M_80_84_TR:  age>=80  and age<=84  and pohlavie==1 and hatlev5==5
+            AGE_M_85_89_TR:  age>=85  and age<=89  and pohlavie==1 and hatlev5==5
+            AGE_M_90_94_TR:  age>=90  and age<=94  and pohlavie==1 and hatlev5==5
+            AGE_M_95_100_TR: age>=95  and age<=100 and pohlavie==1 and hatlev5==5
+
+            AGE_F_16_19_TR:  age>=16  and age<=19  and pohlavie==2 and hatlev5==5
+            AGE_F_20_24_TR:  age>=20  and age<=24  and pohlavie==2 and hatlev5==5
+            AGE_F_25_29_TR:  age>=25  and age<=29  and pohlavie==2 and hatlev5==5
+            AGE_F_30_34_TR:  age>=30  and age<=34  and pohlavie==2 and hatlev5==5
+            AGE_F_35_39_TR:  age>=35  and age<=39  and pohlavie==2 and hatlev5==5
+            AGE_F_40_44_TR:  age>=40  and age<=44  and pohlavie==2 and hatlev5==5
+            AGE_F_45_49_TR:  age>=45  and age<=49  and pohlavie==2 and hatlev5==5
+            AGE_F_50_54_TR:  age>=50  and age<=54  and pohlavie==2 and hatlev5==5
+            AGE_F_55_59_TR:  age>=55  and age<=59  and pohlavie==2 and hatlev5==5
+            AGE_F_60_TR:     age==60               and pohlavie==2 and hatlev5==5
+            AGE_F_61_TR:     age==61               and pohlavie==2 and hatlev5==5
+            AGE_F_62_TR:     age==62               and pohlavie==2 and hatlev5==5
+            AGE_F_63_TR:     age==63               and pohlavie==2 and hatlev5==5
+            AGE_F_64_TR:     age==64               and pohlavie==2 and hatlev5==5
+            AGE_F_65_TR:     age==65               and pohlavie==2 and hatlev5==5
+            AGE_F_66_TR:     age==66               and pohlavie==2 and hatlev5==5
+            AGE_F_67_TR:     age==67               and pohlavie==2 and hatlev5==5
+            AGE_F_68_TR:     age==68               and pohlavie==2 and hatlev5==5
+            AGE_F_69_TR:     age==69               and pohlavie==2 and hatlev5==5
+            AGE_F_70_71_TR:  age>=70  and age<=71  and pohlavie==2 and hatlev5==5
+            AGE_F_72_73_TR:  age>=72  and age<=73  and pohlavie==2 and hatlev5==5
+            AGE_F_74_75_TR:  age>=74  and age<=75  and pohlavie==2 and hatlev5==5
+            AGE_F_76_77_TR:  age>=76  and age<=77  and pohlavie==2 and hatlev5==5
+            AGE_F_78_79_TR:  age>=78  and age<=79  and pohlavie==2 and hatlev5==5
+            AGE_F_80_84_TR:  age>=80  and age<=84  and pohlavie==2 and hatlev5==5
+            AGE_F_85_89_TR:  age>=85  and age<=89  and pohlavie==2 and hatlev5==5
+            AGE_F_90_94_TR:  age>=90  and age<=94  and pohlavie==2 and hatlev5==5
+            AGE_F_95_100_TR: age>=95  and age<=100 and pohlavie==2 and hatlev5==5
+            
+            MOTHER: maternity==True
+           
+            
+        processes: 
+            initialize_historical_year():
+               - historical_year: base_year
+               
+            historical_year(): 
+               - historical_year: base_year - (period - base_year)  
+
+########################################################################               
+### DEMO processes #####################################################
+########################################################################
+                
+            init_variable():
+               - sex: if(pohlavie==1, 1, 2)
+               - isco: isco
+               - age: vek
+               - nace: nace
+               - status: ekon_status 
+               - country_b: country_b
+               - hatlev5: vzdelanie
+               - qual: isco
+               
+            init_define():   
+               - status: if(status==3 or status==4 or status==5 or status==6, 3, status)
+               - status: if(status==7, 4, status)
+               - status: if(age<=15 and (status==8 or status==9), 3, status)
+               - status: if((status==8 or status==9) and nace>0, 1, status)
+               - status: if((status==8 or status==9) and isco>0, 1, status)
+               - status: if(status==8, 5, status)
+               - status: if(status==9, 5, status)
+               - status: if(status==3 and age>=50, 5, status)
+               - status: if(status==5 and age>=63, 4, status)
+               
+               - age: if(sex==1 and age==90, 
+                        choice([90, 91, 92, 93, 94, 95, 96, 97, 98, 99], [0.255322317, 0.197409558, 0.147089474, 0.104064314, 0.079202025, 0.058210511, 0.04228078, 0.036623493, 0.027690933, 0.052106595]), age)
+               - age: if(sex==2 and age==90, 
+                        choice([90, 91, 92, 93, 94, 95, 96, 97, 98, 99], [0.252911814, 0.200831947, 0.157127011, 0.114642263, 0.084914032, 0.059456461, 0.045313367, 0.030116473, 0.019911259, 0.034775374]), age)
+                
+               - hatlev5: if(hatlev5==0 or hatlev5==10 or hatlev5==11 or hatlev5==12 or hatlev5==91 or hatlev5==92, 1, hatlev5)
+               - hatlev5: if(hatlev5==20 or hatlev5==21 or hatlev5==22 or hatlev5==23, 2, hatlev5)               
+               - hatlev5: if(hatlev5==30 or hatlev5==31 or hatlev5==32 or hatlev5==33 or hatlev5==40 or hatlev5==41, 3, hatlev5)
+               - hatlev5: if(hatlev5==42 or hatlev5==43, 4, hatlev5)
+               - hatlev5: if(hatlev5==50 or hatlev5==51 or hatlev5==52 or hatlev5==53, 5, hatlev5)
+               
+               - country_b: if(country_b>1 and country_b<17, 2, country_b)
+               - country_b: if(country_b>16 and country_b<39, 3, country_b)
+               
+               - nace: if(nace==2 or nace==3 or nace==4 or nace==5, 2, nace)
+               - nace: if(nace==6, 3, nace)
+               - nace: if(nace==7 or nace==8 or nace==9 or nace==10 or nace==11 or nace==12 or nace==13 or nace==14, 4, nace)
+               - nace: if(nace==15 or nace==16 or nace==17 or nace==18 or nace==19 or nace==20 or nace==21, 5, nace)
+               - nace: if(nace==22, choice([1, 2, 3, 4, 5], [0.027255753, 0.23245703, 0.07775926, 0.414545065, 0.247982892]), nace)
+
+               - isco: if(isco==0, -1, isco)
+               - isco: if(nace==1 and (isco==98 or isco==99),
+                        choice([1, 11, 12, 13, 14, 21, 22, 23, 24, 25, 26, 31, 32, 33, 34, 35, 41, 42, 43, 44, 51, 52, 53, 54, 61, 62, 63, 71, 72, 73, 74, 75, 81, 82, 83, 91, 92, 93, 94, 96], [0.000647459, 0.026006259, 0.012085896, 0.023955973, 0.002805654, 0.021797777, 0.007337866, 0.008632783 ,0.038631704, 0.008524873, 0.00517967, 0.105319953, 0.005611309, 0.040034531, 0.005935038, 0.002374015, 0.019100032, 0.004100572, 0.043379735, 0.002589835, 0.027948635, 0.023848063, 0.006042948, 0.017805115, 0.10672278, 0.025790439, 0.002481925, 0.017049746, 0.056113089, 0.000323729, 0.01035934, 0.019963311, 0.015970649, 0.009711881, 0.176972051, 0.018020934, 0.031725478, 0.016402288, 0.005503399, 0.027193266]), isco)
+               - isco: if(nace==2 and (isco==98 or isco==99),
+                        choice([1, 11, 12, 13, 14, 21, 22, 23, 24, 25, 26, 31, 32, 33, 34, 35, 41, 42, 43, 44, 51, 52, 53, 54, 61, 62, 63, 71, 72, 73, 74, 75, 81, 82, 83, 91, 92, 93, 94, 96], [0.000440841, 0.011881209, 0.014741301, 0.018934669, 0.001795622, 0.044180895, 0.005462131, 0.005849211, 0.048589308, 0.01410692, 0.005128812, 0.082534085, 0.005365361, 0.041686379, 0.003591243, 0.003946067, 0.017988474, 0.00478474, 0.062567201, 0.003075137, 0.022278612, 0.024697862, 0.004021332, 0.012730635, 0.001623586, 0.000784912, 0.000129027, 0.023267816, 0.10850071, 0.007096469, 0.027074104, 0.066093931, 0.111844652, 0.104898714, 0.041869167, 0.010139349, 0.000860178, 0.032342695, 0.003075137, 2.15045E-05]), isco)
+               - isco: if(nace==3 and (isco==98 or isco==99),
+                        choice([1, 11, 12, 13, 14, 21, 22, 23, 24, 25, 26, 31, 32, 33, 34, 35, 41, 42, 43, 44, 51, 52, 53, 54, 61, 62, 63, 71, 72, 73, 74, 75, 81, 82, 83, 91, 92, 93, 94, 96], [0.001445396, 0.035867238, 0.014079229, 0.01493576, 0.002944325, 0.059796574, 0.008458244, 0.010278373, 0.042719486, 0.011991435, 0.007708779, 0.068683084, 0.005353319, 0.054389722, 0.005728051, 0.006531049, 0.026873662, 0.005888651, 0.040685225, 0.002623126, 0.029496788, 0.026659529, 0.007815846, 0.019914347, 0.002141328, 0.00117773, 0.0001606, 0.19748394, 0.046627409, 0.000856531, 0.04379015, 0.022537473, 0.020235546, 0.022269807, 0.073768737, 0.010867238, 0.001445396, 0.042398287, 0.003265525, 0.000107066]), isco)
+               - isco: if(nace==4 and (isco==98 or isco==99),
+                        choice([1, 11, 12, 13, 14, 21, 22, 23, 24, 25, 26, 31, 32, 33, 34, 35, 41, 42, 43, 44, 51, 52, 53, 54, 61, 62, 63, 71, 72, 73, 74, 75, 81, 82, 83, 91, 92, 93, 94, 96], [0.000684347, 0.024851562, 0.02380223, 0.017916849, 0.007058547, 0.032594456, 0.013908532, 0.010297789, 0.087785389, 0.042436014, 0.016515567, 0.038388592, 0.01018699, 0.072729761, 0.01061715, 0.011340603, 0.027256552, 0.02210114, 0.070676721, 0.011901115, 0.047682672, 0.134509975, 0.006758738, 0.026311502, 0.002496236, 0.000475784, 9.77638E-05, 0.015798633, 0.029277004, 0.001935724, 0.010877854, 0.013647829, 0.014729748, 0.015081698, 0.085028449, 0.018855381, 0.001147095, 0.013713005, 0.008407688, 0.000117317]), isco)
+               - isco: if(nace==5 and (isco==98 or isco==99),
+                        choice([1, 11, 12, 13, 14, 21, 22, 23, 24, 25, 26, 31, 32, 33, 34, 35, 41, 42, 43, 44, 51, 52, 53, 54, 61, 62, 63, 71, 72, 73, 74, 75, 81, 82, 83, 91, 92, 93, 94, 96], [0.024098022, 0.018005607, 0.009633388, 0.014765374, 0.004753636, 0.014416127, 0.083819207, 0.205521978, 0.033857527, 0.011001271, 0.050252719, 0.012272141, 0.071042598, 0.080821506, 0.018597386, 0.004249168, 0.03395454, 0.013125855, 0.025446502, 0.00987592, 0.050795991, 0.012883323, 0.049864667, 0.02729945, 0.001387285, 0.000310442, 8.73117E-05, 0.0082267, 0.007625219, 0.000834312, 0.003909623, 0.004899155, 0.006441661, 0.004220064, 0.0164534, 0.045916239, 0.000756701, 0.004481999, 0.014018374, 7.76104E-05]), isco)
+
+               - ageg: 5 * trunc(age / 5)+2 
+
+               - hatfield: if(hatlev5==1, 0, hatfield)
+#       muži
+               - hatfield: if(sex==1 and ageg==17 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.774193548, 0, 0, 0, 0, 0, 0, 0.225806452, 0, 0, 0]), hatfield)
+               - hatfield: if(sex==1 and ageg==22 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.639278977, 0, 0.005135192, 0, 0, 0, 0, 0.286208342, 0.003877594, 0, 0.065499895]), hatfield)
+               - hatfield: if(sex==1 and ageg==27 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.291395415, 0, 0.009623549, 0, 0.006934616, 0, 0, 0.494056043, 0.043305972, 0, 0.154684404]), hatfield)
+               - hatfield: if(sex==1 and ageg==32 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.16475997, 0, 0.007698065, 0, 0.012188603, 0, 0.008018817, 0.601090559, 0.075269967, 0, 0.130974019]), hatfield)
+               - hatfield: if(sex==1 and ageg==37 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.139975425, 0, 0.003583862, 0, 0, 0, 0.002559902, 0.690968667, 0.059184927, 0, 0.103727217]), hatfield)
+               - hatfield: if(sex==1 and ageg==42 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.111766932, 0, 0.01097238, 0, 0.021263715, 0, 0, 0.724025728, 0.079833523, 0.001135074, 0.051002649]), hatfield)
+               - hatfield: if(sex==1 and ageg==47 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.087815373, 0, 0.00651933, 0, 0.013495013, 0, 0.003129278, 0.780754938, 0.075950192, 0.001499446, 0.03083643]), hatfield)
+               - hatfield: if(sex==1 and ageg==52 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.089706458, 0, 0.003522505, 0, 0.005792564, 0, 0, 0.786144814, 0.08704501, 0, 0.02778865]), hatfield)
+               - hatfield: if(sex==1 and ageg==57 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.03414958, 0, 0.01733294, 0.00420416, 0.003540345, 0.002065201, 0, 0.853813247, 0.029576634, 0.000368786, 0.054949108]), hatfield)
+               - hatfield: if(sex==1 and ageg==62 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.074938501, 0, 0.004199916, 0.000599988, 0.006299874, 0.005459891, 0, 0.784124318, 0.077278454, 0, 0.047099058]), hatfield)
+               - hatfield: if(sex==1 and ageg==67 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.057153127, 0, 0.003235083, 0, 0.005319914, 0.00100647, 0, 0.813946801, 0.063767074, 0.00100647, 0.054565061]), hatfield)
+               - hatfield: if(sex==1 and ageg==72 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.040470425, 0, 0.000576502, 0, 0.001268304, 0, 0.004612014, 0.827510665, 0.084053961, 0.002306007, 0.039202122]), hatfield)
+               - hatfield: if(sex==1 and ageg>=77 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.066675281, 0, 0.007882155, 0, 0.004264117, 0.007236077, 0.004780979, 0.810828272, 0.058017832, 0, 0.040315286]), hatfield)
+
+               - hatfield: if(sex==1 and ageg==17 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.028880866, 0.02166065, 0.072202166, 0.06377858, 0, 0.015643803, 0.732851986, 0, 0.061371841, 0.003610108]), hatfield)
+               - hatfield: if(sex==1 and ageg==22 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.003881756, 0.039937295, 0.02635115, 0.060391162, 0.01231711, 0.049193789, 0.635413556, 0.036354136, 0.021125709, 0.115034339]), hatfield)
+               - hatfield: if(sex==1 and ageg==27 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.003795921, 0.025027343, 0.026185421, 0.068326578, 0.010487036, 0.050119025, 0.625554912, 0.04040404, 0.007527504, 0.142572219]), hatfield)
+               - hatfield: if(sex==1 and ageg==32 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0.019213557, 0.014619011, 0.077510591, 0.00942777, 0.01682678, 0.626171013, 0.071125962, 0.035025956, 0.13007936]), hatfield)
+               - hatfield: if(sex==1 and ageg==37 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.001902547, 0.002378184, 0.019818201, 0.025420146, 0.055385266, 0.022883416, 0.016383046, 0.633019765, 0.071186978, 0.009248494, 0.142373956]), hatfield)
+               - hatfield: if(sex==1 and ageg==42 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0.009746795, 0.01763958, 0.053289543, 0.003602076, 0.013401843, 0.693240809, 0.102606208, 0.005138256, 0.101334887]), hatfield)
+               - hatfield: if(sex==1 and ageg==47 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.00070817, 0.010558166, 0.024335286, 0.012489538, 0.005665358, 0.009077448, 0.756582759, 0.079443765, 0.008433657, 0.092705852]), hatfield)
+               - hatfield: if(sex==1 and ageg==52 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.005155036, 0.007924906, 0.008771255, 0.011002539, 0.018388859, 0, 0.740093868, 0.123720859, 0.009694545, 0.075248134]), hatfield)
+               - hatfield: if(sex==1 and ageg==57 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.004990273, 0, 0.021821873, 0.002029942, 0.016239533, 0.021906454, 0.00558234, 0.74574981, 0.107248583, 0.003467817, 0.070963376]), hatfield)
+               - hatfield: if(sex==1 and ageg==62 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.002340766, 0.005297524, 0.005790317, 0.018849329, 0.029690772, 0, 0.714796107, 0.120487865, 0.008377479, 0.094369841]), hatfield)
+               - hatfield: if(sex==1 and ageg==67 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.002568956, 0.016630611, 0.028258518, 0.016089778, 0.024067063, 0, 0.724310438, 0.087479719, 0, 0.100594916]), hatfield)
+               - hatfield: if(sex==1 and ageg==72 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.00147929, 0.018676036, 0.020340237, 0.025887574, 0.007211538, 0.002588757, 0.733173077, 0.13683432, 0.021449704, 0.032359467]), hatfield)
+               - hatfield: if(sex==1 and ageg>=77 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.021068002, 0.046516479, 0.046516479, 0.024196913, 0.041718815, 0, 0.676887776, 0.089278264, 0.013558615, 0.040258657]), hatfield)
+
+               - hatfield: if(sex==1 and ageg==17 and hatlev5==4, 0, hatfield)
+               - hatfield: if(sex==1 and ageg==22 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.040449438, 0.065168539, 0.202247191, 0, 0, 0, 0.314606742, 0, 0.184269663, 0.193258427]), hatfield)
+               - hatfield: if(sex==1 and ageg==27 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0, 0, 0.024096386, 0, 0, 0.543674699, 0, 0.262048193, 0.170180723]), hatfield)
+               - hatfield: if(sex==1 and ageg==32 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0.031088083, 0, 0, 0, 0.075129534, 0.893782383, 0, 0, 0]), hatfield)
+               - hatfield: if(sex==1 and ageg==37 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0.032482599, 0, 0.061484919, 0, 0, 0.639211137, 0, 0, 0.266821346]), hatfield)
+               - hatfield: if(sex==1 and ageg==42 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0.039767216, 0, 0.122211445, 0.044616877, 0, 0.560620757, 0.087293889, 0, 0.145489816]), hatfield)
+               - hatfield: if(sex==1 and ageg==47 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0.075581395, 0, 0.101162791, 0, 0.048837209, 0.531395349, 0.048837209, 0.01744186, 0.176744186]), hatfield)
+               - hatfield: if(sex==1 and ageg==52 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0, 0.012219959, 0, 0, 0, 0.775967413, 0.065173116, 0.095723014, 0.050916497]), hatfield)
+               - hatfield: if(sex==1 and ageg==57 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.037558685, 0.045774648, 0, 0.008215962, 0.098591549, 0, 0, 0.728873239, 0.022300469, 0.011737089, 0.046948357]), hatfield)
+               - hatfield: if(sex==1 and ageg==62 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.031784841, 0, 0.012224939, 0.08801956, 0, 0, 0.655256724, 0, 0.105134474, 0.107579462]), hatfield)
+               - hatfield: if(sex==1 and ageg==67 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.06017192, 0, 0.034383954, 0.100286533, 0.088825215, 0, 0.312320917, 0.154727794, 0.097421203, 0.151862464]), hatfield)
+               - hatfield: if(sex==1 and ageg==72 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.125714286, 0, 0, 0.097142857, 0.117142857, 0, 0.485714286, 0.062857143, 0, 0.111428571]), hatfield)
+               - hatfield: if(sex==1 and ageg>=77 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.012376238, 0, 0.069306931, 0.03960396, 0, 0, 0.737623762, 0.113861386, 0.027227723, 0]), hatfield)
+               
+               - hatfield: if(sex==1 and ageg==17 and hatlev5==5, 0, hatfield)
+               - hatfield: if(sex==1 and ageg==22 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.021143305, 0.026624902, 0.070086139, 0.114722005, 0.070477682, 0.180892717, 0.326155051, 0.010963195, 0.090054816, 0.088880188]), hatfield)
+               - hatfield: if(sex==1 and ageg==27 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.036686877, 0.050765594, 0.091871339, 0.16164834, 0.049840715, 0.141712054, 0.239235433, 0.058267393, 0.086219299, 0.083752954]), hatfield)
+               - hatfield: if(sex==1 and ageg==32 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.056629598, 0.064927288, 0.108212147, 0.145166809, 0.075534645, 0.142686056, 0.205731394, 0.055175364, 0.064927288, 0.08100941]), hatfield)
+               - hatfield: if(sex==1 and ageg==37 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.078190354, 0.058898848, 0.08288519, 0.1394793, 0.049082373, 0.094494238, 0.344942382, 0.037644046, 0.06973965, 0.044643619]), hatfield)
+               - hatfield: if(sex==1 and ageg==42 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.072434217, 0.040586465, 0.137489077, 0.089814545, 0.066996796, 0.057966793, 0.309156229, 0.071948733, 0.086416157, 0.067190989]), hatfield)
+               - hatfield: if(sex==1 and ageg==47 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.014346646, 0.116711904, 0.045624919, 0.146568437, 0.073025721, 0.042652191, 0.079229676, 0.233294559, 0.057774331, 0.085175132, 0.105596484]), hatfield)
+               - hatfield: if(sex==1 and ageg==52 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.103169671, 0.023617154, 0.108297079, 0.02688005, 0.052206339, 0.060907396, 0.448881293, 0.038844002, 0.068676196, 0.06852082]), hatfield)
+               - hatfield: if(sex==1 and ageg==57 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.060445035, 0.011125872, 0.063932248, 0.063600133, 0.048322816, 0.027067419, 0.443042179, 0.108601793, 0.052474261, 0.121388243]), hatfield)
+               - hatfield: if(sex==1 and ageg==62 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.051865183, 0.036812827, 0.075098168, 0.066426702, 0.062827225, 0.037794503, 0.480039267, 0.093586387, 0.025687173, 0.069862565]), hatfield)
+               - hatfield: if(sex==1 and ageg==67 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.073374501, 0.017798765, 0.090628405, 0.067381039, 0.055394116, 0.013984744, 0.423901199, 0.10606611, 0.061932437, 0.089538685]), hatfield)
+               - hatfield: if(sex==1 and ageg==72 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.095577746, 0.033523538, 0.120066572, 0.07489301, 0.040180694, 0.011412268, 0.458155017, 0.052543985, 0.063480742, 0.050166429]), hatfield)
+               - hatfield: if(sex==1 and ageg>=77 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.115025162, 0.039300264, 0.098729931, 0.023005032, 0.083393242, 0.005990894, 0.418883297, 0.088665229, 0.071171819, 0.055835131]), hatfield)
+#       ženy
+               - hatfield: if(sex==2 and ageg==17 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.746184739, 0, 0, 0, 0, 0, 0, 0.032931727, 0, 0, 0.220883534]), hatfield)
+               - hatfield: if(sex==2 and ageg==22 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.863649985, 0, 0, 0, 0.011587254, 0, 0, 0.022275497, 0.009090001, 0.001198681, 0.092198582]), hatfield)
+               - hatfield: if(sex==2 and ageg==27 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.499773037, 0, 0, 0, 0.075578756, 0, 0, 0.050158874, 0.03654108, 0.009986382, 0.32796187]), hatfield)
+               - hatfield: if(sex==2 and ageg==32 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.300476289, 0, 0.014495755, 0.016566577, 0.129840547, 0.011389522, 0, 0.227790433, 0, 0.013874508, 0.28556637]), hatfield)
+               - hatfield: if(sex==2 and ageg==37 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.173514307, 0, 0.015957447, 0.003301541, 0.16617755, 0.01375642, 0, 0.375275128, 0.017791636, 0.010454879, 0.223771093]), hatfield)
+               - hatfield: if(sex==2 and ageg==42 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.245348731, 0.003482724, 0, 0, 0.147099258, 0.006598845, 0, 0.387132252, 0.045916965, 0.002749519, 0.161671707]), hatfield)
+               - hatfield: if(sex==2 and ageg==47 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.145758161, 0, 0.005454393, 0, 0.199798607, 0.009230511, 0, 0.500881094, 0.033565495, 0.004195687, 0.101116053]), hatfield)
+               - hatfield: if(sex==2 and ageg==52 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.165535821, 0, 0.002594293, 0.01855917, 0.191179405, 0.021452804, 0, 0.436639393, 0.050888046, 0.009179804, 0.103971263]), hatfield)
+               - hatfield: if(sex==2 and ageg==57 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.152695483, 0, 0.002914036, 0.005050996, 0.246138902, 0.006993686, 0, 0.430888781, 0.023215153, 0.006508014, 0.125594949]), hatfield)
+               - hatfield: if(sex==2 and ageg==62 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.162770698, 0, 0.001876319, 0.004690798, 0.18466109, 0.012274255, 0.002658119, 0.442889532, 0.043624423, 0.012430615, 0.13212415]), hatfield)
+               - hatfield: if(sex==2 and ageg==67 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.22604739, 0.001459478, 0.015367445, 0.011589973, 0.170758929, 0.004893544, 0.000686813, 0.36512706, 0.046188187, 0.009529533, 0.148351648]), hatfield)
+               - hatfield: if(sex==2 and ageg==72 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.220531936, 0.00201491, 0.004029821, 0.005541003, 0.172073343, 0.00674995, 0.001511183, 0.335684062, 0.049063067, 0.014507354, 0.188293371]), hatfield)
+               - hatfield: if(sex==2 and ageg>=77 and hatlev5==2, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.212219519, 0, 0.008831216, 0.023880328, 0.228980806, 0.00081103, 0, 0.322970172, 0.054339011, 0.004325493, 0.143642426]), hatfield)
+
+               - hatfield: if(sex==2 and ageg==17 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.156384505, 0.057388809, 0.020086083, 0.167862267, 0.073170732, 0.022955524, 0.054519369, 0.045911047, 0.275466284, 0.12625538]), hatfield)
+               - hatfield: if(sex==2 and ageg==22 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.130856553, 0.073684211, 0.071723426, 0.205882353, 0.019504644, 0.006707946, 0.067905057, 0.024871001, 0.143343653, 0.255521156]), hatfield)
+               - hatfield: if(sex==2 and ageg==27 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.0500314, 0.046472682, 0.088758635, 0.24272556, 0.008582793, 0, 0.073686414, 0.029935106, 0.122985137, 0.336822273]), hatfield)
+               - hatfield: if(sex==2 and ageg==32 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.033984935, 0.029770445, 0.082586083, 0.253407461, 0.018292683, 0.020803443, 0.183195839, 0.042772597, 0.075771162, 0.259415352]), hatfield)
+               - hatfield: if(sex==2 and ageg==37 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.027984937, 0.007605405, 0.136380418, 0.32142066, 0.015358488, 0.010706638, 0.203426124, 0.057151296, 0.04629698, 0.173669054]), hatfield)
+               - hatfield: if(sex==2 and ageg==42 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.001084599, 0.035855557, 0.011420186, 0.142720429, 0.238484114, 0.008804389, 0.011611586, 0.26706648, 0.054229935, 0.09965548, 0.129067245]), hatfield)
+               - hatfield: if(sex==2 and ageg==47 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.017221584, 0.016141014, 0.108529749, 0.186533396, 0.027959749, 0.001215641, 0.360437631, 0.059296279, 0.125481191, 0.097183764]), hatfield)
+               - hatfield: if(sex==2 and ageg==52 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.032947057, 0.010603651, 0.072559267, 0.20298417, 0.054078618, 0.001060365, 0.307051428, 0.105506324, 0.128379914, 0.084829205]), hatfield)
+               - hatfield: if(sex==2 and ageg==57 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.027625078, 0.002296291, 0.144457588, 0.175770649, 0.033052676, 0.005914689, 0.287662654, 0.081622712, 0.150511447, 0.091086215]), hatfield)
+               - hatfield: if(sex==2 and ageg==62 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.055532837, 0.008342194, 0.157029525, 0.271039503, 0.019056187, 0.000572503, 0.222703852, 0.066655762, 0.132657234, 0.066410403]), hatfield)
+               - hatfield: if(sex==2 and ageg==67 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.00062261, 0.069732278, 0.007204483, 0.196655697, 0.236680601, 0.0231255, 0, 0.192831095, 0.038779685, 0.168104598, 0.066263453]), hatfield)
+               - hatfield: if(sex==2 and ageg==72 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.001653088, 0.094934467, 0.008619672, 0.182430039, 0.169087259, 0.041091038, 0, 0.190105089, 0.085724407, 0.183610816, 0.042744126]), hatfield)
+               - hatfield: if(sex==2 and ageg>=77 and hatlev5==3, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.14551201, 0.02806574, 0.170543616, 0.220986094, 0.041213654, 0, 0.134892541, 0.064222503, 0.15954488, 0.035018963]), hatfield)
+
+               - hatfield: if(sex==2 and ageg==17 and hatlev5==4, 0, hatfield)
+               - hatfield: if(sex==2 and ageg==22 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0, 0, 0, 0.3984375, 0, 0, 0.16796875, 0, 0.15625, 0.27734375]), hatfield)
+               - hatfield: if(sex==2 and ageg==27 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.072443182, 0.061079545, 0.072443182, 0.105113636, 0, 0, 0.105113636, 0, 0.348011364, 0.235795455]), hatfield)
+               - hatfield: if(sex==2 and ageg==32 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.240384615, 0, 0.210164835, 0, 0, 0, 0.163461538, 0, 0.021978022, 0.364010989]), hatfield)
+               - hatfield: if(sex==2 and ageg==37 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.111731844, 0.044692737, 0.094972067, 0.241819633, 0, 0, 0.173184358, 0.031923384, 0.121308859, 0.180367119]), hatfield)
+               - hatfield: if(sex==2 and ageg==42 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.140869565, 0, 0.026086957, 0.099130435, 0, 0.130434783, 0.07826087, 0.08, 0.363478261, 0.08173913]), hatfield)
+               - hatfield: if(sex==2 and ageg==47 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.149859944, 0, 0.117647059, 0.099439776, 0, 0, 0.112044818, 0.075630252, 0.233893557, 0.211484594]), hatfield)
+               - hatfield: if(sex==2 and ageg==52 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.156862745, 0, 0.039215686, 0.130718954, 0.033986928, 0, 0.125490196, 0.049673203, 0.207843137, 0.25620915]), hatfield)
+               - hatfield: if(sex==2 and ageg==57 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.317961165, 0, 0.048543689, 0.171116505, 0.018203883, 0.035194175, 0.047330097, 0.024271845, 0.276699029, 0.060679612]), hatfield)
+               - hatfield: if(sex==2 and ageg==62 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.165145985, 0.075729927, 0.231751825, 0.099452555, 0, 0.055656934, 0.162408759, 0.017335766, 0.166970803, 0.025547445]), hatfield)
+               - hatfield: if(sex==2 and ageg==67 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.084210526, 0.068421053, 0.215789474, 0.257894737, 0.040789474, 0, 0.040789474, 0, 0.147368421, 0.144736842]), hatfield)
+               - hatfield: if(sex==2 and ageg==72 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.02359882, 0.013274336, 0.238938053, 0.265486726, 0.067846608, 0, 0.039823009, 0.08259587, 0.159292035, 0.109144543]), hatfield)
+               - hatfield: if(sex==2 and ageg>=77 and hatlev5==4, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.163909774, 0, 0.163909774, 0.106766917, 0.042105263, 0, 0.133834586, 0, 0.359398496, 0.030075188]), hatfield)
+               
+               - hatfield: if(sex==2 and ageg==17 and hatlev5==5, 0, hatfield)
+               - hatfield: if(sex==2 and ageg==22 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.164273995, 0.084085316, 0.193806399, 0.186423298, 0.068088597, 0.010664479, 0.044503692, 0.029327317, 0.149712879, 0.069114028]), hatfield)
+               - hatfield: if(sex==2 and ageg==27 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.169070606, 0.073397697, 0.158311039, 0.16435966, 0.090903804, 0.023961847, 0.033151099, 0.028207514, 0.20059323, 0.058043504]), hatfield)
+               - hatfield: if(sex==2 and ageg==32 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.176896366, 0.09590649, 0.180124224, 0.210886683, 0.054091065, 0.006015552, 0.062943219, 0.025920673, 0.167066073, 0.020149655]), hatfield)
+               - hatfield: if(sex==2 and ageg==37 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.196989387, 0.080950834, 0.209768248, 0.15735326, 0.055772146, 0.00259909, 0.073911631, 0.019493177, 0.18199047, 0.021171757]), hatfield)
+               - hatfield: if(sex==2 and ageg==42 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0.002613501, 0.252912186, 0.048387097, 0.132616487, 0.163903823, 0.054062127, 0.000896057, 0.077583632, 0.034274194, 0.199148746, 0.033602151]), hatfield)
+               - hatfield: if(sex==2 and ageg==47 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.24355458, 0.056683123, 0.156152862, 0.09471567, 0.03081002, 0.005485464, 0.067105504, 0.034009874, 0.295209362, 0.016273542]), hatfield)
+               - hatfield: if(sex==2 and ageg==52 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.263431953, 0.053491124, 0.183786982, 0.094319527, 0.05112426, 0.003668639, 0.146153846, 0.026508876, 0.141420118, 0.036094675]), hatfield)
+               - hatfield: if(sex==2 and ageg==57 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.273930066, 0.009720535, 0.162413933, 0.091670042, 0.05508303, 0.005670312, 0.168759282, 0.048332658, 0.1672742, 0.017145943]), hatfield)
+               - hatfield: if(sex==2 and ageg==62 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.240461686, 0.030939404, 0.234049375, 0.063642193, 0.047611414, 0, 0.166078871, 0.05226034, 0.15165117, 0.013305547]), hatfield)
+               - hatfield: if(sex==2 and ageg==67 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.324398249, 0.061086798, 0.205506929, 0.047592998, 0.095550693, 0.011123268, 0.098832969, 0.026440554, 0.102479942, 0.0269876]), hatfield)
+               - hatfield: if(sex==2 and ageg==72 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.408061194, 0.068843778, 0.115916446, 0.056781406, 0.081788761, 0, 0.077964107, 0.038246543, 0.126507796, 0.025889968]), hatfield)
+               - hatfield: if(sex==2 and ageg>=77 and hatlev5==5, choice([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.398511905, 0.047619048, 0.10297619, 0.067857143, 0.073809524, 0.003869048, 0.119642857, 0.066369048, 0.118452381, 0.000892857]), hatfield)               
+
+               - days: uniform()
+               - pocet_deti: 
+                    if(sex==2, 
+                    if(age==15, choice([0,1,2,3,4,5], [0.986894199, 0.009279884, 0.0028142, 0.000627962, 0.000081403, 0.000302352]),
+                    if(age==16, choice([0,1,2,3,4,5], [0.972964604, 0.019143075, 0.005805294, 0.001295396, 0.000167922, 0.000623709]),
+                    if(age==17, choice([0,1,2,3,4,5], [0.945854318, 0.038339179, 0.011626668, 0.002594381, 0.000336309, 0.001249146]),
+                    if(age==18, choice([0,1,2,3,4,5], [0.924360803, 0.053558189, 0.016241957, 0.003624238, 0.000469809, 0.001745004]),
+                    if(age==19, choice([0,1,2,3,4,5], [0.893805564, 0.075193576, 0.022803064, 0.005088287, 0.000659593, 0.002449916]),
+                    if(ageg==22, choice([0,1,2,3,4,5], [0.775409174, 0.1548844, 0.050839918, 0.011924579, 0.003682094, 0.003259835]),
+                    if(ageg==27, choice([0,1,2,3,4,5], [0.498227223, 0.283783981, 0.165865209, 0.03199456, 0.008535919, 0.011593109]),
+                    if(ageg==32, choice([0,1,2,3,4,5], [0.239286796, 0.297193172, 0.357427035, 0.072616912, 0.015226243, 0.018249843]),
+                    if(ageg==37, choice([0,1,2,3,4,5], [0.117041429, 0.226295889, 0.469170645, 0.129395516, 0.030401638, 0.027694884]),
+                    if(ageg==42, choice([0,1,2,3,4,5], [0.093422362, 0.162032979, 0.488969354, 0.169296383, 0.047507487, 0.038771434]),
+                    if(ageg==47, choice([0,1,2,3,4,5], [0.066209477, 0.120922745, 0.506486311, 0.206457379, 0.059627201, 0.040296887]),
+                    if(ageg==52, choice([0,1,2,3,4,5], [0.045520645, 0.099103898, 0.504747978, 0.238972207, 0.068686104, 0.04296917]),
+                    if(ageg==57, choice([0,1,2,3,4,5], [0.037372373, 0.090605337, 0.498056975, 0.256282522, 0.074567151, 0.043115643]),
+                    if(ageg>=62, choice([0,1,2,3,4,5], [0.024919804, 0.092351637, 0.459815267, 0.272170629, 0.091654525, 0.059088137]),
+                    choice([0,1,2,3,4,5], [1, 0, 0, 0, 0, 0]))))))))))))))),0)
+                     
+               - destination: 1
+                    
+            init_disab():
+               - disabled_score: logit_regr(ISFEMALE*(-0.011774)+AGRO*(0.2301949)+INDUSTRY*(-0.0892453)+MAR_SERVICES*(0.1889849)+NMAR_SERVICES*(0.4119144)+PRIMARY*(0.4828295)+LOWER_SECONDARY*(0.3662102)+POST_SECONDARY*(0.1159768)+TERTIARY*(-0.6491878)+DETI1*(-0.3018152)+DETI2*(-0.392612)+DETI3*(-0.3703769)+DETI4*(-0.3384038)+DETI5*(-0.4508266)+DETI6*(-0.5884336)+age*(0.3414163)+(age*age)*(-0.002962)+1*(-12.0914))
+               - disabled_score: if(status==5, 3, disabled_score)
+               - disabled: if(age>=18 and age<=62, 
+                              if(ISMALE,
+                                 align_abs(disabled_score, 'disability_male_2021_sample_20.csv', leave=retired),
+                                 align_abs(disabled_score, 'disability_female_2021_sample_20.csv', leave=retired)),
+                                 False) 
+
+               - status: if(disabled, DISABLED, status)              
+            
+            ageing():           
+               - age: age - 1
+               - ageg: 5 * trunc(age / 5)+2 
+               - age_float: age+days
+
+               - unborn: if(age<0, True,
+                            False)
+               - remove(unborn) 
+               
+            rebirth():
+               - to_rebirth_male: logit_regr(0.0, align='mortality_male_EUROPOP.csv')
+               - to_rebirth_female: logit_regr(0.0, align='mortality_female_EUROPOP.csv')
+
+               - to_rebirth: if(ISMALE, to_rebirth_male, to_rebirth_female)
+
+               - clone(filter=to_rebirth)
+               
+            maternity():
+                - maternity: False
+                - maternity_score: logit_regr(-22.33631 + age*(1.310724) + (age*age)*(-0.0211879) + PRIMARY*(-1.194066) + LOWER_SECONDARY*(-0.3180492) + POST_SECONDARY*(0.1338316) + TERTIARY*(0.4085348), filter=ISFEMALE and age>=15 and age<40)
+                - maternity: if(age>=15 and age<40 and ISFEMALE,
+                                align_abs(maternity_score, count(age<=3)*0.75),
+                                False)
+               
+# prerobit tak, aby materska bola pre ludi do 3 rokov / 2 rokov
+# spocitat deti pod 2 (2, 1 a 0 rocni) a align_abs na to_give_birth - rovno dat ako maternity
+#            birth():
+#              - to_give_birth: False
+#                - to_give_birth: logit_regr (0.0, filter=(sex==2 and age >= 14 and age < 51), align='fertility_EUROPOP.csv')
+             
+               
+            immigration(): 
+               - immigrant_sim: False
+               - to_immigrate: False
+               - immigrant_score: if(country_b!=1, 2, 0)
+               - immigrant: if(country_b!=1, True, False)
+               - immigrant: if(immigrant_sim, True, immigrant)
+ 
+################################################################################
+### EA processes ###############################################################
+################################################################################
+
+            statusing(): 
+               - status1y: status 
+               - status: -1
+  
+            # Education
+            study(): 
+               - student: False
+               - student: if(age<GRADUATIONAGE_P, True, False)
+               - student: if(hatlev5==1, if(age<=GRADUATIONAGE_P,  True,  False), student)
+               - student: if(hatlev5==2, if(age<=GRADUATIONAGE_LS, True,  False), student)
+               - student: if(hatlev5==3, if(age<=GRADUATIONAGE_US, True,  False), student)                            
+               - student: if(hatlev5==4, if(age<=GRADUATIONAGE_PS, True,  False), student)  
+               - student: if(hatlev5==5, if(age<=GRADUATIONAGE_T,  True,  False), student)
+               #- student: if(later_student, True, student)
+               - status: if(student, STUDENT, status)
+               
+            # Retirement - pôvodná chyba, dávalo retired status aj tomu, kto v pôvodnom súbore retired nebol
+            # CHYBA, takto by mi nevystupovali z retirementu, čo je môj cieľ do minulosti
+            retirement():
+               - retired: False
+               - retired: if(ISMALE and age_float>=MALE_RA, True, retired)
+               - retired: if(ISFEMALE and age_float>=FEMALE_RA_0 and pocet_deti==0, True, retired)
+               - retired: if(ISFEMALE and age_float>=FEMALE_RA_1 and pocet_deti==1, True, retired)
+               - retired: if(ISFEMALE and age_float>=FEMALE_RA_2 and pocet_deti==2, True, retired)
+               - retired: if(ISFEMALE and age_float>=FEMALE_RA_3_4 and pocet_deti>=3 and pocet_deti<=4, True, retired)
+               - retired: if(ISFEMALE and age_float>=FEMALE_RA_5 and pocet_deti>=5, True, retired) 
+               - toret: if(ISMALE,  trunc(age_float-MALE_RA), 
+                        if(pocet_deti==0, trunc(age_float-FEMALE_RA_0),
+                        if(pocet_deti==1, trunc(age_float-FEMALE_RA_1),
+                        if(pocet_deti==2, trunc(age_float-FEMALE_RA_2),
+                        if(pocet_deti>=3 and pocet_deti<=4, trunc(age_float-FEMALE_RA_3_4), trunc(age_float-FEMALE_RA_5))))))
+               
+            # PSD align na realne hodnoty, existuju len od 2005
+            #   - retired_early_score: logit_score(ISFEMALE*(-1.464065)+PRIMARY*(-6.446514)+LOWER_SECONDARY*(-0.7186568 )+UPPER_SECONDARY*(-0.2306876)+POST_SECONDARY*(0.033602)+1*(-4.979105))  
+            #   - retired_early_score: if(status1y==RETIRED, retired_early_score+1, retired_early_score)
+            #   - retired_early: if(ISMALE, align_abs(retired_early_score,'early_retired_male_retro.csv', filter=toret<=0 and age>15 and status==-1 ),
+            #                               align_abs(retired_early_score,'early_retired_female_retro.csv', filter=toret<=0 and age>15 and status==-1 ))
+            #   - status: if(retired_early, RETIRED, status)
+
+               - status: if(retired, RETIRED, status)
+            #   - status: if(status1y!=RETIRED and retired, -1, status)
+
+               - rok_priz: if(status1y==RETIRED and status!=RETIRED, 1, 0)
+ 
+            # Working retired
+               - working_retired: False
+               - working_retired_score: logit_score(ISFEMALE*(-0.0588707)+AGRO*(0.0421057)+INDUSTRY*(0.2613706)+MAR_SERVICES*(0.3650801)+NMAR_SERVICES*(0.9087032)+PRIMARY*(-0.238619)+LOWER_SECONDARY*(-0.1386484)+POST_SECONDARY*(-0.5835751)+TERTIARY*(0.6015319)+age*(-0.1307589)+1*(11.78748))
+               - working_retired_score: if(status1y==1, working_retired_score+1, working_retired_score) 
+               - working_retired: if(toret>=0 , 
+                                  if(ISMALE, align(working_retired_score, 'working_retired_male.csv'), align(working_retired_score, 'working_retired_female.csv')), False)   
+            # Nemením status aby som ich mal identifikovaných ako dôchodcov - stále sa berú ako pracujúci v REDUCED EMPL MODULE
+               - status: if(working_retired==True, -1, status)
+               
+            # Disability      
+            disability(): 
+               - disabled: False
+               - disabled_score: logit_regr(ISFEMALE*(0.0213604)+PRIMARY*(2.675516)+LOWER_SECONDARY*(2.075629)+UPPER_SECONDARY*(1.367237)+POST_SECONDARY*(1.567482)+AGEG17*(-1.433565)+AGEG22*(0.3789037)+AGEG27*(1.364744)+AGEG32*(1.219023)+AGEG37*(1.831696)+AGEG42*(1.60277)+AGEG47*(1.918053)+AGEG52*(2.209044)+AGEG57*(2.83268)+1*(-6.611184)) 
+               - disabled_score: if(status1y==6, disabled_score+1, disabled_score)                  
+               - disabled: if(status==-1 and toret<=0 and destination==1 and age>=18 and age<=62, 
+                              if(ISMALE,
+                                 align_abs(disabled_score, 'disability_male_hist_sample_20.csv', leave=retired),
+                                 align_abs(disabled_score, 'disability_female_hist_sample_20.csv', leave=retired)),
+                                 False) 
+
+               - status: if(disabled, DISABLED, status)
+            #   - status: if(status1y==DISABLED, DISABLED, status)
+
+            # Working disabled
+
+            # Inactivity   
+            inactivity():          
+               - inactivity: False
+               - inactivity_score: logit_score(ISFEMALE*(1.306702)+PRIMARY*(2.292582)+LOWER_SECONDARY*(0.8210773)+UPPER_SECONDARY*(0.5358828)+POST_SECONDARY*(0.6890947)+AGEG17*(1.611657)+AGEG22*(3.71789)+AGEG27*(4.523448)+AGEG32*(4.524653)+AGEG37*(3.913862)+AGEG42*(3.599382)+AGEG47*(3.519993)+AGEG52*(3.556672)+AGEG57*(3.479803)+1*(-8.111224))
+               - inactivity_score: if(status1y==5, inactivity_score+1, inactivity_score)
+               #- matrnity: if(to_give_birth==True or lag(to_give_birth==True) or lag(lag(to_give_birth==True)), True, False)
+                                #align(inactivity_score, 'inactivity_female_retro.csv', leave=retired and student and immigrant and disabled, take=maternity)),
+               - inactivity: if(status==-1 and age>15 and toret<=0 and destination==1,
+                                if(ISMALE,
+                                align(inactivity_score, 'inactivity_male_retro.csv', leave=retired and student and immigrant and disabled),
+                                align(inactivity_score, 'inactivity_female_retro.csv', leave=retired and student and immigrant and disabled)),                                
+                                False)
+
+               - status: if(inactivity, INACTIVE, status)
+               
+####################################################################               
+## REDUCED EMPL MODULE
+## Employed/Unemployed/Wages
+####################################################################
+
+            economic_activity():
+                - ea: if(status==-1, if(destination==1, True, False), False)
+                - ea: if(working_retired and destination==1, True, ea)
+
+            employment_nace_score():
+                # AK V TOMTO ROKU PREPADOL MEDZI NEAKTÍVNYCH STRÁCA SEKTOR, INAK HO DEDÍ Z MINULÝCH OBDOBII
+                - nace5: if(not(ea), -1, nace5)
+                
+                # VYBERAME DO SEKTOROV NANOVO
+                - nace1_score: if(ea, logit_score(ISFEMALE*(-1.231728)+PRIMARY*(2.59372)+LOWER_SECONDARY*(0.7021321)+UPPER_SECONDARY*(0.2916175)+FIELD1*(-0.0358069)+FIELD2*(0.3711461)+FIELD3*(1.366124)+FIELD4*(1.667954)+FIELD5*(0.7638078)+FIELD7*(1.512565)+FIELD8*(3.972176)+FIELD9*(-0.9153761)+FIELD10*(1.109238)+AGEG22*(4.355341)+AGEG27*(4.930048)+AGEG32*(5.028397)+AGEG37*(5.310196)+AGEG42*(5.384116)+AGEG47*(5.530687)+AGEG52*(5.902419)+AGEG57*(5.727294)+AGEG62*(4.517933)+1*(-11.10253)),0)
+                - nace2_score: if(ea, logit_score(ISFEMALE*(-2.782176)+PRIMARY*(1.796911)+LOWER_SECONDARY*(0.7911024)+UPPER_SECONDARY*(0.1104568)+FIELD4*(0.2592654)+FIELD7*(1.292964)+FIELD8*(-0.2857299)+FIELD9*(1.762461)+FIELD10*(0.053274)+AGEG22*(5.35408)+AGEG27*(3.840878)+AGEG32*(4.273103)+AGEG37*(4.557366)+AGEG42*(5.423941)+AGEG47*(5.597698)+AGEG52*(5.259345)+AGEG57*(4.71006)+1*(-11.53599)),0)
+                - nace3_score: if(ea, logit_score(ISFEMALE*(-0.2145219)+PRIMARY*(0.2900285)+LOWER_SECONDARY*(0.4649834)+UPPER_SECONDARY*(0.508335)+POST_SECONDARY*(0.3136654)+FIELD1*(-1.626115)+FIELD2*(0.042604)+FIELD3*(-0.0646168)+FIELD4*(0.2220665)+FIELD5*(0.8297565)+FIELD6*(0.537337)+FIELD7*(1.220684)+FIELD8*(0.5244265)+FIELD9*(-1.454127)+FIELD10*(0.3388227)+AGEG22*(3.92983)+AGEG27*(4.445998)+AGEG32*(4.544755)+AGEG37*(4.59592)+AGEG42*(4.541563)+AGEG47*(4.467055)+AGEG52*(4.415977)+AGEG57*(4.040288)+AGEG62*(2.418583)+1*(-6.998593)),0)
+                - nace4_score: if(ea, logit_score(ISFEMALE*(-1.422464)+PRIMARY*(0.2532183)+LOWER_SECONDARY*(-0.642902)+UPPER_SECONDARY*(-0.316109)+POST_SECONDARY*(-0.2083604)+FIELD1*(0.0570321)+FIELD2*(0.4518148)+FIELD3*(0.0012872)+FIELD4*(1.068047)+FIELD5*(0.9346451)+FIELD6*(0.6444659)+FIELD7*(1.343524)+FIELD8*(0.4903086)+FIELD10*(-0.1907229)+AGEG22*(3.417404)+AGEG27*(4.345674)+AGEG32*(5.036765)+AGEG37*(5.491537)+AGEG42*(5.421031)+AGEG47*(5.56431)+AGEG52*(5.700053)+AGEG57*(5.576496)+AGEG62*(4.191482)+1*(-9.523405)),0)
+                - nace5_score: if(ea, logit_score(ISFEMALE*(-2.439621)+PRIMARY*(-0.0312407)+LOWER_SECONDARY*(0.5360953)+UPPER_SECONDARY*(0.2639153)+POST_SECONDARY*(-0.7240419)+FIELD0*(1.424968)+FIELD1*(-1.441081)+FIELD2*(-0.6684172)+FIELD3*(-0.4379628)+FIELD4*(0.2692311)+FIELD5*(-0.0942152)+FIELD6*(-0.5239734)+FIELD7*(0.9583526)+FIELD8*(0.25425)+FIELD9*(-1.031687)+FIELD10*(-0.182302)+AGEG17*(1.745068)+AGEG22*(3.902827)+AGEG27*(4.472909)+AGEG32*(4.484207)+AGEG37*(4.363429)+AGEG42*(4.286719)+AGEG47*(4.436202)+AGEG52*(4.456752)+AGEG57*(4.257444)+AGEG62*(3.221776)+1*(-7.242125)),0)
+                # AK BOLI V MINULOM OBDOBI ZAMESTNANÍ V SEKTORE NAVYSIME IM PRAVDEPODOBNOST UCASTI/SCORE
+                - nace1_score: if(nace5==1, nace1_score+2 ,nace1_score)
+                - nace2_score: if(nace5==2, nace2_score+2 ,nace2_score)
+                - nace3_score: if(nace5==3, nace3_score+2 ,nace3_score)
+                - nace4_score: if(nace5==4, nace4_score+2 ,nace4_score)
+                - nace5_score: if(nace5==5, nace5_score+2 ,nace5_score)
+                
+                - nace1_score: if(working_retired==True and nace1y==1, nace1_score+0.6, nace1_score)
+                - nace1_score: if(working_retired==True, nace1_score+0.6, nace1_score)               
+                - nace2_score: if(working_retired==True and nace1y==2, nace2_score+0.6, nace2_score)
+                - nace2_score: if(working_retired==True, nace2_score+0.6, nace2_score)
+                - nace3_score: if(working_retired==True and nace1y==3, nace3_score+0.6, nace3_score)
+                - nace3_score: if(working_retired==True, nace3_score+0.6, nace3_score)
+                - nace4_score: if(working_retired==True and nace1y==4, nace4_score+0.6, nace4_score)
+                - nace4_score: if(working_retired==True, nace4_score+0.6, nace4_score)   
+                - nace5_score: if(working_retired==True and nace1y==5, nace5_score+0.6, nace5_score)        
+                - nace5_score: if(working_retired==True , nace5_score+0.6, nace5_score) 
+
+            employment():
+                # PRED ALOKOVANIM VOLNYCH EA DO SEKTOROV, NAJSKôR MUSIME FIXNUT NEZAMESTNANYCH, ABY NAM MIERA NEZAMESTNANOSTI KOREŠPONDOVALA S REALITOU
+                # HISTORICKU MIERU NEZAMESTNANOSTI MUSIME DOPLNIŤ DO GLOBALU (globaltable.csv riadok UR) ZO ŠTATISTICKÝCH DÁT (pred rokom 1989 bola MIERA NEZAMESTNANOSTI 0)
+                # Povodne: - unemployed: if(ea, align(-(nace1_score+nace2_score+nace3_score+nace4_score+nace5_score), unem_rate, leave=(age<GRADUATIONAGE_T) and (age>MALE_RA)), False) 
+                - unemployed: if(ea, align(-(nace1_score+nace2_score+nace3_score+nace4_score+nace5_score), unem_rate, leave=(age<GRADUATIONAGE_T)), False) 
+                - status: if(unemployed, 2, status)
+#PORADIE SEKTOROV V KTOROM SU PLNENE ZAMESTNANCAMI STRIELAM PODLA ATRAKTIVNOSTI-SUBJEKTIVNE, ZISLO BY SA ZORADIT NAPR PODLA PRIEMERNEJ MZDY
+                - nace_4: if(status==-1, align_abs(nace4_score, N4), False)
+                - nace5: if(nace_4==True, 4, nace5)
+                
+                - nace_2: if(status==-1 and not(MAR_SERVICES), align_abs(nace2_score, N2), False)
+                - nace5: if(nace_2==True, 2, nace5)
+                
+                - nace_5: if(status==-1 and not(MAR_SERVICES) and not(INDUSTRY), align_abs(nace5_score, N5), False) 
+                - nace5: if(nace_5==True, 5, nace5)
+                
+                - nace_3: if(status==-1 and not(MAR_SERVICES) and not(INDUSTRY) and not(NMAR_SERVICES), align_abs(nace3_score, N3), False)
+                - nace5: if(nace_3==True, 3, nace5)
+                
+                - nace_1: if(status==-1 and not(MAR_SERVICES) and not(INDUSTRY) and not(NMAR_SERVICES) and not(CONSTRUCTION), align_abs(nace1_score, N1), False) 
+                - nace5: if(nace_1==True, 1, nace5)
+                
+                - status: if(ea and not (nace5==-1), EMPLOYED, status)
+                
+                - ea: if(nace5==-1 and working_retired==True and destination==1, False, ea)
+                - status: if(status==-1 and working_retired==True and nace5==-1 and destination==1, RETIRED, status)                
+                - working_retired: if(working_retired==True and nace5==-1, False, working_retired)
+
+            # Rezidualnych dam ako inactive (vznikaju nepriradeni, kedze alokujem ako absolutne cisla a nie podiely - v 2022 mam 34 375 status -1)
+            unidentified():
+               - status: if(status==-1, INACTIVE, status)
+               
+####################################################################               
+## Granted pension level
+####################################################################
+# TOTO je SIMPLE SPOSOB AKO simulovat vyšku dôchodku, necháme to za nás spraviť mincerovskú rovnicu, začnime z týmto spôsobom
+            
+            wages():
+            #    - omb: cont_regr(ISFEMALE*(-0.2899631)+AGRO*(0.188833)+INDUSTRY*(0.4991889)+MAR_SERVICES*(0.265033)+NMAR_SERVICES*(0.3805113)+PRIMARY*(-0.2972319)+LOWER_SECONDARY*(-0.2578316)+POST_SECONDARY*(0.1022439)+TERTIARY*(0.6443882)+DETI1*(-0.0840496)+DETI2*(-0.047883)+DETI3*(-0.1053393)+DETI4*(-0.1605323)+DETI5*(-0.2300576)+DETI6*(-0.3045981)+age*(0.0950027)+(age*age)*(-0.00102)+ZENA2040*(-0.2233584)+1*(-0.7825029))
+                - temp_omb_1m: (if(AGE_M_16_19_AGR,AGE_M_16_19_AGR,0))*(0)+(if(AGE_M_16_19_IND,AGE_M_16_19_IND,0))*(0)+(if(AGE_M_16_19_CON,AGE_M_16_19_CON,0))*(0)+(if(AGE_M_16_19_NMAR,AGE_M_16_19_NMAR,0))*(0)+ 
+                            (if(AGE_M_20_24_AGR,AGE_M_20_24_AGR,0))  *(-0.0652)+(if(AGE_M_20_24_IND,AGE_M_20_24_IND,0))  *(0.137)  +(if(AGE_M_20_24_CON,AGE_M_20_24_CON,0))  *(-0.106) +(if(AGE_M_20_24_NMAR,AGE_M_20_24_NMAR,0))  *(-0.0291)+
+                            (if(AGE_M_25_29_AGR,AGE_M_25_29_AGR,0))  *(-0.221) +(if(AGE_M_25_29_IND,AGE_M_25_29_IND,0))  *(0.0922) +(if(AGE_M_25_29_CON,AGE_M_25_29_CON,0))  *(-0.186) +(if(AGE_M_25_29_NMAR,AGE_M_25_29_NMAR,0))  *(-0.00358)+
+                            (if(AGE_M_30_34_AGR,AGE_M_30_34_AGR,0))  *(-0.222) +(if(AGE_M_30_34_IND,AGE_M_30_34_IND,0))  *(0.108)  +(if(AGE_M_30_34_CON,AGE_M_30_34_CON,0))  *(-0.191) +(if(AGE_M_30_34_NMAR,AGE_M_30_34_NMAR,0))  *(-0.0162)+
+                            (if(AGE_M_35_39_AGR,AGE_M_35_39_AGR,0))  *(-0.167) +(if(AGE_M_35_39_IND,AGE_M_35_39_IND,0))  *(0.124)  +(if(AGE_M_35_39_CON,AGE_M_35_39_CON,0))  *(-0.146) +(if(AGE_M_35_39_NMAR,AGE_M_35_39_NMAR,0))  *(0.0278)+
+                            (if(AGE_M_40_44_AGR,AGE_M_40_44_AGR,0))  *(-0.119) +(if(AGE_M_40_44_IND,AGE_M_40_44_IND,0))  *(0.124)  +(if(AGE_M_40_44_CON,AGE_M_40_44_CON,0))  *(-0.113) +(if(AGE_M_40_44_NMAR,AGE_M_40_44_NMAR,0))  *(0.0797)+
+                            (if(AGE_M_45_49_AGR,AGE_M_45_49_AGR,0))  *(-0.106) +(if(AGE_M_45_49_IND,AGE_M_45_49_IND,0))  *(0.105)  +(if(AGE_M_45_49_CON,AGE_M_45_49_CON,0))  *(-0.0777)+(if(AGE_M_45_49_NMAR,AGE_M_45_49_NMAR,0))  *(0.121)+
+                            (if(AGE_M_50_54_AGR,AGE_M_50_54_AGR,0))  *(-0.0873)+(if(AGE_M_50_54_IND,AGE_M_50_54_IND,0))  *(0.0628) +(if(AGE_M_50_54_CON,AGE_M_50_54_CON,0))  *(-0.0534)+(if(AGE_M_50_54_NMAR,AGE_M_50_54_NMAR,0))  *(0.130)+
+                            (if(AGE_M_55_59_AGR,AGE_M_55_59_AGR,0))  *(-0.104) +(if(AGE_M_55_59_IND,AGE_M_55_59_IND,0))  *(-0.0212)+(if(AGE_M_55_59_CON,AGE_M_55_59_CON,0))  *(-0.0251)+(if(AGE_M_55_59_NMAR,AGE_M_55_59_NMAR,0))  *(0.151)+
+                            (if(AGE_M_60_64_AGR,AGE_M_60_64_AGR,0))  *(-0.139) +(if(AGE_M_60_64_IND,AGE_M_60_64_IND,0))  *(-0.0268)+(if(AGE_M_60_64_CON,AGE_M_60_64_CON,0))  *(-0.0111)+(if(AGE_M_60_64_NMAR,AGE_M_60_64_NMAR,0))  *(0.242)
+                - temp_omb_2m: (if(AGE_M_65_AGR,AGE_M_65_AGR,0))        *(-0.248) +(if(AGE_M_65_IND,AGE_M_65_IND,0))        *(-0.0880)+(if(AGE_M_65_CON,AGE_M_65_CON,0))        *(-0.0394)+(if(AGE_M_65_NMAR,AGE_M_65_NMAR,0))        *(0.325)+
+                            (if(AGE_M_66_AGR,AGE_M_66_AGR,0))        *(-0.276) +(if(AGE_M_66_IND,AGE_M_66_IND,0))        *(-0.115) +(if(AGE_M_66_CON,AGE_M_66_CON,0))        *(-0.0207)+(if(AGE_M_66_NMAR,AGE_M_66_NMAR,0))        *(0.330)+
+                            (if(AGE_M_67_AGR,AGE_M_67_AGR,0))        *(-0.290) +(if(AGE_M_67_IND,AGE_M_67_IND,0))        *(-0.133) +(if(AGE_M_67_CON,AGE_M_67_CON,0))        *(-0.0350)+(if(AGE_M_67_NMAR,AGE_M_67_NMAR,0))        *(0.332)+
+                            (if(AGE_M_68_AGR,AGE_M_68_AGR,0))        *(-0.302) +(if(AGE_M_68_IND,AGE_M_68_IND,0))        *(-0.145) +(if(AGE_M_68_CON,AGE_M_68_CON,0))        *(-0.0128)+(if(AGE_M_68_NMAR,AGE_M_68_NMAR,0))        *(0.344)+
+                            (if(AGE_M_69_AGR,AGE_M_69_AGR,0))        *(-0.298) +(if(AGE_M_69_IND,AGE_M_69_IND,0))        *(-0.129) +(if(AGE_M_69_CON,AGE_M_69_CON,0))        *(-0.0003)+(if(AGE_M_69_NMAR,AGE_M_69_NMAR,0))        *(0.351)+
+                            (if(AGE_M_70_71_AGR,AGE_M_70_71_AGR,0))  *(-0.261) +(if(AGE_M_70_71_IND,AGE_M_70_71_IND,0))  *(-0.143) +(if(AGE_M_70_71_CON,AGE_M_70_71_CON,0))  *(0.0995) +(if(AGE_M_70_71_NMAR,AGE_M_70_71_NMAR,0))  *(0.335)+
+                            (if(AGE_M_72_73_AGR,AGE_M_72_73_AGR,0))  *(-0.240) +(if(AGE_M_72_73_IND,AGE_M_72_73_IND,0))  *(-0.170) +(if(AGE_M_72_73_CON,AGE_M_72_73_CON,0))  *(0.128)  +(if(AGE_M_72_73_NMAR,AGE_M_72_73_NMAR,0))  *(0.287)+
+                            (if(AGE_M_74_75_AGR,AGE_M_74_75_AGR,0))  *(-0.216) +(if(AGE_M_74_75_IND,AGE_M_74_75_IND,0))  *(-0.167) +(if(AGE_M_74_75_CON,AGE_M_74_75_CON,0))  *(0.171)  +(if(AGE_M_74_75_NMAR,AGE_M_74_75_NMAR,0))  *(0.284)+
+                            (if(AGE_M_76_77_AGR,AGE_M_76_77_AGR,0))  *(-0.222) +(if(AGE_M_76_77_IND,AGE_M_76_77_IND,0))  *(-0.174) +(if(AGE_M_76_77_CON,AGE_M_76_77_CON,0))  *(0.100)  +(if(AGE_M_76_77_NMAR,AGE_M_76_77_NMAR,0))  *(0.261)+
+                            (if(AGE_M_78_79_AGR,AGE_M_78_79_AGR,0))  *(-0.264) +(if(AGE_M_78_79_IND,AGE_M_78_79_IND,0))  *(-0.256) +(if(AGE_M_78_79_CON,AGE_M_78_79_CON,0))  *(0.375)  +(if(AGE_M_78_79_NMAR,AGE_M_78_79_NMAR,0))  *(0.274)+
+                            (if(AGE_M_80_84_AGR,AGE_M_80_84_AGR,0))  *(-0.205) +(if(AGE_M_80_84_IND,AGE_M_80_84_IND,0))  *(-0.196) +(if(AGE_M_80_84_CON,AGE_M_80_84_CON,0))  *(0.0546) +(if(AGE_M_80_84_NMAR,AGE_M_80_84_NMAR,0))  *(0.238)+
+                            (if(AGE_M_85_89_AGR,AGE_M_85_89_AGR,0))  *(-0.342) +(if(AGE_M_85_89_IND,AGE_M_85_89_IND,0))  *(0)      +(if(AGE_M_85_89_CON,AGE_M_85_89_CON,0))  *(0.0525) +(if(AGE_M_85_89_NMAR,AGE_M_85_89_NMAR,0))  *(0.231)+
+                            (if(AGE_M_90_94_AGR,AGE_M_90_94_AGR,0))  *(0)      +(if(AGE_M_90_94_IND,AGE_M_90_94_IND,0))  *(-0.545) +(if(AGE_M_90_94_CON,AGE_M_90_94_CON,0))  *(0)      +(if(AGE_M_90_94_NMAR,AGE_M_90_94_NMAR,0))  *(0.432)+
+                            (if(AGE_M_95_100_AGR,AGE_M_95_100_AGR,0))*(0)      +(if(AGE_M_95_100_IND,AGE_M_95_100_IND,0))*(0)      +(if(AGE_M_95_100_CON,AGE_M_95_100_CON,0))*(0)      +(if(AGE_M_95_100_NMAR,AGE_M_95_100_NMAR,0))*(0)
+                
+                - temp_omb_3m: (if(AGE_M_16_19_PR,AGE_M_16_19_PR,0))*(0)+(if(AGE_M_16_19_LS,AGE_M_16_19_LS,0))*(0)+(if(AGE_M_16_19_PS,AGE_M_16_19_PS,0))*(0)+(if(AGE_M_16_19_TR,AGE_M_16_19_TR,0))*(0)+
+                            (if(AGE_M_20_24_PR,AGE_M_20_24_PR,0))  *(0.0135)+(if(AGE_M_20_24_LS,AGE_M_20_24_LS,0))  *(-0.114) +(if(AGE_M_20_24_PS,AGE_M_20_24_PS,0))  *(0.0819) +(if(AGE_M_20_24_TR,AGE_M_20_24_TR,0))  *(0.0984)+
+                            (if(AGE_M_25_29_PR,AGE_M_25_29_PR,0))  *(-0.230)+(if(AGE_M_25_29_LS,AGE_M_25_29_LS,0))  *(-0.228) +(if(AGE_M_25_29_PS,AGE_M_25_29_PS,0))  *(0.122)  +(if(AGE_M_25_29_TR,AGE_M_25_29_TR,0))  *(0.454) +
+                            (if(AGE_M_30_34_PR,AGE_M_30_34_PR,0))  *(-0.276)+(if(AGE_M_30_34_LS,AGE_M_30_34_LS,0))  *(-0.235) +(if(AGE_M_30_34_PS,AGE_M_30_34_PS,0))  *(0.192)  +(if(AGE_M_30_34_TR,AGE_M_30_34_TR,0))  *(0.531) +
+                            (if(AGE_M_35_39_PR,AGE_M_35_39_PR,0))  *(-0.273)+(if(AGE_M_35_39_LS,AGE_M_35_39_LS,0))  *(-0.219) +(if(AGE_M_35_39_PS,AGE_M_35_39_PS,0))  *(0.151)  +(if(AGE_M_35_39_TR,AGE_M_35_39_TR,0))  *(0.547) +
+                            (if(AGE_M_40_44_PR,AGE_M_40_44_PR,0))  *(-0.246)+(if(AGE_M_40_44_LS,AGE_M_40_44_LS,0))  *(-0.194) +(if(AGE_M_40_44_PS,AGE_M_40_44_PS,0))  *(0.0789) +(if(AGE_M_40_44_TR,AGE_M_40_44_TR,0))  *(0.534) +
+                            (if(AGE_M_45_49_PR,AGE_M_45_49_PR,0))  *(-0.215)+(if(AGE_M_45_49_LS,AGE_M_45_49_LS,0))  *(-0.178) +(if(AGE_M_45_49_PS,AGE_M_45_49_PS,0))  *(0.0771) +(if(AGE_M_45_49_TR,AGE_M_45_49_TR,0))  *(0.529) +
+                            (if(AGE_M_50_54_PR,AGE_M_50_54_PR,0))  *(-0.140)+(if(AGE_M_50_54_LS,AGE_M_50_54_LS,0))  *(-0.153) +(if(AGE_M_50_54_PS,AGE_M_50_54_PS,0))  *(0.0706) +(if(AGE_M_50_54_TR,AGE_M_50_54_TR,0))  *(0.538) +
+                            (if(AGE_M_55_59_PR,AGE_M_55_59_PR,0))  *(-0.076)+(if(AGE_M_55_59_LS,AGE_M_55_59_LS,0))  *(-0.142) +(if(AGE_M_55_59_PS,AGE_M_55_59_PS,0))  *(0.0846) +(if(AGE_M_55_59_TR,AGE_M_55_59_TR,0))  *(0.583) +
+                            (if(AGE_M_60_64_PR,AGE_M_60_64_PR,0))  *(0.0360)+(if(AGE_M_60_64_LS,AGE_M_60_64_LS,0))  *(-0.0995)+(if(AGE_M_60_64_PS,AGE_M_60_64_PS,0))  *(0.0564) +(if(AGE_M_60_64_TR,AGE_M_60_64_TR,0))  *(0.635) 
+                - temp_omb_4m: (if(AGE_M_65_PR,AGE_M_65_PR,0))        *(0.134) +(if(AGE_M_65_LS,AGE_M_65_LS,0))        *(-0.0667)+(if(AGE_M_65_PS,AGE_M_65_PS,0))        *(0.0466) +(if(AGE_M_65_TR,AGE_M_65_TR,0))        *(0.609) +
+                            (if(AGE_M_66_PR,AGE_M_66_PR,0))        *(0.171) +(if(AGE_M_66_LS,AGE_M_66_LS,0))        *(-0.0527)+(if(AGE_M_66_PS,AGE_M_66_PS,0))        *(0.0813) +(if(AGE_M_66_TR,AGE_M_66_TR,0))        *(0.597) +
+                            (if(AGE_M_67_PR,AGE_M_67_PR,0))        *(0.203) +(if(AGE_M_67_LS,AGE_M_67_LS,0))        *(-0.0483)+(if(AGE_M_67_PS,AGE_M_67_PS,0))        *(0.00493)+(if(AGE_M_67_TR,AGE_M_67_TR,0))        *(0.571) +
+                            (if(AGE_M_68_PR,AGE_M_68_PR,0))        *(0.210) +(if(AGE_M_68_LS,AGE_M_68_LS,0))        *(-0.0586)+(if(AGE_M_68_PS,AGE_M_68_PS,0))        *(-0.0355)+(if(AGE_M_68_TR,AGE_M_68_TR,0))        *(0.558) +
+                            (if(AGE_M_69_PR,AGE_M_69_PR,0))        *(0.229) +(if(AGE_M_69_LS,AGE_M_69_LS,0))        *(-0.0549)+(if(AGE_M_69_PS,AGE_M_69_PS,0))        *(0.453)  +(if(AGE_M_69_TR,AGE_M_69_TR,0))        *(0.551) +
+                            (if(AGE_M_70_71_PR,AGE_M_70_71_PR,0))  *(0.195) +(if(AGE_M_70_71_LS,AGE_M_70_71_LS,0))  *(-0.0467)+(if(AGE_M_70_71_PS,AGE_M_70_71_PS,0))  *(0)      +(if(AGE_M_70_71_TR,AGE_M_70_71_TR,0))  *(0.518) +
+                            (if(AGE_M_72_73_PR,AGE_M_72_73_PR,0))  *(0.206) +(if(AGE_M_72_73_LS,AGE_M_72_73_LS,0))  *(-0.0257)+(if(AGE_M_72_73_PS,AGE_M_72_73_PS,0))  *(0)      +(if(AGE_M_72_73_TR,AGE_M_72_73_TR,0))  *(0.494) +
+                            (if(AGE_M_74_75_PR,AGE_M_74_75_PR,0))  *(0.188) +(if(AGE_M_74_75_LS,AGE_M_74_75_LS,0))  *(-0.0129)+(if(AGE_M_74_75_PS,AGE_M_74_75_PS,0))  *(0)      +(if(AGE_M_74_75_TR,AGE_M_74_75_TR,0))  *(0.440) +
+                            (if(AGE_M_76_77_PR,AGE_M_76_77_PR,0))  *(0.254) +(if(AGE_M_76_77_LS,AGE_M_76_77_LS,0))  *(0)      +(if(AGE_M_76_77_PS,AGE_M_76_77_PS,0))  *(0)      +(if(AGE_M_76_77_TR,AGE_M_76_77_TR,0))  *(0.455) +
+                            (if(AGE_M_78_79_PR,AGE_M_78_79_PR,0))  *(0)     +(if(AGE_M_78_79_LS,AGE_M_78_79_LS,0))  *(0)      +(if(AGE_M_78_79_PS,AGE_M_78_79_PS,0))  *(0)      +(if(AGE_M_78_79_TR,AGE_M_78_79_TR,0))  *(0.147) +
+                            (if(AGE_M_80_84_PR,AGE_M_80_84_PR,0))  *(0)     +(if(AGE_M_80_84_LS,AGE_M_80_84_LS,0))  *(0)      +(if(AGE_M_80_84_PS,AGE_M_80_84_PS,0))  *(0)      +(if(AGE_M_80_84_TR,AGE_M_80_84_TR,0))  *(0)     +
+                            (if(AGE_M_85_89_PR,AGE_M_85_89_PR,0))  *(0)     +(if(AGE_M_85_89_LS,AGE_M_85_89_LS,0))  *(0)      +(if(AGE_M_85_89_PS,AGE_M_85_89_PS,0))  *(0)      +(if(AGE_M_85_89_TR,AGE_M_85_89_TR,0))  *(0)     +
+                            (if(AGE_M_90_94_PR,AGE_M_90_94_PR,0))  *(0)     +(if(AGE_M_90_94_LS,AGE_M_90_94_LS,0))  *(0)      +(if(AGE_M_90_94_PS,AGE_M_90_94_PS,0))  *(0)      +(if(AGE_M_90_94_TR,AGE_M_90_94_TR,0))  *(0)     +
+                            (if(AGE_M_95_100_PR,AGE_M_95_100_PR,0))*(0)     +(if(AGE_M_95_100_LS,AGE_M_95_100_LS,0))*(0)      +(if(AGE_M_95_100_PS,AGE_M_95_100_PS,0))*(0)      +(if(AGE_M_95_100_TR,AGE_M_95_100_TR,0))*(0)
+                
+                
+                - omb_m: if(AGEGALL and ISMALE,
+                        cont_regr(1*(-0.934)+temp_omb_1m+temp_omb_2m+temp_omb_3m+temp_omb_4m+AGRO*(0.221)+INDUSTRY*(0.229)+CONSTRUCTION*(-0.00595)+NMAR_SERVICES*(-0.0239)+PRIMARY*(-0.228)+LOWER_SECONDARY*(0.006)+POST_SECONDARY*(-0.0648)+TERTIARY*(-0.0888)+AGE_M_20_24*(0.0714)+AGE_M_25_29*(0.152)+AGE_M_30_34*(0.0648)+AGE_M_35_39*(-0.0403)+AGE_M_40_44*(-0.0973)+AGE_M_45_49*(-0.106)+AGE_M_50_54*(-0.069)+AGE_M_55_59*(0.0159)+AGE_M_60_64*(-0.0255)+AGE_M_65*(-0.161)+AGE_M_66*(-0.172)+AGE_M_67*(-0.162)+AGE_M_68*(-0.139)+AGE_M_69*(-0.122)+AGE_M_70_71*(-0.0876)+AGE_M_72_73*(-0.0228)+AGE_M_74_75*(0.0812)+AGE_M_76_77*(0.157)+AGE_M_78_79*(0.569)+AGE_M_80_84*(0.911)+AGE_M_85_89*(1.240)+AGE_M_90_94*(1.657)+AGE_M_95_100*(2.171)+age*(0.0926)+(age*age)*(-0.00106)),-1)
+                                     
+                - temp_omb_1z: (if(AGE_F_16_19_AGR,AGE_F_16_19_AGR,0))*(0)+(if(AGE_F_16_19_IND,AGE_F_16_19_IND,0))*(0)+(if(AGE_F_16_19_CON,AGE_F_16_19_CON,0))*(0)+(if(AGE_F_16_19_NMAR,AGE_F_16_19_NMAR,0))*(0)+ 
+                            (if(AGE_F_20_24_AGR,AGE_F_20_24_AGR,0))  *(-0.0267) +(if(AGE_F_20_24_IND,AGE_F_20_24_IND,0))  *(0.0892)  +(if(AGE_F_20_24_CON,AGE_F_20_24_CON,0))  *(-0.0664) +(if(AGE_F_20_24_NMAR,AGE_F_20_24_NMAR,0))  *(0.0960) +
+                            (if(AGE_F_25_29_AGR,AGE_F_25_29_AGR,0))  *(-0.168)  +(if(AGE_F_25_29_IND,AGE_F_25_29_IND,0))  *(-0.0120) +(if(AGE_F_25_29_CON,AGE_F_25_29_CON,0))  *(-0.145)  +(if(AGE_F_25_29_NMAR,AGE_F_25_29_NMAR,0))  *(-0.0865)+
+                            (if(AGE_F_30_34_AGR,AGE_F_30_34_AGR,0))  *(-0.114)  +(if(AGE_F_30_34_IND,AGE_F_30_34_IND,0))  *(-0.00791)+(if(AGE_F_30_34_CON,AGE_F_30_34_CON,0))  *(-0.157)  +(if(AGE_F_30_34_NMAR,AGE_F_30_34_NMAR,0))  *(-0.0940)+
+                            (if(AGE_F_35_39_AGR,AGE_F_35_39_AGR,0))  *(-0.0569) +(if(AGE_F_35_39_IND,AGE_F_35_39_IND,0))  *(0.0467)  +(if(AGE_F_35_39_CON,AGE_F_35_39_CON,0))  *(-0.142)  +(if(AGE_F_35_39_NMAR,AGE_F_35_39_NMAR,0))  *(-0.0423)+
+                            (if(AGE_F_40_44_AGR,AGE_F_40_44_AGR,0))  *(-0.0275) +(if(AGE_F_40_44_IND,AGE_F_40_44_IND,0))  *(0.0690)  +(if(AGE_F_40_44_CON,AGE_F_40_44_CON,0))  *(-0.119)  +(if(AGE_F_40_44_NMAR,AGE_F_40_44_NMAR,0))  *(0.00272)+
+                            (if(AGE_F_45_49_AGR,AGE_F_45_49_AGR,0))  *(-0.00446)+(if(AGE_F_45_49_IND,AGE_F_45_49_IND,0))  *(0.0733)  +(if(AGE_F_45_49_CON,AGE_F_45_49_CON,0))  *(-0.0889) +(if(AGE_F_45_49_NMAR,AGE_F_45_49_NMAR,0))  *(0.0422) +
+                            (if(AGE_F_50_54_AGR,AGE_F_50_54_AGR,0))  *(0.0201)  +(if(AGE_F_50_54_IND,AGE_F_50_54_IND,0))  *(0.0667)  +(if(AGE_F_50_54_CON,AGE_F_50_54_CON,0))  *(-0.0482) +(if(AGE_F_50_54_NMAR,AGE_F_50_54_NMAR,0))  *(0.0441) +
+                            (if(AGE_F_55_59_AGR,AGE_F_55_59_AGR,0))  *(0.0481)  +(if(AGE_F_55_59_IND,AGE_F_55_59_IND,0))  *(0.0562)  +(if(AGE_F_55_59_CON,AGE_F_55_59_CON,0))  *(-0.00241)+(if(AGE_F_55_59_NMAR,AGE_F_55_59_NMAR,0))  *(0.0559) +
+                            (if(AGE_F_60_AGR,AGE_F_60_AGR,0))        *(0.0455)  +(if(AGE_F_60_IND,AGE_F_60_IND,0))        *(0.0395)  +(if(AGE_F_60_CON,AGE_F_60_CON,0))        *(0.0288)  +(if(AGE_F_60_NMAR,AGE_F_60_NMAR,0))        *(0.101)  +
+                            (if(AGE_F_61_AGR,AGE_F_61_AGR,0))        *(0.0549)  +(if(AGE_F_61_IND,AGE_F_61_IND,0))        *(0.0440)  +(if(AGE_F_61_CON,AGE_F_61_CON,0))        *(0.0432)  +(if(AGE_F_61_NMAR,AGE_F_61_NMAR,0))        *(0.117)  +
+                            (if(AGE_F_62_AGR,AGE_F_62_AGR,0))        *(0.0247)  +(if(AGE_F_62_IND,AGE_F_62_IND,0))        *(0.0460)  +(if(AGE_F_62_CON,AGE_F_62_CON,0))        *(0.0557)  +(if(AGE_F_62_NMAR,AGE_F_62_NMAR,0))        *(0.172)  +
+                            (if(AGE_F_63_AGR,AGE_F_63_AGR,0))        *(0.00975) +(if(AGE_F_63_IND,AGE_F_63_IND,0))        *(0.0349)  +(if(AGE_F_63_CON,AGE_F_63_CON,0))        *(0.0455)  +(if(AGE_F_63_NMAR,AGE_F_63_NMAR,0))        *(0.221)
+                - temp_omb_2z: (if(AGE_F_64_AGR,AGE_F_64_AGR,0))        *(-0.00115)+(if(AGE_F_64_IND,AGE_F_64_IND,0))        *(-0.00375)+(if(AGE_F_64_CON,AGE_F_64_CON,0))        *(0)       +(if(AGE_F_64_NMAR,AGE_F_64_NMAR,0))        *(0.235)  +
+                            (if(AGE_F_65_AGR,AGE_F_65_AGR,0))        *(-0.0245) +(if(AGE_F_65_IND,AGE_F_65_IND,0))        *(-0.0287) +(if(AGE_F_65_CON,AGE_F_65_CON,0))        *(0)       +(if(AGE_F_65_NMAR,AGE_F_65_NMAR,0))        *(0.230)  +
+                            (if(AGE_F_66_AGR,AGE_F_66_AGR,0))        *(-0.0515) +(if(AGE_F_66_IND,AGE_F_66_IND,0))        *(-0.0494) +(if(AGE_F_66_CON,AGE_F_66_CON,0))        *(0)       +(if(AGE_F_66_NMAR,AGE_F_66_NMAR,0))        *(0.213)  +
+                            (if(AGE_F_67_AGR,AGE_F_67_AGR,0))        *(-0.0209) +(if(AGE_F_67_IND,AGE_F_67_IND,0))        *(-0.0521) +(if(AGE_F_67_CON,AGE_F_67_CON,0))        *(0)       +(if(AGE_F_67_NMAR,AGE_F_67_NMAR,0))        *(0.207)  +
+                            (if(AGE_F_68_AGR,AGE_F_68_AGR,0))        *(-0.0584) +(if(AGE_F_68_IND,AGE_F_68_IND,0))        *(-0.0668) +(if(AGE_F_68_CON,AGE_F_68_CON,0))        *(0)       +(if(AGE_F_68_NMAR,AGE_F_68_NMAR,0))        *(0.215)  +
+                            (if(AGE_F_69_AGR,AGE_F_69_AGR,0))        *(-0.0952) +(if(AGE_F_69_IND,AGE_F_69_IND,0))        *(-0.0661) +(if(AGE_F_69_CON,AGE_F_69_CON,0))        *(0)       +(if(AGE_F_69_NMAR,AGE_F_69_NMAR,0))        *(0.212)  +
+                            (if(AGE_F_70_71_AGR,AGE_F_70_71_AGR,0))  *(-0.109)  +(if(AGE_F_70_71_IND,AGE_F_70_71_IND,0))  *(-0.0872) +(if(AGE_F_70_71_CON,AGE_F_70_71_CON,0))  *(0)       +(if(AGE_F_70_71_NMAR,AGE_F_70_71_NMAR,0))  *(0.212)  +
+                            (if(AGE_F_72_73_AGR,AGE_F_72_73_AGR,0))  *(-0.138)  +(if(AGE_F_72_73_IND,AGE_F_72_73_IND,0))  *(-0.116)  +(if(AGE_F_72_73_CON,AGE_F_72_73_CON,0))  *(0)       +(if(AGE_F_72_73_NMAR,AGE_F_72_73_NMAR,0))  *(0.172)  +
+                            (if(AGE_F_74_75_AGR,AGE_F_74_75_AGR,0))  *(-0.121)  +(if(AGE_F_74_75_IND,AGE_F_74_75_IND,0))  *(-0.111)  +(if(AGE_F_74_75_CON,AGE_F_74_75_CON,0))  *(0)       +(if(AGE_F_74_75_NMAR,AGE_F_74_75_NMAR,0))  *(0.227)  +
+                            (if(AGE_F_76_77_AGR,AGE_F_76_77_AGR,0))  *(0)       +(if(AGE_F_76_77_IND,AGE_F_76_77_IND,0))  *(0)       +(if(AGE_F_76_77_CON,AGE_F_76_77_CON,0))  *(0)       +(if(AGE_F_76_77_NMAR,AGE_F_76_77_NMAR,0))  *(0.197)  +
+                            (if(AGE_F_78_79_AGR,AGE_F_78_79_AGR,0))  *(0)       +(if(AGE_F_78_79_IND,AGE_F_78_79_IND,0))  *(-0.177)  +(if(AGE_F_78_79_CON,AGE_F_78_79_CON,0))  *(0)       +(if(AGE_F_78_79_NMAR,AGE_F_78_79_NMAR,0))  *(0.135)  +
+                            (if(AGE_F_80_84_AGR,AGE_F_80_84_AGR,0))  *(0)       +(if(AGE_F_80_84_IND,AGE_F_80_84_IND,0))  *(-0.293)  +(if(AGE_F_80_84_CON,AGE_F_80_84_CON,0))  *(0)       +(if(AGE_F_80_84_NMAR,AGE_F_80_84_NMAR,0))  *(0.0899) +
+                            (if(AGE_F_85_89_AGR,AGE_F_85_89_AGR,0))  *(0)       +(if(AGE_F_85_89_IND,AGE_F_85_89_IND,0))  *(-0.533)  +(if(AGE_F_85_89_CON,AGE_F_85_89_CON,0))  *(0)       +(if(AGE_F_85_89_NMAR,AGE_F_85_89_NMAR,0))  *(-0.0202)+
+                            (if(AGE_F_90_94_AGR,AGE_F_90_94_AGR,0))  *(0)       +(if(AGE_F_90_94_IND,AGE_F_90_94_IND,0))  *(0)       +(if(AGE_F_90_94_CON,AGE_F_90_94_CON,0))  *(0)       +(if(AGE_F_90_94_NMAR,AGE_F_90_94_NMAR,0))  *(-1.238) +
+                            (if(AGE_F_95_100_AGR,AGE_F_95_100_AGR,0))*(0)       +(if(AGE_F_95_100_IND,AGE_F_95_100_IND,0))*(0)       +(if(AGE_F_95_100_CON,AGE_F_95_100_CON,0))*(0)       +(if(AGE_F_95_100_NMAR,AGE_F_95_100_NMAR,0))*(0)
+                
+                - temp_omb_3z: (if(AGE_F_16_19_PR,AGE_F_16_19_PR,0))*(0)+(if(AGE_F_16_19_LS,AGE_F_16_19_LS,0))*(0)+(if(AGE_F_16_19_PS,AGE_F_16_19_PS,0))*(0)+(if(AGE_F_16_19_TR,AGE_F_16_19_TR,0))*(0)+
+                            (if(AGE_F_20_24_PR,AGE_F_20_24_PR,0))  *(0.0536)  +(if(AGE_F_20_24_LS,AGE_F_20_24_LS,0))  *(-0.127) +(if(AGE_F_20_24_PS,AGE_F_20_24_PS,0))  *(0.0835) +(if(AGE_F_20_24_TR,AGE_F_20_24_TR,0))  *(0.0815)+
+                            (if(AGE_F_25_29_PR,AGE_F_25_29_PR,0))  *(-0.122)  +(if(AGE_F_25_29_LS,AGE_F_25_29_LS,0))  *(-0.274) +(if(AGE_F_25_29_PS,AGE_F_25_29_PS,0))  *(0.112)  +(if(AGE_F_25_29_TR,AGE_F_25_29_TR,0))  *(0.362) +
+                            (if(AGE_F_30_34_PR,AGE_F_30_34_PR,0))  *(-0.115)  +(if(AGE_F_30_34_LS,AGE_F_30_34_LS,0))  *(-0.258) +(if(AGE_F_30_34_PS,AGE_F_30_34_PS,0))  *(0.129)  +(if(AGE_F_30_34_TR,AGE_F_30_34_TR,0))  *(0.357) +
+                            (if(AGE_F_35_39_PR,AGE_F_35_39_PR,0))  *(-0.149)  +(if(AGE_F_35_39_LS,AGE_F_35_39_LS,0))  *(-0.269) +(if(AGE_F_35_39_PS,AGE_F_35_39_PS,0))  *(0.0942) +(if(AGE_F_35_39_TR,AGE_F_35_39_TR,0))  *(0.419) +
+                            (if(AGE_F_40_44_PR,AGE_F_40_44_PR,0))  *(-0.178)  +(if(AGE_F_40_44_LS,AGE_F_40_44_LS,0))  *(-0.274) +(if(AGE_F_40_44_PS,AGE_F_40_44_PS,0))  *(0.105)  +(if(AGE_F_40_44_TR,AGE_F_40_44_TR,0))  *(0.489) +
+                            (if(AGE_F_45_49_PR,AGE_F_45_49_PR,0))  *(-0.178)  +(if(AGE_F_45_49_LS,AGE_F_45_49_LS,0))  *(-0.269) +(if(AGE_F_45_49_PS,AGE_F_45_49_PS,0))  *(0.0742) +(if(AGE_F_45_49_TR,AGE_F_45_49_TR,0))  *(0.565) +
+                            (if(AGE_F_50_54_PR,AGE_F_50_54_PR,0))  *(-0.138)  +(if(AGE_F_50_54_LS,AGE_F_50_54_LS,0))  *(-0.269) +(if(AGE_F_50_54_PS,AGE_F_50_54_PS,0))  *(0.0640) +(if(AGE_F_50_54_TR,AGE_F_50_54_TR,0))  *(0.623) +
+                            (if(AGE_F_55_59_PR,AGE_F_55_59_PR,0))  *(-0.117)  +(if(AGE_F_55_59_LS,AGE_F_55_59_LS,0))  *(-0.270) +(if(AGE_F_55_59_PS,AGE_F_55_59_PS,0))  *(0.0240) +(if(AGE_F_55_59_TR,AGE_F_55_59_TR,0))  *(0.669) +
+                            (if(AGE_F_60_PR,AGE_F_60_PR,0))        *(-0.130)  +(if(AGE_F_60_LS,AGE_F_60_LS,0))        *(-0.281) +(if(AGE_F_60_PS,AGE_F_60_PS,0))        *(0.0537) +(if(AGE_F_60_TR,AGE_F_60_TR,0))        *(0.709) +
+                            (if(AGE_F_61_PR,AGE_F_61_PR,0))        *(-0.122)  +(if(AGE_F_61_LS,AGE_F_61_LS,0))        *(-0.282) +(if(AGE_F_61_PS,AGE_F_61_PS,0))        *(0.0821) +(if(AGE_F_61_TR,AGE_F_61_TR,0))        *(0.684) +
+                            (if(AGE_F_62_PR,AGE_F_62_PR,0))        *(-0.0943) +(if(AGE_F_60_LS,AGE_F_62_LS,0))        *(-0.271) +(if(AGE_F_62_PS,AGE_F_62_PS,0))        *(0.0571) +(if(AGE_F_62_TR,AGE_F_62_TR,0))        *(0.664) +
+                            (if(AGE_F_63_PR,AGE_F_63_PR,0))        *(-0.0441) +(if(AGE_F_60_LS,AGE_F_63_LS,0))        *(-0.243) +(if(AGE_F_63_PS,AGE_F_63_PS,0))        *(0.0988) +(if(AGE_F_63_TR,AGE_F_63_TR,0))        *(0.613)
+                - temp_omb_4z: (if(AGE_F_64_PR,AGE_F_64_PR,0))        *(-0.00150)+(if(AGE_F_60_LS,AGE_F_64_LS,0))        *(-0.213) +(if(AGE_F_64_PS,AGE_F_64_PS,0))        *(0.0004) +(if(AGE_F_64_TR,AGE_F_64_TR,0))        *(0.587) +
+                            (if(AGE_F_65_PR,AGE_F_65_PR,0))        *(0.0369)  +(if(AGE_F_65_LS,AGE_F_65_LS,0))        *(-0.190) +(if(AGE_F_65_PS,AGE_F_65_PS,0))        *(0.0067) +(if(AGE_F_65_TR,AGE_F_65_TR,0))        *(0.560) +
+                            (if(AGE_F_66_PR,AGE_F_66_PR,0))        *(0.0641)  +(if(AGE_F_66_LS,AGE_F_66_LS,0))        *(-0.170) +(if(AGE_F_66_PS,AGE_F_66_PS,0))        *(-0.0649)+(if(AGE_F_66_TR,AGE_F_66_TR,0))        *(0.535) +
+                            (if(AGE_F_67_PR,AGE_F_67_PR,0))        *(0.0809)  +(if(AGE_F_67_LS,AGE_F_67_LS,0))        *(-0.149) +(if(AGE_F_67_PS,AGE_F_67_PS,0))        *(0.256)  +(if(AGE_F_67_TR,AGE_F_67_TR,0))        *(0.517) +
+                            (if(AGE_F_68_PR,AGE_F_68_PR,0))        *(0.0779)  +(if(AGE_F_68_LS,AGE_F_68_LS,0))        *(-0.142) +(if(AGE_F_68_PS,AGE_F_68_PS,0))        *(0.00814)+(if(AGE_F_68_TR,AGE_F_68_TR,0))        *(0.486) +
+                            (if(AGE_F_69_PR,AGE_F_69_PR,0))        *(0.0973)  +(if(AGE_F_69_LS,AGE_F_69_LS,0))        *(-0.123) +(if(AGE_F_69_PS,AGE_F_69_PS,0))        *(-0.465) +(if(AGE_F_69_TR,AGE_F_69_TR,0))        *(0.447) +
+                            (if(AGE_F_70_71_PR,AGE_F_70_71_PR,0))  *(0.113)   +(if(AGE_F_70_71_LS,AGE_F_70_71_LS,0))  *(-0.119) +(if(AGE_F_70_71_PS,AGE_F_70_71_PS,0))  *(0)      +(if(AGE_F_70_71_TR,AGE_F_70_71_TR,0))  *(0.396) +
+                            (if(AGE_F_72_73_PR,AGE_F_72_73_PR,0))  *(0.0798)  +(if(AGE_F_72_73_LS,AGE_F_72_73_LS,0))  *(-0.0846)+(if(AGE_F_72_73_PS,AGE_F_72_73_PS,0))  *(-0.145) +(if(AGE_F_72_73_TR,AGE_F_72_73_TR,0))  *(0.331) +
+                            (if(AGE_F_74_75_PR,AGE_F_74_75_PR,0))  *(0.0273)  +(if(AGE_F_74_75_LS,AGE_F_74_75_LS,0))  *(-0.227) +(if(AGE_F_74_75_PS,AGE_F_74_75_PS,0))  *(-0.226) +(if(AGE_F_74_75_TR,AGE_F_74_75_TR,0))  *(0.261) +
+                            (if(AGE_F_76_77_PR,AGE_F_76_77_PR,0))  *(0)       +(if(AGE_F_76_77_LS,AGE_F_76_77_LS,0))  *(-0.341) +(if(AGE_F_76_77_PS,AGE_F_76_77_PS,0))  *(-0.383) +(if(AGE_F_76_77_TR,AGE_F_76_77_TR,0))  *(0.0656)+
+                            (if(AGE_F_78_79_PR,AGE_F_78_79_PR,0))  *(0)       +(if(AGE_F_78_79_LS,AGE_F_78_79_LS,0))  *(0)      +(if(AGE_F_78_79_PS,AGE_F_78_79_PS,0))  *(0)      +(if(AGE_F_78_79_TR,AGE_F_78_79_TR,0))  *(0.144) +
+                            (if(AGE_F_80_84_PR,AGE_F_80_84_PR,0))  *(0)       +(if(AGE_F_80_84_LS,AGE_F_80_84_LS,0))  *(0)      +(if(AGE_F_80_84_PS,AGE_F_80_84_PS,0))  *(0)      +(if(AGE_F_80_84_TR,AGE_F_80_84_TR,0))  *(-0.585)+
+                            (if(AGE_F_85_89_PR,AGE_F_85_89_PR,0))  *(0)       +(if(AGE_F_85_89_LS,AGE_F_85_89_LS,0))  *(0)      +(if(AGE_F_85_89_PS,AGE_F_85_89_PS,0))  *(0)      +(if(AGE_F_85_89_TR,AGE_F_85_89_TR,0))  *(0)     +
+                            (if(AGE_F_90_94_PR,AGE_F_90_94_PR,0))  *(0)       +(if(AGE_F_90_94_LS,AGE_F_90_94_LS,0))  *(0)      +(if(AGE_F_90_94_PS,AGE_F_90_94_PS,0))  *(0)      +(if(AGE_F_90_94_TR,AGE_F_90_94_TR,0))  *(0)     +
+                            (if(AGE_F_95_100_PR,AGE_F_95_100_PR,0))*(0)       +(if(AGE_F_95_100_LS,AGE_F_95_100_LS,0))*(0)      +(if(AGE_F_95_100_PS,AGE_F_95_100_PS,0))*(0)      +(if(AGE_F_95_100_TR,AGE_F_95_100_TR,0))*(0)
+
+                
+                - omb_f: if(AGEGALL and ISFEMALE,
+                        cont_regr(1*(-0.741)+temp_omb_1z+temp_omb_2z+temp_omb_3z+temp_omb_4z+AGRO*(0.0307)+INDUSTRY*(0.112)+CONSTRUCTION*(-0.0220)+NMAR_SERVICES*(0.105)+PRIMARY*(-0.135)+LOWER_SECONDARY*(0.0937)+POST_SECONDARY*(0)+TERTIARY*(0.00298)+AGE_F_20_24*(0.0587)+AGE_F_25_29*(0.112)+AGE_F_30_34*(-0.00653)+AGE_F_35_39*(-0.0758)+AGE_F_40_44*(-0.107)+AGE_F_45_49*(-0.155)+AGE_F_50_54*(-0.189)+AGE_F_55_59*(-0.191)+AGE_F_60*(-0.208)+AGE_F_61*(-0.258)+AGE_F_62*(-0.345)+AGE_F_63*(-0.444)+AGE_F_64*(-0.504)+AGE_F_65*(-0.542)+AGE_F_66*(-0.563)+AGE_F_67*(-0.580)+AGE_F_68*(-0.582)+AGE_F_69*(-0.592)+AGE_F_70_71*(-0.580)+AGE_F_72_73*(-0.545)+AGE_F_74_75*(-0.494)+AGE_F_76_77*(-0.263)+AGE_F_78_79*(-0.279)+AGE_F_80_84*(0.560)+AGE_F_85_89*(0.311)+AGE_F_90_94*(1.700)+AGE_F_95_100*(0.267)+age*(0.0677)+(age*age)*(-0.000663)),-1)
+            
+                - omb: if(ISMALE, omb_m, omb_f)
+            
+            # Minimum OMB na 0.3 - uroven minimalnej mzdy je 0,55 ale nemusi byt cely rok  
+                - omb: if(IS_EMPLOYED, max(0.3, omb), 0)
+                
+            # OMB pre matky na urovni minimalnej mzdy - 60% priemernej mzdy spred dvoch rokov = približne 55% priemernej mzdy v tomto roku
+                - omb: if(MOTHER, 0.55, omb)
+                
+            # Normalizácia OMB na priemer 1
+            #    - omb: if(IS_EMPLOYED, omb / MEAN_OMB, 0)
+                
+            # Do POMB sa zapocitavaju len obdobia po 1984 (period 2060 pri baseyear 2022)
+                - omb: if(period >= 2060, 0, omb)
+                #dat to cez period namiesto historical_year
+                
+            # Kumulacia OMB pre vypocet POMB
+                - cumulative_omb: if(period == base_year, 0, if(IS_EMPLOYED, cumulative_omb + omb, cumulative_omb))
+
+            # Za náhradné doby pripočítavam 0,3 OMB - pridam to do pension ako kalibraciu
+            #    - cumulative_omb: if((IS_DISABLED and period >= 2037)
+            #           or (IS_STUDENT and age > GRADUATIONAGE_P and period >= 2040) 
+            #           or (IS_UNEMPLOYED and period >= 2041), 
+            #           cumulative_omb + 0.3, cumulative_omb)
+                
+            #update_mean_omb():
+            #    - mean_omb_temp: sum(omb * IS_EMPLOYED) / sum(IS_EMPLOYED)
+            #    - csv(period, dump(mean_omb_temp), fname='align_omb.csv', mode='a')
+            
+            # ODP s nahradnymi dobami    
+            # period to historical_year 2037 - 2007, 2040 - 2004, 2041 - 2003
+            pridat_odp():
+                - odp: if(period == base_year, 0, 
+                       if(IS_EMPLOYED or (IS_DISABLED and period >= 2037)
+                       or (IS_STUDENT and age > GRADUATIONAGE_P and period >= 2040) 
+                       or (IS_UNEMPLOYED and period >= 2041), 
+                       odp + 1, odp))
+                       
+                - roky_pomb: if(period == base_year, 0, if(IS_EMPLOYED, roky_pomb + 1, roky_pomb))
+                - roky_pomb: if(period >= 2060, roky_pomb + 0, roky_pomb)
+               
+            # Toto prerobit aby to vypluvalo len dochodkove parametre. Potom sa moze csv_all vypnut
+            csv_empl():
+               - csv(period, dump(period, sex, status, omb, cumulative_omb), fname='emplH2022.csv', mode='a')
+               - csv(period, dump(period, sex, status, omb, cumulative_omb, filter=ISFEMALE==True), fname='emplH2022_F.csv', mode='a')
+               - csv(period, dump(period, sex, status, omb, cumulative_omb, filter=ISFEMALE==False), fname='emplH2022_M.csv', mode='a')
+               
+            csv_all():
+               - csv(period, dump(), fname='simulation_retospective_new100.csv', mode='a')
+               
+            csv_input():
+               - csv(period, dump(period, sex, status, nace, country_b, hatlev5, isco, age, age_float, omb, cumulative_omb, odp, roky_pomb, vzdelanie, ekon_status, pohlavie, vek, rok_priz, pocet_deti), fname='simulation_retrospective_test.csv', mode='a')
+            #   - csv(period, dump(period, sex, status, nace, country_b, hatlev5, isco, age, omb, cumulative_omb, odp, roky_pomb, vzdelanie, ekon_status, pohlavie, vek), fname='simulation_retrospective_debug.csv', mode='a')
+ 
+               
+simulation:
+   init: 
+        - person: [init_variable, init_define, init_disab]
+        - person: [initialize_historical_year]
+   processes:   
+        #- person: [historical_year, ageing, rebirth, maternity, immigration, statusing, study, retirement, disability, inactivity, economic_activity, employment_nace_score, employment, unidentified, wages, update_mean_omb, pridat_odp] 
+         - person: [historical_year, ageing, maternity, immigration, statusing, study, retirement, disability, inactivity, economic_activity, employment_nace_score, employment, unidentified, wages, pridat_odp] 
+        #- person: [historical_year, ageing, rebirth, maternity, immigration, statusing, study, retirement, disability, inactivity, economic_activity, employment_nace_score, employment, unidentified]        
+        #- person: [csv_all]
+        #- person: [csv_empl]
+         - person: [csv_input]
+   
+   input:
+        path:   "INPUT_DATA"
+        file:   "cenzus2021.h5"
+
+   output:
+        path:   "OUTPUT_DATA"
+        file:   "simulation_retospective.h5"
+        
+   start_period: 2022
+    
+   periods: 50
+   random_seed: 1                
+            

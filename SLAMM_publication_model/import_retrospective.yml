@@ -1,0 +1,46 @@
+#ZMENIL SOM GLOBAL!!!!!
+# Zjednodušil som zamestnanost do 5 sektorov. A davam konštantný počet zamestnaných v 5 sektoroch pre rok ktorý tam bol (asi 2021), tento global treba podoplnať relanymi čislami (historickými). Do budúčna predpokladáme konštantnú zamestnanosť. 
+# Agregaciu z NACE na 5 sektorov nájdeš niekde v Stata kódoch. Pozor počty zamestnaných sú delené 5timi.
+# AWG/AR2024 income-side baseline copy.
+# Employment demand directly follows the AWG/Ageing Report 2024 EM(T) 15-74
+# series for the full available projection horizon.
+ 
+output: INPUT_DATA/prospective_input.h5
+globals:
+    periodic:
+        path: INPUT_DATA/global_5_41_sample_20_awg.csv 
+        transposed: True
+      
+entities:
+    person:
+       path: INPUT_DATA\simulation_retospective_calibrated.csv
+       fields:
+            - sex: int
+            - status: int
+            - nace: int
+            - country_b: int
+            - hatlev5: int
+            - isco: int
+            - age: int
+            - omb: float
+            - roky_pomb: int
+            - vzdelanie: int
+            - ekon_status: int
+            - pohlavie: int
+            - vek: int
+            - cumulative_omb: float
+            - odp: int
+            - rok_priz: int
+            - pension: float
+            - pension_total: float
+            - pension_oldage: float
+            - pension_survivor: float
+            - pension_widow: float
+            - pension_widower: float
+            - pension_oldage_full: float
+            - pension_survivor_full: float
+            - pension_has_survivor: float
+            - pension_has_overlap: float
+
+            
+            
