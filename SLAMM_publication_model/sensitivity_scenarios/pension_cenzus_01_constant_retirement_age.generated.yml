@@ -1,0 +1,2116 @@
+import: 
+     - premenne_dopyt.yml
+     - demo_cenzus_2021_01.yml
+     - edu_cenzus_2021_01.yml
+- sensitivity_scenarios/ea_cenzus_2021_01_constant_retirement_age.generated.yml
+     - empl_cenzus_2021_01.yml
+
+# AWG/AR2024 income-side baseline copy. The baseline prospective input is built
+# from global_5_41_sample_20_awg.csv, which directly follows the AWG/Ageing
+# Report 2024 EM(T) 15-74 employment series.
+     
+################################################################################
+# Prospective simulation #####################################################
+################################################################################
+
+## TO DO: nace 5 agregovat qual do jednej skupiny
+
+globals: 
+     base_year: 2022
+     sigma_ln_disab_pension: 0.40705
+     disability_new_pension_base_adh: 15.13
+     survivor_new_benefit_factor: 1.10
+     survivor_benefit_uplift_factor: 0.89
+     disability_benefit_uplift_factor: 1.13
+     oldage_non_covered_factor: 0.53
+     minimum_pension_takeup_rate: 0.906
+     minimum_pension_benefit_factor: 0.80
+     older_worker_omb_floor_factor_65_66: 0.75
+     older_worker_omb_floor_factor_67_68: 0.65
+     older_worker_omb_floor_factor_69_plus: 0.55
+     pillar2_mandatory_entry_rate: 0.97
+     pillar2_return_rate: 0.04251
+     pillar2_first_pillar_reduction_rate: 0.1758241758241758
+     oldage_insurance_contrib_rate: 0.18
+     disability_insurance_contrib_rate: 0.06
+     reserve_fund_contrib_rate: 0.0475
+     pillar2_contrib_rate_pre_2025: 0.055
+     pillar2_contrib_rate_2025_2026: 0.0575
+     pillar2_contrib_rate: 0.06
+     # Recalibrated to the 2022 SLOPEM contribution totals after aligning the
+     # contributor share to the AWG/SLOPEM value of 0.84049.
+     oldage_contribution_effective_collection_factor: 0.8811981570120886
+     disability_contribution_effective_collection_factor: 0.8474519913134346
+     reserve_fund_contribution_effective_collection_factor: 0.8829994017742439
+     pillar2_contribution_effective_collection_factor: 1.1011127893296353
+     social_insurance_contribution_effective_collection_factor: 0.8705883628056315
+     # AWG/SLOPEM contributors as a fixed share of total employment.
+     social_contribution_payer_ratio: 0.84049
+     social_contribution_payer_baseyear_alignment_ratio: 0.84049
+     social_contribution_payer_future_alignment_ratio: 0.84049
+
+     align_omb:
+         path: align_omb.csv
+         fields:
+         - PERIOD: int
+         - MEAN_OMB: float
+     
+
+     awg_participation:
+         path: awg_participation_rates_no_reform.csv
+         fields:
+            - PERIOD: int
+            - PR_M_15: float
+            - PR_M_16: float
+            - PR_M_17: float
+            - PR_M_18: float
+            - PR_M_19: float
+            - PR_M_20: float
+            - PR_M_21: float
+            - PR_M_22: float
+            - PR_M_23: float
+            - PR_M_24: float
+            - PR_M_25: float
+            - PR_M_26: float
+            - PR_M_27: float
+            - PR_M_28: float
+            - PR_M_29: float
+            - PR_M_30: float
+            - PR_M_31: float
+            - PR_M_32: float
+            - PR_M_33: float
+            - PR_M_34: float
+            - PR_M_35: float
+            - PR_M_36: float
+            - PR_M_37: float
+            - PR_M_38: float
+            - PR_M_39: float
+            - PR_M_40: float
+            - PR_M_41: float
+            - PR_M_42: float
+            - PR_M_43: float
+            - PR_M_44: float
+            - PR_M_45: float
+            - PR_M_46: float
+            - PR_M_47: float
+            - PR_M_48: float
+            - PR_M_49: float
+            - PR_M_50: float
+            - PR_M_51: float
+            - PR_M_52: float
+            - PR_M_53: float
+            - PR_M_54: float
+            - PR_M_55: float
+            - PR_M_56: float
+            - PR_M_57: float
+            - PR_M_58: float
+            - PR_M_59: float
+            - PR_M_60: float
+            - PR_M_61: float
+            - PR_M_62: float
+            - PR_M_63: float
+            - PR_M_64: float
+            - PR_M_65: float
+            - PR_M_66: float
+            - PR_M_67: float
+            - PR_M_68: float
+            - PR_M_69: float
+            - PR_M_70: float
+            - PR_M_71: float
+            - PR_M_72: float
+            - PR_M_73: float
+            - PR_M_74: float
+            - PR_F_15: float
+            - PR_F_16: float
+            - PR_F_17: float
+            - PR_F_18: float
+            - PR_F_19: float
+            - PR_F_20: float
+            - PR_F_21: float
+            - PR_F_22: float
+            - PR_F_23: float
+            - PR_F_24: float
+            - PR_F_25: float
+            - PR_F_26: float
+            - PR_F_27: float
+            - PR_F_28: float
+            - PR_F_29: float
+            - PR_F_30: float
+            - PR_F_31: float
+            - PR_F_32: float
+            - PR_F_33: float
+            - PR_F_34: float
+            - PR_F_35: float
+            - PR_F_36: float
+            - PR_F_37: float
+            - PR_F_38: float
+            - PR_F_39: float
+            - PR_F_40: float
+            - PR_F_41: float
+            - PR_F_42: float
+            - PR_F_43: float
+            - PR_F_44: float
+            - PR_F_45: float
+            - PR_F_46: float
+            - PR_F_47: float
+            - PR_F_48: float
+            - PR_F_49: float
+            - PR_F_50: float
+            - PR_F_51: float
+            - PR_F_52: float
+            - PR_F_53: float
+            - PR_F_54: float
+            - PR_F_55: float
+            - PR_F_56: float
+            - PR_F_57: float
+            - PR_F_58: float
+            - PR_F_59: float
+            - PR_F_60: float
+            - PR_F_61: float
+            - PR_F_62: float
+            - PR_F_63: float
+            - PR_F_64: float
+            - PR_F_65: float
+            - PR_F_66: float
+            - PR_F_67: float
+            - PR_F_68: float
+            - PR_F_69: float
+            - PR_F_70: float
+            - PR_F_71: float
+            - PR_F_72: float
+            - PR_F_73: float
+            - PR_F_74: float
+     edutable:
+         path: edu_level.csv
+         fields:
+         - PERIOD: int
+         - PL: float
+         - LSL: float
+         - HSL: float
+         - PSL: float
+         - TL: float
+         # input global variables - retirement age, average wage, share of unemployment rate and elasticity of inactivity              
+     globaltable:
+         path: globaltable_slopem_indexed_2024_constant_retirement_age.csv 
+         transposed: True 
+         fields:
+            - PERIOD: int
+            - MALE_RA: float
+            - FEMALE_RA_0: float 
+            - FEMALE_RA_1: float 
+            - FEMALE_RA_2: float 
+            - FEMALE_RA_3_4: float 
+            - FEMALE_RA_5: float 
+            - W_avg: float
+            - MONTHLY_AVG_WAGE: float
+            - SOCIAL_INSURANCE_CONTRIB_RATE: float
+            - unem_rate: float
+            - inac_elas: float
+            - VALORIZACIA: float
+            - PRVA_VALORIZACIA: float
+            - MIMORIADNA: float
+            - REAL_AVG_OLDAGE_PENSION: float
+            - ADH: float
+            - SUBSISTENCE_MINIMUM: float
+            - MATERIAL_NEED_BENEFIT: float
+            - STANDALONE_SURVIVOR_BENEFIT_FACTOR: float
+
+entities:
+    person:
+        fields:
+            # Maternity
+            - maternity: {type: bool, initialdata: False}
+
+            # Pension rights
+            - omb_m: {type: float, initialdata: False}
+            - omb_f: {type: float, initialdata: False}
+            - omb: {type: float, initialdata: True}
+            - nominal_wage: {type: float, initialdata: False}
+            - last_nominal_wage: {type: float, initialdata: False}
+            - last_wage_level: {type: float, initialdata: False}
+            - pays_social_contributions_score: {type: float, initialdata: False}
+            - pays_social_contributions: {type: bool, initialdata: False}
+            - social_insurance_contribution: {type: float, initialdata: False}
+            - oldage_insurance_contribution: {type: float, initialdata: False}
+            - disability_insurance_contribution: {type: float, initialdata: False}
+            - reserve_fund_contribution: {type: float, initialdata: False}
+            - pension_relevant_contribution: {type: float, initialdata: False}
+            - pillar2_contribution: {type: float, initialdata: False}
+            - first_pillar_oldage_contribution: {type: float, initialdata: False}
+            - cumulative_omb: {type: float, initialdata: True}
+            - pomb: {type: float, initialdata: False}
+            - odp: {type: int, initialdata: True}
+            - odp_pension: {type: float, initialdata: False}
+            - roky_pomb: {type: int, initialdata: True}
+            - roky_pomb_for_calc: {type: float, initialdata: False}
+            - cumulative_omb_sk: {type: float, initialdata: False}
+            - roky_pomb_sk: {type: int, initialdata: False}
+            - roky_pomb_sk_for_calc: {type: float, initialdata: False}
+            - pomb_sk: {type: float, initialdata: False}
+            - odp_sk: {type: int, initialdata: False}
+            - eu_pension_proration: {type: float, initialdata: False}
+            - pension_new_full_eu: {type: float, initialdata: False}
+            - mean_omb_temp: {type: float, initialdata: False}
+            
+            # Pension takeup
+            - pensioner: {type: bool, initialdata: False}
+            - pension: {type: float, initialdata: True}
+            - pension_total: {type: float, initialdata: True}
+            - pension_oldage: {type: float, initialdata: True}
+            - pension_survivor: {type: float, initialdata: True}
+            - pension_widow: {type: float, initialdata: True}
+            - pension_widower: {type: float, initialdata: True}
+            - pension_oldage_full: {type: float, initialdata: True}
+            - pension_survivor_full: {type: float, initialdata: True}
+            - pension_has_survivor: {type: float, initialdata: True}
+            - pension_has_overlap: {type: float, initialdata: True}
+            - survivor_pension_score: {type: float, initialdata: False}
+            - survivor_alignment_age: {type: int, initialdata: False}
+            - survivor_pension_stock: {type: bool, initialdata: False}
+            - survivor_pension_award: {type: bool, initialdata: False}
+            - survivor_pension_amount: {type: float, initialdata: False}
+            - survivor_flat_award_amount: {type: float, initialdata: False}
+            - survivor_donor_base: {type: float, initialdata: False}
+            - male_deceased_survivor_donor_base: {type: float, initialdata: False}
+            - female_deceased_survivor_donor_base: {type: float, initialdata: False}
+            - standalone_survivor: {type: bool, initialdata: False}
+            - standalone_survivor_score: {type: float, initialdata: False}
+            - standalone_survivor_alignment_age: {type: int, initialdata: False}
+            - standalone_survivor_stock: {type: bool, initialdata: False}
+            - standalone_survivor_award: {type: bool, initialdata: False}
+            - standalone_survivor_amount: {type: float, initialdata: False}
+            - pension_new: {type: float, initialdata: False}
+            - replacement_rate: {type: float, initialdata: False}
+            - benefit_ratio: {type: float, initialdata: False}
+            - pension_early: {type: float, initialdata: False}
+            - pension_takeup: {type: float, initialdata: False}
+            - pension_calib_factor: {type: float, initialdata: False}
+            - pension_disab: {type: float, initialdata: False}
+            - disability_oldage_pension: {type: float, initialdata: False}
+            - disability_to_oldage: {type: bool, initialdata: False}
+            - minimum_pension_multiplier: {type: float, initialdata: False}
+            - minimum_pension_amount: {type: float, initialdata: False}
+            - minimum_pension_eligible: {type: bool, initialdata: False}
+            - minimum_pension_score: {type: float, initialdata: False}
+            - minimum_pension_benefit: {type: float, initialdata: False}
+            - material_need_pension_benefit: {type: float, initialdata: False}
+            - material_need_oldage_reclass_score: {type: float, initialdata: False}
+            - material_need_oldage_reclass: {type: bool, initialdata: False}
+            
+            # Second pension pillar
+            - pillar2_saver: {type: bool, initialdata: False}
+            - pillar2_saver_score: {type: float, initialdata: False}
+            - pillar2_entry_year: {type: int, initialdata: False}
+            - pillar2_entry: {type: bool, initialdata: False}
+            - pillar2_entry_score: {type: float, initialdata: False}
+            - pillar2_return: {type: bool, initialdata: False}
+            - pillar2_return_score: {type: float, initialdata: False}
+            - pillar2_years: {type: float, initialdata: False}
+            - pillar2_pension_base: {type: float, initialdata: False}
+            - pillar2_pension_reduction: {type: float, initialdata: False}
+    
+            - disab_ln_score: {type: float, initialdata: False}
+            - disab_pension_pred: {type: float, initialdata: False}
+
+            # Pension mapping
+            - rok_priz: {type: int, initialdata: True}
+            - pohl: {type: int, initialdata: False}
+            - ageband_pens: {type: int, initialdata: False}
+            - prizband: {type: int, initialdata: False}
+            - obd_band: {type: int, initialdata: False}
+            - pomb_band: {type: int, initialdata: False}
+            - kids_band: {type: int, initialdata: False}
+            - min_flag: {type: bool, initialdata: False}
+            - cell: {type: int, initialdata: False}
+            
+        macros:
+            UNSET: -1
+
+            ISMALE: sex == 1
+            ISFEMALE: sex == 2 
+
+            AGEG16: age>=16 and age<=19
+            AGEG17: age>=15 and age<=19
+            AGEG22: age>=20 and age<=24
+            AGEG27: age>=25 and age<=29
+            AGEG32: age>=30 and age<=34
+            AGEG37: age>=35 and age<=39
+            AGEG42: age>=40 and age<=44
+            AGEG47: age>=45 and age<=49
+            AGEG52: age>=50 and age<=54
+            AGEG57: age>=55 and age<=59
+            AGEG62: age>=60 and age<=64
+            AGEG67: age>=65 and age<=69
+            AGEGALL: age>=16 and age<=64
+            WAGE_AGE: age>=16 and age<=74
+
+            AGE_M_16_19:  age>=16  and age<=19  and pohlavie==1
+            AGE_M_20_24:  age>=20  and age<=24  and pohlavie==1
+            AGE_M_25_29:  age>=25  and age<=29  and pohlavie==1
+            AGE_M_30_34:  age>=30  and age<=34  and pohlavie==1
+            AGE_M_35_39:  age>=35  and age<=39  and pohlavie==1
+            AGE_M_40_44:  age>=40  and age<=44  and pohlavie==1
+            AGE_M_45_49:  age>=45  and age<=49  and pohlavie==1
+            AGE_M_50_54:  age>=50  and age<=54  and pohlavie==1
+            AGE_M_55_59:  age>=55  and age<=59  and pohlavie==1
+            AGE_M_60_64:  age>=60  and age<=64  and pohlavie==1
+
+            AGE_M_65:     age==65               and pohlavie==1
+            AGE_M_66:     age==66               and pohlavie==1
+            AGE_M_67:     age==67               and pohlavie==1
+            AGE_M_68:     age==68               and pohlavie==1
+            AGE_M_69:     age==69               and pohlavie==1
+
+            AGE_M_70_71:  age>=70  and age<=71  and pohlavie==1
+            AGE_M_72_73:  age>=72  and age<=73  and pohlavie==1
+            AGE_M_74_75:  age>=74  and age<=75  and pohlavie==1
+            AGE_M_76_77:  age>=76  and age<=77  and pohlavie==1
+            AGE_M_78_79:  age>=78  and age<=79  and pohlavie==1
+
+            AGE_M_80_84:  age>=80  and age<=84  and pohlavie==1
+            AGE_M_85_89:  age>=85  and age<=89  and pohlavie==1
+            AGE_M_90_94:  age>=90  and age<=94  and pohlavie==1
+            AGE_M_95_100: age>=95  and age<=100 and pohlavie==1
+
+            AGE_F_16_19:  age>=16  and age<=19  and pohlavie==2
+            AGE_F_20_24:  age>=20  and age<=24  and pohlavie==2
+            AGE_F_25_29:  age>=25  and age<=29  and pohlavie==2
+            AGE_F_30_34:  age>=30  and age<=34  and pohlavie==2
+            AGE_F_35_39:  age>=35  and age<=39  and pohlavie==2
+            AGE_F_40_44:  age>=40  and age<=44  and pohlavie==2
+            AGE_F_45_49:  age>=45  and age<=49  and pohlavie==2
+            AGE_F_50_54:  age>=50  and age<=54  and pohlavie==2
+            AGE_F_55_59:  age>=55  and age<=59  and pohlavie==2
+
+            AGE_F_60:     age==60               and pohlavie==2
+            AGE_F_61:     age==61               and pohlavie==2
+            AGE_F_62:     age==62               and pohlavie==2
+            AGE_F_63:     age==63               and pohlavie==2
+            AGE_F_64:     age==64               and pohlavie==2
+            AGE_F_65:     age==65               and pohlavie==2
+            AGE_F_66:     age==66               and pohlavie==2
+            AGE_F_67:     age==67               and pohlavie==2
+            AGE_F_68:     age==68               and pohlavie==2
+            AGE_F_69:     age==69               and pohlavie==2
+
+            AGE_F_70_71:  age>=70  and age<=71  and pohlavie==2
+            AGE_F_72_73:  age>=72  and age<=73  and pohlavie==2
+            AGE_F_74_75:  age>=74  and age<=75  and pohlavie==2
+            AGE_F_76_77:  age>=76  and age<=77  and pohlavie==2
+            AGE_F_78_79:  age>=78  and age<=79  and pohlavie==2
+
+            AGE_F_80_84:  age>=80  and age<=84  and pohlavie==2
+            AGE_F_85_89:  age>=85  and age<=89  and pohlavie==2
+            AGE_F_90_94:  age>=90  and age<=94  and pohlavie==2
+            AGE_F_95_100: age>=95  and age<=100 and pohlavie==2
+
+            AGE19: age==19
+            AGE20: age==20
+            AGE21: age==21
+            AGE22: age==22
+            AGE23: age==23
+            AGE24: age==24
+            AGE25: age==25
+            AGE26: age==26
+            AGE27: age==27
+            AGE28: age==28
+            AGE29: age==29
+            AGE30: age==30
+            AGE31: age==31
+            AGE32: age==32
+            AGE33: age==33
+            AGE34: age==34
+            AGE35: age==35
+            AGE36: age==36
+            AGE37: age==37
+            AGE38: age==38
+            AGE39: age==39
+            AGE40: age==40
+            AGE41: age==41
+            AGE42: age==42
+            AGE43: age==43
+            AGE44: age==44
+            AGE45: age==45
+            AGE46: age==46
+            AGE47: age==47
+            AGE48: age==48
+            AGE49: age==49
+            AGE50: age==50
+            AGE51: age==51
+            AGE52: age==52
+            AGE53: age==53
+            AGE54: age==54
+            AGE55: age==55
+            AGE56: age==56
+            AGE57: age==57
+            AGE58: age==58
+            AGE59: age==59
+            AGE60: age==60
+            AGE61: age==61
+            AGE62: age==62
+            AGE63: age==63
+            AGE64: age==64
+            AGE65: age==65
+            AGE66: age==66
+            AGE67: age==67
+            AGE68: age==68
+            AGE69: age==69
+
+            PRIMARY: hatlev5==1
+            LOWER_SECONDARY: hatlev5==2
+            UPPER_SECONDARY: hatlev5==3
+            POST_SECONDARY: hatlev5==4
+            TERTIARY: hatlev5==5
+
+            GRADUATIONAGE_P: 15   
+            GRADUATIONAGE_LS: 15
+            GRADUATIONAGE_US: 20
+            GRADUATIONAGE_PS: 20
+            GRADUATIONAGE_T: 26    
+            
+            EMPLOYED: 1
+            UNEMPLOYED: 2
+            STUDENT: 3
+            RETIRED: 4
+            INACTIVE: 5
+            DISABLED: 6
+
+            IS_EMPLOYED: status==1
+            IS_UNEMPLOYED: status==2
+            IS_STUDENT: status==3
+            IS_RETIRED: status==4
+            IS_INACTIVE: status==5 
+            IS_DISABLED: status==6
+
+            WAS_EMPLOYED: status1y==1
+            WAS_UNEMPLOYED: status1y==2
+            WAS_STUDENT: status1y==3
+            WAS_RETIRED: status1y==4
+            WAS_INACTIVE: status1y==5   
+            WAS_DISABLED: status1y==6            
+            
+            FIELD0: hatfield==0 or hatfield==99
+            FIELD1: hatfield==1
+            FIELD2: hatfield==2
+            FIELD3: hatfield==3
+            FIELD4: hatfield==4
+            FIELD5: hatfield==5
+            FIELD6: hatfield==6
+            FIELD7: hatfield==7
+            FIELD8: hatfield==8
+            FIELD9: hatfield==9
+            FIELD10: hatfield==10
+            
+            AGRO: nace==1 
+            INDUSTRY: nace==2
+            CONSTRUCTION: nace==3
+            MAR_SERVICES: nace==4
+            NMAR_SERVICES: nace==5
+
+            MALE_RA: globaltable.MALE_RA[period]
+            FEMALE_RA_0: globaltable.FEMALE_RA_0[period]
+            FEMALE_RA_1: globaltable.FEMALE_RA_1[period]
+            FEMALE_RA_2: globaltable.FEMALE_RA_2[period]
+            FEMALE_RA_3_4: globaltable.FEMALE_RA_3_4[period]
+            FEMALE_RA_5: globaltable.FEMALE_RA_5[period]
+            W_avg: globaltable.W_avg[period]
+            MONTHLY_AVG_WAGE: globaltable.MONTHLY_AVG_WAGE[period]
+            SOCIAL_INSURANCE_CONTRIB_RATE: globaltable.SOCIAL_INSURANCE_CONTRIB_RATE[period]
+            unem_rate: globaltable.unem_rate[period]
+            inac_elas: globaltable.inac_elas[period]
+            VALORIZACIA: globaltable.VALORIZACIA[period]
+            PRVA_VALORIZACIA: globaltable.PRVA_VALORIZACIA[period]
+            MIMORIADNA: globaltable.MIMORIADNA[period]
+            REAL_AVG_OLDAGE_PENSION: globaltable.REAL_AVG_OLDAGE_PENSION[period]
+            ADH: globaltable.ADH[period]            
+            SUBSISTENCE_MINIMUM: globaltable.SUBSISTENCE_MINIMUM[period]
+            MATERIAL_NEED_BENEFIT: globaltable.MATERIAL_NEED_BENEFIT[period]
+            STANDALONE_SURVIVOR_BENEFIT_FACTOR: globaltable.STANDALONE_SURVIVOR_BENEFIT_FACTOR[period]
+            
+            DETI1: pocet_deti==1 
+            DETI2: pocet_deti==2
+            DETI3: pocet_deti==3
+            DETI4: pocet_deti==4
+            DETI5: pocet_deti==5
+            DETI6: pocet_deti==6
+            
+            ZENA2040: age>=20 and age<=40 and sex == 2 
+            AGEG4044: age>=20 and age<=40
+            AGEG4549: age>=20 and age<=40
+            
+            #MEAN_OMB: align_omb.MEAN_OMB[period]
+
+            AGE_M_16_19_AGR:  age>=16  and age<=19  and pohlavie==1 and nace==1
+            AGE_M_20_24_AGR:  age>=20  and age<=24  and pohlavie==1 and nace==1
+            AGE_M_25_29_AGR:  age>=25  and age<=29  and pohlavie==1 and nace==1
+            AGE_M_30_34_AGR:  age>=30  and age<=34  and pohlavie==1 and nace==1
+            AGE_M_35_39_AGR:  age>=35  and age<=39  and pohlavie==1 and nace==1
+            AGE_M_40_44_AGR:  age>=40  and age<=44  and pohlavie==1 and nace==1
+            AGE_M_45_49_AGR:  age>=45  and age<=49  and pohlavie==1 and nace==1
+            AGE_M_50_54_AGR:  age>=50  and age<=54  and pohlavie==1 and nace==1
+            AGE_M_55_59_AGR:  age>=55  and age<=59  and pohlavie==1 and nace==1
+            AGE_M_60_64_AGR:  age>=60  and age<=64  and pohlavie==1 and nace==1
+            AGE_M_65_AGR:     age==65               and pohlavie==1 and nace==1
+            AGE_M_66_AGR:     age==66               and pohlavie==1 and nace==1
+            AGE_M_67_AGR:     age==67               and pohlavie==1 and nace==1
+            AGE_M_68_AGR:     age==68               and pohlavie==1 and nace==1
+            AGE_M_69_AGR:     age==69               and pohlavie==1 and nace==1
+            AGE_M_70_71_AGR:  age>=70  and age<=71  and pohlavie==1 and nace==1
+            AGE_M_72_73_AGR:  age>=72  and age<=73  and pohlavie==1 and nace==1
+            AGE_M_74_75_AGR:  age>=74  and age<=75  and pohlavie==1 and nace==1
+            AGE_M_76_77_AGR:  age>=76  and age<=77  and pohlavie==1 and nace==1
+            AGE_M_78_79_AGR:  age>=78  and age<=79  and pohlavie==1 and nace==1
+            AGE_M_80_84_AGR:  age>=80  and age<=84  and pohlavie==1 and nace==1
+            AGE_M_85_89_AGR:  age>=85  and age<=89  and pohlavie==1 and nace==1
+            AGE_M_90_94_AGR:  age>=90  and age<=94  and pohlavie==1 and nace==1
+            AGE_M_95_100_AGR: age>=95  and age<=100 and pohlavie==1 and nace==1
+
+            AGE_F_16_19_AGR:  age>=16  and age<=19  and pohlavie==2 and nace==1
+            AGE_F_20_24_AGR:  age>=20  and age<=24  and pohlavie==2 and nace==1
+            AGE_F_25_29_AGR:  age>=25  and age<=29  and pohlavie==2 and nace==1
+            AGE_F_30_34_AGR:  age>=30  and age<=34  and pohlavie==2 and nace==1
+            AGE_F_35_39_AGR:  age>=35  and age<=39  and pohlavie==2 and nace==1
+            AGE_F_40_44_AGR:  age>=40  and age<=44  and pohlavie==2 and nace==1
+            AGE_F_45_49_AGR:  age>=45  and age<=49  and pohlavie==2 and nace==1
+            AGE_F_50_54_AGR:  age>=50  and age<=54  and pohlavie==2 and nace==1
+            AGE_F_55_59_AGR:  age>=55  and age<=59  and pohlavie==2 and nace==1
+            AGE_F_60_AGR:     age==60               and pohlavie==2 and nace==1
+            AGE_F_61_AGR:     age==61               and pohlavie==2 and nace==1
+            AGE_F_62_AGR:     age==62               and pohlavie==2 and nace==1
+            AGE_F_63_AGR:     age==63               and pohlavie==2 and nace==1
+            AGE_F_64_AGR:     age==64               and pohlavie==2 and nace==1
+            AGE_F_65_AGR:     age==65               and pohlavie==2 and nace==1
+            AGE_F_66_AGR:     age==66               and pohlavie==2 and nace==1
+            AGE_F_67_AGR:     age==67               and pohlavie==2 and nace==1
+            AGE_F_68_AGR:     age==68               and pohlavie==2 and nace==1
+            AGE_F_69_AGR:     age==69               and pohlavie==2 and nace==1
+            AGE_F_70_71_AGR:  age>=70  and age<=71  and pohlavie==2 and nace==1
+            AGE_F_72_73_AGR:  age>=72  and age<=73  and pohlavie==2 and nace==1
+            AGE_F_74_75_AGR:  age>=74  and age<=75  and pohlavie==2 and nace==1
+            AGE_F_76_77_AGR:  age>=76  and age<=77  and pohlavie==2 and nace==1
+            AGE_F_78_79_AGR:  age>=78  and age<=79  and pohlavie==2 and nace==1
+            AGE_F_80_84_AGR:  age>=80  and age<=84  and pohlavie==2 and nace==1
+            AGE_F_85_89_AGR:  age>=85  and age<=89  and pohlavie==2 and nace==1
+            AGE_F_90_94_AGR:  age>=90  and age<=94  and pohlavie==2 and nace==1
+            AGE_F_95_100_AGR: age>=95  and age<=100 and pohlavie==2 and nace==1
+
+            AGE_M_16_19_IND:  age>=16  and age<=19  and pohlavie==1 and nace==2
+            AGE_M_20_24_IND:  age>=20  and age<=24  and pohlavie==1 and nace==2
+            AGE_M_25_29_IND:  age>=25  and age<=29  and pohlavie==1 and nace==2
+            AGE_M_30_34_IND:  age>=30  and age<=34  and pohlavie==1 and nace==2
+            AGE_M_35_39_IND:  age>=35  and age<=39  and pohlavie==1 and nace==2
+            AGE_M_40_44_IND:  age>=40  and age<=44  and pohlavie==1 and nace==2
+            AGE_M_45_49_IND:  age>=45  and age<=49  and pohlavie==1 and nace==2
+            AGE_M_50_54_IND:  age>=50  and age<=54  and pohlavie==1 and nace==2
+            AGE_M_55_59_IND:  age>=55  and age<=59  and pohlavie==1 and nace==2
+            AGE_M_60_64_IND:  age>=60  and age<=64  and pohlavie==1 and nace==2
+            AGE_M_65_IND:     age==65               and pohlavie==1 and nace==2
+            AGE_M_66_IND:     age==66               and pohlavie==1 and nace==2
+            AGE_M_67_IND:     age==67               and pohlavie==1 and nace==2
+            AGE_M_68_IND:     age==68               and pohlavie==1 and nace==2
+            AGE_M_69_IND:     age==69               and pohlavie==1 and nace==2
+            AGE_M_70_71_IND:  age>=70  and age<=71  and pohlavie==1 and nace==2
+            AGE_M_72_73_IND:  age>=72  and age<=73  and pohlavie==1 and nace==2
+            AGE_M_74_75_IND:  age>=74  and age<=75  and pohlavie==1 and nace==2
+            AGE_M_76_77_IND:  age>=76  and age<=77  and pohlavie==1 and nace==2
+            AGE_M_78_79_IND:  age>=78  and age<=79  and pohlavie==1 and nace==2
+            AGE_M_80_84_IND:  age>=80  and age<=84  and pohlavie==1 and nace==2
+            AGE_M_85_89_IND:  age>=85  and age<=89  and pohlavie==1 and nace==2
+            AGE_M_90_94_IND:  age>=90  and age<=94  and pohlavie==1 and nace==2
+            AGE_M_95_100_IND: age>=95  and age<=100 and pohlavie==1 and nace==2
+
+            AGE_F_16_19_IND:  age>=16  and age<=19  and pohlavie==2 and nace==2
+            AGE_F_20_24_IND:  age>=20  and age<=24  and pohlavie==2 and nace==2
+            AGE_F_25_29_IND:  age>=25  and age<=29  and pohlavie==2 and nace==2
+            AGE_F_30_34_IND:  age>=30  and age<=34  and pohlavie==2 and nace==2
+            AGE_F_35_39_IND:  age>=35  and age<=39  and pohlavie==2 and nace==2
+            AGE_F_40_44_IND:  age>=40  and age<=44  and pohlavie==2 and nace==2
+            AGE_F_45_49_IND:  age>=45  and age<=49  and pohlavie==2 and nace==2
+            AGE_F_50_54_IND:  age>=50  and age<=54  and pohlavie==2 and nace==2
+            AGE_F_55_59_IND:  age>=55  and age<=59  and pohlavie==2 and nace==2
+            AGE_F_60_IND:     age==60               and pohlavie==2 and nace==2
+            AGE_F_61_IND:     age==61               and pohlavie==2 and nace==2
+            AGE_F_62_IND:     age==62               and pohlavie==2 and nace==2
+            AGE_F_63_IND:     age==63               and pohlavie==2 and nace==2
+            AGE_F_64_IND:     age==64               and pohlavie==2 and nace==2
+            AGE_F_65_IND:     age==65               and pohlavie==2 and nace==2
+            AGE_F_66_IND:     age==66               and pohlavie==2 and nace==2
+            AGE_F_67_IND:     age==67               and pohlavie==2 and nace==2
+            AGE_F_68_IND:     age==68               and pohlavie==2 and nace==2
+            AGE_F_69_IND:     age==69               and pohlavie==2 and nace==2
+            AGE_F_70_71_IND:  age>=70  and age<=71  and pohlavie==2 and nace==2
+            AGE_F_72_73_IND:  age>=72  and age<=73  and pohlavie==2 and nace==2
+            AGE_F_74_75_IND:  age>=74  and age<=75  and pohlavie==2 and nace==2
+            AGE_F_76_77_IND:  age>=76  and age<=77  and pohlavie==2 and nace==2
+            AGE_F_78_79_IND:  age>=78  and age<=79  and pohlavie==2 and nace==2
+            AGE_F_80_84_IND:  age>=80  and age<=84  and pohlavie==2 and nace==2
+            AGE_F_85_89_IND:  age>=85  and age<=89  and pohlavie==2 and nace==2
+            AGE_F_90_94_IND:  age>=90  and age<=94  and pohlavie==2 and nace==2
+            AGE_F_95_100_IND: age>=95  and age<=100 and pohlavie==2 and nace==2
+
+            AGE_M_16_19_CON:  age>=16  and age<=19  and pohlavie==1 and nace==3
+            AGE_M_20_24_CON:  age>=20  and age<=24  and pohlavie==1 and nace==3
+            AGE_M_25_29_CON:  age>=25  and age<=29  and pohlavie==1 and nace==3
+            AGE_M_30_34_CON:  age>=30  and age<=34  and pohlavie==1 and nace==3
+            AGE_M_35_39_CON:  age>=35  and age<=39  and pohlavie==1 and nace==3
+            AGE_M_40_44_CON:  age>=40  and age<=44  and pohlavie==1 and nace==3
+            AGE_M_45_49_CON:  age>=45  and age<=49  and pohlavie==1 and nace==3
+            AGE_M_50_54_CON:  age>=50  and age<=54  and pohlavie==1 and nace==3
+            AGE_M_55_59_CON:  age>=55  and age<=59  and pohlavie==1 and nace==3
+            AGE_M_60_64_CON:  age>=60  and age<=64  and pohlavie==1 and nace==3
+            AGE_M_65_CON:     age==65               and pohlavie==1 and nace==3
+            AGE_M_66_CON:     age==66               and pohlavie==1 and nace==3
+            AGE_M_67_CON:     age==67               and pohlavie==1 and nace==3
+            AGE_M_68_CON:     age==68               and pohlavie==1 and nace==3
+            AGE_M_69_CON:     age==69               and pohlavie==1 and nace==3
+            AGE_M_70_71_CON:  age>=70  and age<=71  and pohlavie==1 and nace==3
+            AGE_M_72_73_CON:  age>=72  and age<=73  and pohlavie==1 and nace==3
+            AGE_M_74_75_CON:  age>=74  and age<=75  and pohlavie==1 and nace==3
+            AGE_M_76_77_CON:  age>=76  and age<=77  and pohlavie==1 and nace==3
+            AGE_M_78_79_CON:  age>=78  and age<=79  and pohlavie==1 and nace==3
+            AGE_M_80_84_CON:  age>=80  and age<=84  and pohlavie==1 and nace==3
+            AGE_M_85_89_CON:  age>=85  and age<=89  and pohlavie==1 and nace==3
+            AGE_M_90_94_CON:  age>=90  and age<=94  and pohlavie==1 and nace==3
+            AGE_M_95_100_CON: age>=95  and age<=100 and pohlavie==1 and nace==3
+
+            AGE_F_16_19_CON:  age>=16  and age<=19  and pohlavie==2 and nace==3
+            AGE_F_20_24_CON:  age>=20  and age<=24  and pohlavie==2 and nace==3
+            AGE_F_25_29_CON:  age>=25  and age<=29  and pohlavie==2 and nace==3
+            AGE_F_30_34_CON:  age>=30  and age<=34  and pohlavie==2 and nace==3
+            AGE_F_35_39_CON:  age>=35  and age<=39  and pohlavie==2 and nace==3
+            AGE_F_40_44_CON:  age>=40  and age<=44  and pohlavie==2 and nace==3
+            AGE_F_45_49_CON:  age>=45  and age<=49  and pohlavie==2 and nace==3
+            AGE_F_50_54_CON:  age>=50  and age<=54  and pohlavie==2 and nace==3
+            AGE_F_55_59_CON:  age>=55  and age<=59  and pohlavie==2 and nace==3
+            AGE_F_60_CON:     age==60               and pohlavie==2 and nace==3
+            AGE_F_61_CON:     age==61               and pohlavie==2 and nace==3
+            AGE_F_62_CON:     age==62               and pohlavie==2 and nace==3
+            AGE_F_63_CON:     age==63               and pohlavie==2 and nace==3
+            AGE_F_64_CON:     age==64               and pohlavie==2 and nace==3
+            AGE_F_65_CON:     age==65               and pohlavie==2 and nace==3
+            AGE_F_66_CON:     age==66               and pohlavie==2 and nace==3
+            AGE_F_67_CON:     age==67               and pohlavie==2 and nace==3
+            AGE_F_68_CON:     age==68               and pohlavie==2 and nace==3
+            AGE_F_69_CON:     age==69               and pohlavie==2 and nace==3
+            AGE_F_70_71_CON:  age>=70  and age<=71  and pohlavie==2 and nace==3
+            AGE_F_72_73_CON:  age>=72  and age<=73  and pohlavie==2 and nace==3
+            AGE_F_74_75_CON:  age>=74  and age<=75  and pohlavie==2 and nace==3
+            AGE_F_76_77_CON:  age>=76  and age<=77  and pohlavie==2 and nace==3
+            AGE_F_78_79_CON:  age>=78  and age<=79  and pohlavie==2 and nace==3
+            AGE_F_80_84_CON:  age>=80  and age<=84  and pohlavie==2 and nace==3
+            AGE_F_85_89_CON:  age>=85  and age<=89  and pohlavie==2 and nace==3
+            AGE_F_90_94_CON:  age>=90  and age<=94  and pohlavie==2 and nace==3
+            AGE_F_95_100_CON: age>=95  and age<=100 and pohlavie==2 and nace==3
+
+            AGE_M_16_19_MAR:  age>=16  and age<=19  and pohlavie==1 and nace==4
+            AGE_M_20_24_MAR:  age>=20  and age<=24  and pohlavie==1 and nace==4
+            AGE_M_25_29_MAR:  age>=25  and age<=29  and pohlavie==1 and nace==4
+            AGE_M_30_34_MAR:  age>=30  and age<=34  and pohlavie==1 and nace==4
+            AGE_M_35_39_MAR:  age>=35  and age<=39  and pohlavie==1 and nace==4
+            AGE_M_40_44_MAR:  age>=40  and age<=44  and pohlavie==1 and nace==4
+            AGE_M_45_49_MAR:  age>=45  and age<=49  and pohlavie==1 and nace==4
+            AGE_M_50_54_MAR:  age>=50  and age<=54  and pohlavie==1 and nace==4
+            AGE_M_55_59_MAR:  age>=55  and age<=59  and pohlavie==1 and nace==4
+            AGE_M_60_64_MAR:  age>=60  and age<=64  and pohlavie==1 and nace==4
+            AGE_M_65_MAR:     age==65               and pohlavie==1 and nace==4
+            AGE_M_66_MAR:     age==66               and pohlavie==1 and nace==4
+            AGE_M_67_MAR:     age==67               and pohlavie==1 and nace==4
+            AGE_M_68_MAR:     age==68               and pohlavie==1 and nace==4
+            AGE_M_69_MAR:     age==69               and pohlavie==1 and nace==4
+            AGE_M_70_71_MAR:  age>=70  and age<=71  and pohlavie==1 and nace==4
+            AGE_M_72_73_MAR:  age>=72  and age<=73  and pohlavie==1 and nace==4
+            AGE_M_74_75_MAR:  age>=74  and age<=75  and pohlavie==1 and nace==4
+            AGE_M_76_77_MAR:  age>=76  and age<=77  and pohlavie==1 and nace==4
+            AGE_M_78_79_MAR:  age>=78  and age<=79  and pohlavie==1 and nace==4
+            AGE_M_80_84_MAR:  age>=80  and age<=84  and pohlavie==1 and nace==4
+            AGE_M_85_89_MAR:  age>=85  and age<=89  and pohlavie==1 and nace==4
+            AGE_M_90_94_MAR:  age>=90  and age<=94  and pohlavie==1 and nace==4
+            AGE_M_95_100_MAR: age>=95  and age<=100 and pohlavie==1 and nace==4
+
+            AGE_F_16_19_MAR:  age>=16  and age<=19  and pohlavie==2 and nace==4
+            AGE_F_20_24_MAR:  age>=20  and age<=24  and pohlavie==2 and nace==4
+            AGE_F_25_29_MAR:  age>=25  and age<=29  and pohlavie==2 and nace==4
+            AGE_F_30_34_MAR:  age>=30  and age<=34  and pohlavie==2 and nace==4
+            AGE_F_35_39_MAR:  age>=35  and age<=39  and pohlavie==2 and nace==4
+            AGE_F_40_44_MAR:  age>=40  and age<=44  and pohlavie==2 and nace==4
+            AGE_F_45_49_MAR:  age>=45  and age<=49  and pohlavie==2 and nace==4
+            AGE_F_50_54_MAR:  age>=50  and age<=54  and pohlavie==2 and nace==4
+            AGE_F_55_59_MAR:  age>=55  and age<=59  and pohlavie==2 and nace==4
+            AGE_F_60_MAR:     age==60               and pohlavie==2 and nace==4
+            AGE_F_61_MAR:     age==61               and pohlavie==2 and nace==4
+            AGE_F_62_MAR:     age==62               and pohlavie==2 and nace==4
+            AGE_F_63_MAR:     age==63               and pohlavie==2 and nace==4
+            AGE_F_64_MAR:     age==64               and pohlavie==2 and nace==4
+            AGE_F_65_MAR:     age==65               and pohlavie==2 and nace==4
+            AGE_F_66_MAR:     age==66               and pohlavie==2 and nace==4
+            AGE_F_67_MAR:     age==67               and pohlavie==2 and nace==4
+            AGE_F_68_MAR:     age==68               and pohlavie==2 and nace==4
+            AGE_F_69_MAR:     age==69               and pohlavie==2 and nace==4
+            AGE_F_70_71_MAR:  age>=70  and age<=71  and pohlavie==2 and nace==4
+            AGE_F_72_73_MAR:  age>=72  and age<=73  and pohlavie==2 and nace==4
+            AGE_F_74_75_MAR:  age>=74  and age<=75  and pohlavie==2 and nace==4
+            AGE_F_76_77_MAR:  age>=76  and age<=77  and pohlavie==2 and nace==4
+            AGE_F_78_79_MAR:  age>=78  and age<=79  and pohlavie==2 and nace==4
+            AGE_F_80_84_MAR:  age>=80  and age<=84  and pohlavie==2 and nace==4
+            AGE_F_85_89_MAR:  age>=85  and age<=89  and pohlavie==2 and nace==4
+            AGE_F_90_94_MAR:  age>=90  and age<=94  and pohlavie==2 and nace==4
+            AGE_F_95_100_MAR: age>=95  and age<=100 and pohlavie==2 and nace==4
+
+            AGE_M_16_19_NMAR:  age>=16  and age<=19  and pohlavie==1 and nace==5
+            AGE_M_20_24_NMAR:  age>=20  and age<=24  and pohlavie==1 and nace==5
+            AGE_M_25_29_NMAR:  age>=25  and age<=29  and pohlavie==1 and nace==5
+            AGE_M_30_34_NMAR:  age>=30  and age<=34  and pohlavie==1 and nace==5
+            AGE_M_35_39_NMAR:  age>=35  and age<=39  and pohlavie==1 and nace==5
+            AGE_M_40_44_NMAR:  age>=40  and age<=44  and pohlavie==1 and nace==5
+            AGE_M_45_49_NMAR:  age>=45  and age<=49  and pohlavie==1 and nace==5
+            AGE_M_50_54_NMAR:  age>=50  and age<=54  and pohlavie==1 and nace==5
+            AGE_M_55_59_NMAR:  age>=55  and age<=59  and pohlavie==1 and nace==5
+            AGE_M_60_64_NMAR:  age>=60  and age<=64  and pohlavie==1 and nace==5
+            AGE_M_65_NMAR:     age==65               and pohlavie==1 and nace==5
+            AGE_M_66_NMAR:     age==66               and pohlavie==1 and nace==5
+            AGE_M_67_NMAR:     age==67               and pohlavie==1 and nace==5
+            AGE_M_68_NMAR:     age==68               and pohlavie==1 and nace==5
+            AGE_M_69_NMAR:     age==69               and pohlavie==1 and nace==5
+            AGE_M_70_71_NMAR:  age>=70  and age<=71  and pohlavie==1 and nace==5
+            AGE_M_72_73_NMAR:  age>=72  and age<=73  and pohlavie==1 and nace==5
+            AGE_M_74_75_NMAR:  age>=74  and age<=75  and pohlavie==1 and nace==5
+            AGE_M_76_77_NMAR:  age>=76  and age<=77  and pohlavie==1 and nace==5
+            AGE_M_78_79_NMAR:  age>=78  and age<=79  and pohlavie==1 and nace==5
+            AGE_M_80_84_NMAR:  age>=80  and age<=84  and pohlavie==1 and nace==5
+            AGE_M_85_89_NMAR:  age>=85  and age<=89  and pohlavie==1 and nace==5
+            AGE_M_90_94_NMAR:  age>=90  and age<=94  and pohlavie==1 and nace==5
+            AGE_M_95_100_NMAR: age>=95  and age<=100 and pohlavie==1 and nace==5
+
+            AGE_F_16_19_NMAR:  age>=16  and age<=19  and pohlavie==2 and nace==5
+            AGE_F_20_24_NMAR:  age>=20  and age<=24  and pohlavie==2 and nace==5
+            AGE_F_25_29_NMAR:  age>=25  and age<=29  and pohlavie==2 and nace==5
+            AGE_F_30_34_NMAR:  age>=30  and age<=34  and pohlavie==2 and nace==5
+            AGE_F_35_39_NMAR:  age>=35  and age<=39  and pohlavie==2 and nace==5
+            AGE_F_40_44_NMAR:  age>=40  and age<=44  and pohlavie==2 and nace==5
+            AGE_F_45_49_NMAR:  age>=45  and age<=49  and pohlavie==2 and nace==5
+            AGE_F_50_54_NMAR:  age>=50  and age<=54  and pohlavie==2 and nace==5
+            AGE_F_55_59_NMAR:  age>=55  and age<=59  and pohlavie==2 and nace==5
+            AGE_F_60_NMAR:     age==60               and pohlavie==2 and nace==5
+            AGE_F_61_NMAR:     age==61               and pohlavie==2 and nace==5
+            AGE_F_62_NMAR:     age==62               and pohlavie==2 and nace==5
+            AGE_F_63_NMAR:     age==63               and pohlavie==2 and nace==5
+            AGE_F_64_NMAR:     age==64               and pohlavie==2 and nace==5
+            AGE_F_65_NMAR:     age==65               and pohlavie==2 and nace==5
+            AGE_F_66_NMAR:     age==66               and pohlavie==2 and nace==5
+            AGE_F_67_NMAR:     age==67               and pohlavie==2 and nace==5
+            AGE_F_68_NMAR:     age==68               and pohlavie==2 and nace==5
+            AGE_F_69_NMAR:     age==69               and pohlavie==2 and nace==5
+            AGE_F_70_71_NMAR:  age>=70  and age<=71  and pohlavie==2 and nace==5
+            AGE_F_72_73_NMAR:  age>=72  and age<=73  and pohlavie==2 and nace==5
+            AGE_F_74_75_NMAR:  age>=74  and age<=75  and pohlavie==2 and nace==5
+            AGE_F_76_77_NMAR:  age>=76  and age<=77  and pohlavie==2 and nace==5
+            AGE_F_78_79_NMAR:  age>=78  and age<=79  and pohlavie==2 and nace==5
+            AGE_F_80_84_NMAR:  age>=80  and age<=84  and pohlavie==2 and nace==5
+            AGE_F_85_89_NMAR:  age>=85  and age<=89  and pohlavie==2 and nace==5
+            AGE_F_90_94_NMAR:  age>=90  and age<=94  and pohlavie==2 and nace==5
+            AGE_F_95_100_NMAR: age>=95  and age<=100 and pohlavie==2 and nace==5
+
+            AGE_M_16_19_PR:  age>=16  and age<=19  and pohlavie==1 and hatlev5==1
+            AGE_M_20_24_PR:  age>=20  and age<=24  and pohlavie==1 and hatlev5==1
+            AGE_M_25_29_PR:  age>=25  and age<=29  and pohlavie==1 and hatlev5==1
+            AGE_M_30_34_PR:  age>=30  and age<=34  and pohlavie==1 and hatlev5==1
+            AGE_M_35_39_PR:  age>=35  and age<=39  and pohlavie==1 and hatlev5==1
+            AGE_M_40_44_PR:  age>=40  and age<=44  and pohlavie==1 and hatlev5==1
+            AGE_M_45_49_PR:  age>=45  and age<=49  and pohlavie==1 and hatlev5==1
+            AGE_M_50_54_PR:  age>=50  and age<=54  and pohlavie==1 and hatlev5==1
+            AGE_M_55_59_PR:  age>=55  and age<=59  and pohlavie==1 and hatlev5==1
+            AGE_M_60_64_PR:  age>=60  and age<=64  and pohlavie==1 and hatlev5==1
+            AGE_M_65_PR:     age==65               and pohlavie==1 and hatlev5==1
+            AGE_M_66_PR:     age==66               and pohlavie==1 and hatlev5==1
+            AGE_M_67_PR:     age==67               and pohlavie==1 and hatlev5==1
+            AGE_M_68_PR:     age==68               and pohlavie==1 and hatlev5==1
+            AGE_M_69_PR:     age==69               and pohlavie==1 and hatlev5==1
+            AGE_M_70_71_PR:  age>=70  and age<=71  and pohlavie==1 and hatlev5==1
+            AGE_M_72_73_PR:  age>=72  and age<=73  and pohlavie==1 and hatlev5==1
+            AGE_M_74_75_PR:  age>=74  and age<=75  and pohlavie==1 and hatlev5==1
+            AGE_M_76_77_PR:  age>=76  and age<=77  and pohlavie==1 and hatlev5==1
+            AGE_M_78_79_PR:  age>=78  and age<=79  and pohlavie==1 and hatlev5==1
+            AGE_M_80_84_PR:  age>=80  and age<=84  and pohlavie==1 and hatlev5==1
+            AGE_M_85_89_PR:  age>=85  and age<=89  and pohlavie==1 and hatlev5==1
+            AGE_M_90_94_PR:  age>=90  and age<=94  and pohlavie==1 and hatlev5==1
+            AGE_M_95_100_PR: age>=95  and age<=100 and pohlavie==1 and hatlev5==1
+
+            AGE_F_16_19_PR:  age>=16  and age<=19  and pohlavie==2 and hatlev5==1
+            AGE_F_20_24_PR:  age>=20  and age<=24  and pohlavie==2 and hatlev5==1
+            AGE_F_25_29_PR:  age>=25  and age<=29  and pohlavie==2 and hatlev5==1
+            AGE_F_30_34_PR:  age>=30  and age<=34  and pohlavie==2 and hatlev5==1
+            AGE_F_35_39_PR:  age>=35  and age<=39  and pohlavie==2 and hatlev5==1
+            AGE_F_40_44_PR:  age>=40  and age<=44  and pohlavie==2 and hatlev5==1
+            AGE_F_45_49_PR:  age>=45  and age<=49  and pohlavie==2 and hatlev5==1
+            AGE_F_50_54_PR:  age>=50  and age<=54  and pohlavie==2 and hatlev5==1
+            AGE_F_55_59_PR:  age>=55  and age<=59  and pohlavie==2 and hatlev5==1
+            AGE_F_60_PR:     age==60               and pohlavie==2 and hatlev5==1
+            AGE_F_61_PR:     age==61               and pohlavie==2 and hatlev5==1
+            AGE_F_62_PR:     age==62               and pohlavie==2 and hatlev5==1
+            AGE_F_63_PR:     age==63               and pohlavie==2 and hatlev5==1
+            AGE_F_64_PR:     age==64               and pohlavie==2 and hatlev5==1
+            AGE_F_65_PR:     age==65               and pohlavie==2 and hatlev5==1
+            AGE_F_66_PR:     age==66               and pohlavie==2 and hatlev5==1
+            AGE_F_67_PR:     age==67               and pohlavie==2 and hatlev5==1
+            AGE_F_68_PR:     age==68               and pohlavie==2 and hatlev5==1
+            AGE_F_69_PR:     age==69               and pohlavie==2 and hatlev5==1
+            AGE_F_70_71_PR:  age>=70  and age<=71  and pohlavie==2 and hatlev5==1
+            AGE_F_72_73_PR:  age>=72  and age<=73  and pohlavie==2 and hatlev5==1
+            AGE_F_74_75_PR:  age>=74  and age<=75  and pohlavie==2 and hatlev5==1
+            AGE_F_76_77_PR:  age>=76  and age<=77  and pohlavie==2 and hatlev5==1
+            AGE_F_78_79_PR:  age>=78  and age<=79  and pohlavie==2 and hatlev5==1
+            AGE_F_80_84_PR:  age>=80  and age<=84  and pohlavie==2 and hatlev5==1
+            AGE_F_85_89_PR:  age>=85  and age<=89  and pohlavie==2 and hatlev5==1
+            AGE_F_90_94_PR:  age>=90  and age<=94  and pohlavie==2 and hatlev5==1
+            AGE_F_95_100_PR: age>=95  and age<=100 and pohlavie==2 and hatlev5==1
+
+            AGE_M_16_19_LS:  age>=16  and age<=19  and pohlavie==1 and hatlev5==2
+            AGE_M_20_24_LS:  age>=20  and age<=24  and pohlavie==1 and hatlev5==2
+            AGE_M_25_29_LS:  age>=25  and age<=29  and pohlavie==1 and hatlev5==2
+            AGE_M_30_34_LS:  age>=30  and age<=34  and pohlavie==1 and hatlev5==2
+            AGE_M_35_39_LS:  age>=35  and age<=39  and pohlavie==1 and hatlev5==2
+            AGE_M_40_44_LS:  age>=40  and age<=44  and pohlavie==1 and hatlev5==2
+            AGE_M_45_49_LS:  age>=45  and age<=49  and pohlavie==1 and hatlev5==2
+            AGE_M_50_54_LS:  age>=50  and age<=54  and pohlavie==1 and hatlev5==2
+            AGE_M_55_59_LS:  age>=55  and age<=59  and pohlavie==1 and hatlev5==2
+            AGE_M_60_64_LS:  age>=60  and age<=64  and pohlavie==1 and hatlev5==2
+            AGE_M_65_LS:     age==65               and pohlavie==1 and hatlev5==2
+            AGE_M_66_LS:     age==66               and pohlavie==1 and hatlev5==2
+            AGE_M_67_LS:     age==67               and pohlavie==1 and hatlev5==2
+            AGE_M_68_LS:     age==68               and pohlavie==1 and hatlev5==2
+            AGE_M_69_LS:     age==69               and pohlavie==1 and hatlev5==2
+            AGE_M_70_71_LS:  age>=70  and age<=71  and pohlavie==1 and hatlev5==2
+            AGE_M_72_73_LS:  age>=72  and age<=73  and pohlavie==1 and hatlev5==2
+            AGE_M_74_75_LS:  age>=74  and age<=75  and pohlavie==1 and hatlev5==2
+            AGE_M_76_77_LS:  age>=76  and age<=77  and pohlavie==1 and hatlev5==2
+            AGE_M_78_79_LS:  age>=78  and age<=79  and pohlavie==1 and hatlev5==2
+            AGE_M_80_84_LS:  age>=80  and age<=84  and pohlavie==1 and hatlev5==2
+            AGE_M_85_89_LS:  age>=85  and age<=89  and pohlavie==1 and hatlev5==2
+            AGE_M_90_94_LS:  age>=90  and age<=94  and pohlavie==1 and hatlev5==2
+            AGE_M_95_100_LS: age>=95  and age<=100 and pohlavie==1 and hatlev5==2
+
+            AGE_F_16_19_LS:  age>=16  and age<=19  and pohlavie==2 and hatlev5==2
+            AGE_F_20_24_LS:  age>=20  and age<=24  and pohlavie==2 and hatlev5==2
+            AGE_F_25_29_LS:  age>=25  and age<=29  and pohlavie==2 and hatlev5==2
+            AGE_F_30_34_LS:  age>=30  and age<=34  and pohlavie==2 and hatlev5==2
+            AGE_F_35_39_LS:  age>=35  and age<=39  and pohlavie==2 and hatlev5==2
+            AGE_F_40_44_LS:  age>=40  and age<=44  and pohlavie==2 and hatlev5==2
+            AGE_F_45_49_LS:  age>=45  and age<=49  and pohlavie==2 and hatlev5==2
+            AGE_F_50_54_LS:  age>=50  and age<=54  and pohlavie==2 and hatlev5==2
+            AGE_F_55_59_LS:  age>=55  and age<=59  and pohlavie==2 and hatlev5==2
+            AGE_F_60_LS:     age==60               and pohlavie==2 and hatlev5==2
+            AGE_F_61_LS:     age==61               and pohlavie==2 and hatlev5==2
+            AGE_F_62_LS:     age==62               and pohlavie==2 and hatlev5==2
+            AGE_F_63_LS:     age==63               and pohlavie==2 and hatlev5==2
+            AGE_F_64_LS:     age==64               and pohlavie==2 and hatlev5==2
+            AGE_F_65_LS:     age==65               and pohlavie==2 and hatlev5==2
+            AGE_F_66_LS:     age==66               and pohlavie==2 and hatlev5==2
+            AGE_F_67_LS:     age==67               and pohlavie==2 and hatlev5==2
+            AGE_F_68_LS:     age==68               and pohlavie==2 and hatlev5==2
+            AGE_F_69_LS:     age==69               and pohlavie==2 and hatlev5==2
+            AGE_F_70_71_LS:  age>=70  and age<=71  and pohlavie==2 and hatlev5==2
+            AGE_F_72_73_LS:  age>=72  and age<=73  and pohlavie==2 and hatlev5==2
+            AGE_F_74_75_LS:  age>=74  and age<=75  and pohlavie==2 and hatlev5==2
+            AGE_F_76_77_LS:  age>=76  and age<=77  and pohlavie==2 and hatlev5==2
+            AGE_F_78_79_LS:  age>=78  and age<=79  and pohlavie==2 and hatlev5==2
+            AGE_F_80_84_LS:  age>=80  and age<=84  and pohlavie==2 and hatlev5==2
+            AGE_F_85_89_LS:  age>=85  and age<=89  and pohlavie==2 and hatlev5==2
+            AGE_F_90_94_LS:  age>=90  and age<=94  and pohlavie==2 and hatlev5==2
+            AGE_F_95_100_LS: age>=95  and age<=100 and pohlavie==2 and hatlev5==2
+
+            AGE_M_16_19_US:  age>=16  and age<=19  and pohlavie==1 and hatlev5==3
+            AGE_M_20_24_US:  age>=20  and age<=24  and pohlavie==1 and hatlev5==3
+            AGE_M_25_29_US:  age>=25  and age<=29  and pohlavie==1 and hatlev5==3
+            AGE_M_30_34_US:  age>=30  and age<=34  and pohlavie==1 and hatlev5==3
+            AGE_M_35_39_US:  age>=35  and age<=39  and pohlavie==1 and hatlev5==3
+            AGE_M_40_44_US:  age>=40  and age<=44  and pohlavie==1 and hatlev5==3
+            AGE_M_45_49_US:  age>=45  and age<=49  and pohlavie==1 and hatlev5==3
+            AGE_M_50_54_US:  age>=50  and age<=54  and pohlavie==1 and hatlev5==3
+            AGE_M_55_59_US:  age>=55  and age<=59  and pohlavie==1 and hatlev5==3
+            AGE_M_60_64_US:  age>=60  and age<=64  and pohlavie==1 and hatlev5==3
+            AGE_M_65_US:     age==65               and pohlavie==1 and hatlev5==3
+            AGE_M_66_US:     age==66               and pohlavie==1 and hatlev5==3
+            AGE_M_67_US:     age==67               and pohlavie==1 and hatlev5==3
+            AGE_M_68_US:     age==68               and pohlavie==1 and hatlev5==3
+            AGE_M_69_US:     age==69               and pohlavie==1 and hatlev5==3
+            AGE_M_70_71_US:  age>=70  and age<=71  and pohlavie==1 and hatlev5==3
+            AGE_M_72_73_US:  age>=72  and age<=73  and pohlavie==1 and hatlev5==3
+            AGE_M_74_75_US:  age>=74  and age<=75  and pohlavie==1 and hatlev5==3
+            AGE_M_76_77_US:  age>=76  and age<=77  and pohlavie==1 and hatlev5==3
+            AGE_M_78_79_US:  age>=78  and age<=79  and pohlavie==1 and hatlev5==3
+            AGE_M_80_84_US:  age>=80  and age<=84  and pohlavie==1 and hatlev5==3
+            AGE_M_85_89_US:  age>=85  and age<=89  and pohlavie==1 and hatlev5==3
+            AGE_M_90_94_US:  age>=90  and age<=94  and pohlavie==1 and hatlev5==3
+            AGE_M_95_100_US: age>=95  and age<=100 and pohlavie==1 and hatlev5==3
+
+            AGE_F_16_19_US:  age>=16  and age<=19  and pohlavie==2 and hatlev5==3
+            AGE_F_20_24_US:  age>=20  and age<=24  and pohlavie==2 and hatlev5==3
+            AGE_F_25_29_US:  age>=25  and age<=29  and pohlavie==2 and hatlev5==3
+            AGE_F_30_34_US:  age>=30  and age<=34  and pohlavie==2 and hatlev5==3
+            AGE_F_35_39_US:  age>=35  and age<=39  and pohlavie==2 and hatlev5==3
+            AGE_F_40_44_US:  age>=40  and age<=44  and pohlavie==2 and hatlev5==3
+            AGE_F_45_49_US:  age>=45  and age<=49  and pohlavie==2 and hatlev5==3
+            AGE_F_50_54_US:  age>=50  and age<=54  and pohlavie==2 and hatlev5==3
+            AGE_F_55_59_US:  age>=55  and age<=59  and pohlavie==2 and hatlev5==3
+            AGE_F_60_US:     age==60               and pohlavie==2 and hatlev5==3
+            AGE_F_61_US:     age==61               and pohlavie==2 and hatlev5==3
+            AGE_F_62_US:     age==62               and pohlavie==2 and hatlev5==3
+            AGE_F_63_US:     age==63               and pohlavie==2 and hatlev5==3
+            AGE_F_64_US:     age==64               and pohlavie==2 and hatlev5==3
+            AGE_F_65_US:     age==65               and pohlavie==2 and hatlev5==3
+            AGE_F_66_US:     age==66               and pohlavie==2 and hatlev5==3
+            AGE_F_67_US:     age==67               and pohlavie==2 and hatlev5==3
+            AGE_F_68_US:     age==68               and pohlavie==2 and hatlev5==3
+            AGE_F_69_US:     age==69               and pohlavie==2 and hatlev5==3
+            AGE_F_70_71_US:  age>=70  and age<=71  and pohlavie==2 and hatlev5==3
+            AGE_F_72_73_US:  age>=72  and age<=73  and pohlavie==2 and hatlev5==3
+            AGE_F_74_75_US:  age>=74  and age<=75  and pohlavie==2 and hatlev5==3
+            AGE_F_76_77_US:  age>=76  and age<=77  and pohlavie==2 and hatlev5==3
+            AGE_F_78_79_US:  age>=78  and age<=79  and pohlavie==2 and hatlev5==3
+            AGE_F_80_84_US:  age>=80  and age<=84  and pohlavie==2 and hatlev5==3
+            AGE_F_85_89_US:  age>=85  and age<=89  and pohlavie==2 and hatlev5==3
+            AGE_F_90_94_US:  age>=90  and age<=94  and pohlavie==2 and hatlev5==3
+            AGE_F_95_100_US: age>=95  and age<=100 and pohlavie==2 and hatlev5==3
+
+            AGE_M_16_19_PS:  age>=16  and age<=19  and pohlavie==1 and hatlev5==4
+            AGE_M_20_24_PS:  age>=20  and age<=24  and pohlavie==1 and hatlev5==4
+            AGE_M_25_29_PS:  age>=25  and age<=29  and pohlavie==1 and hatlev5==4
+            AGE_M_30_34_PS:  age>=30  and age<=34  and pohlavie==1 and hatlev5==4
+            AGE_M_35_39_PS:  age>=35  and age<=39  and pohlavie==1 and hatlev5==4
+            AGE_M_40_44_PS:  age>=40  and age<=44  and pohlavie==1 and hatlev5==4
+            AGE_M_45_49_PS:  age>=45  and age<=49  and pohlavie==1 and hatlev5==4
+            AGE_M_50_54_PS:  age>=50  and age<=54  and pohlavie==1 and hatlev5==4
+            AGE_M_55_59_PS:  age>=55  and age<=59  and pohlavie==1 and hatlev5==4
+            AGE_M_60_64_PS:  age>=60  and age<=64  and pohlavie==1 and hatlev5==4
+            AGE_M_65_PS:     age==65               and pohlavie==1 and hatlev5==4
+            AGE_M_66_PS:     age==66               and pohlavie==1 and hatlev5==4
+            AGE_M_67_PS:     age==67               and pohlavie==1 and hatlev5==4
+            AGE_M_68_PS:     age==68               and pohlavie==1 and hatlev5==4
+            AGE_M_69_PS:     age==69               and pohlavie==1 and hatlev5==4
+            AGE_M_70_71_PS:  age>=70  and age<=71  and pohlavie==1 and hatlev5==4
+            AGE_M_72_73_PS:  age>=72  and age<=73  and pohlavie==1 and hatlev5==4
+            AGE_M_74_75_PS:  age>=74  and age<=75  and pohlavie==1 and hatlev5==4
+            AGE_M_76_77_PS:  age>=76  and age<=77  and pohlavie==1 and hatlev5==4
+            AGE_M_78_79_PS:  age>=78  and age<=79  and pohlavie==1 and hatlev5==4
+            AGE_M_80_84_PS:  age>=80  and age<=84  and pohlavie==1 and hatlev5==4
+            AGE_M_85_89_PS:  age>=85  and age<=89  and pohlavie==1 and hatlev5==4
+            AGE_M_90_94_PS:  age>=90  and age<=94  and pohlavie==1 and hatlev5==4
+            AGE_M_95_100_PS: age>=95  and age<=100 and pohlavie==1 and hatlev5==4
+
+            AGE_F_16_19_PS:  age>=16  and age<=19  and pohlavie==2 and hatlev5==4
+            AGE_F_20_24_PS:  age>=20  and age<=24  and pohlavie==2 and hatlev5==4
+            AGE_F_25_29_PS:  age>=25  and age<=29  and pohlavie==2 and hatlev5==4
+            AGE_F_30_34_PS:  age>=30  and age<=34  and pohlavie==2 and hatlev5==4
+            AGE_F_35_39_PS:  age>=35  and age<=39  and pohlavie==2 and hatlev5==4
+            AGE_F_40_44_PS:  age>=40  and age<=44  and pohlavie==2 and hatlev5==4
+            AGE_F_45_49_PS:  age>=45  and age<=49  and pohlavie==2 and hatlev5==4
+            AGE_F_50_54_PS:  age>=50  and age<=54  and pohlavie==2 and hatlev5==4
+            AGE_F_55_59_PS:  age>=55  and age<=59  and pohlavie==2 and hatlev5==4
+            AGE_F_60_PS:     age==60               and pohlavie==2 and hatlev5==4
+            AGE_F_61_PS:     age==61               and pohlavie==2 and hatlev5==4
+            AGE_F_62_PS:     age==62               and pohlavie==2 and hatlev5==4
+            AGE_F_63_PS:     age==63               and pohlavie==2 and hatlev5==4
+            AGE_F_64_PS:     age==64               and pohlavie==2 and hatlev5==4
+            AGE_F_65_PS:     age==65               and pohlavie==2 and hatlev5==4
+            AGE_F_66_PS:     age==66               and pohlavie==2 and hatlev5==4
+            AGE_F_67_PS:     age==67               and pohlavie==2 and hatlev5==4
+            AGE_F_68_PS:     age==68               and pohlavie==2 and hatlev5==4
+            AGE_F_69_PS:     age==69               and pohlavie==2 and hatlev5==4
+            AGE_F_70_71_PS:  age>=70  and age<=71  and pohlavie==2 and hatlev5==4
+            AGE_F_72_73_PS:  age>=72  and age<=73  and pohlavie==2 and hatlev5==4
+            AGE_F_74_75_PS:  age>=74  and age<=75  and pohlavie==2 and hatlev5==4
+            AGE_F_76_77_PS:  age>=76  and age<=77  and pohlavie==2 and hatlev5==4
+            AGE_F_78_79_PS:  age>=78  and age<=79  and pohlavie==2 and hatlev5==4
+            AGE_F_80_84_PS:  age>=80  and age<=84  and pohlavie==2 and hatlev5==4
+            AGE_F_85_89_PS:  age>=85  and age<=89  and pohlavie==2 and hatlev5==4
+            AGE_F_90_94_PS:  age>=90  and age<=94  and pohlavie==2 and hatlev5==4
+            AGE_F_95_100_PS: age>=95  and age<=100 and pohlavie==2 and hatlev5==4
+
+            AGE_M_16_19_TR:  age>=16  and age<=19  and pohlavie==1 and hatlev5==5
+            AGE_M_20_24_TR:  age>=20  and age<=24  and pohlavie==1 and hatlev5==5
+            AGE_M_25_29_TR:  age>=25  and age<=29  and pohlavie==1 and hatlev5==5
+            AGE_M_30_34_TR:  age>=30  and age<=34  and pohlavie==1 and hatlev5==5
+            AGE_M_35_39_TR:  age>=35  and age<=39  and pohlavie==1 and hatlev5==5
+            AGE_M_40_44_TR:  age>=40  and age<=44  and pohlavie==1 and hatlev5==5
+            AGE_M_45_49_TR:  age>=45  and age<=49  and pohlavie==1 and hatlev5==5
+            AGE_M_50_54_TR:  age>=50  and age<=54  and pohlavie==1 and hatlev5==5
+            AGE_M_55_59_TR:  age>=55  and age<=59  and pohlavie==1 and hatlev5==5
+            AGE_M_60_64_TR:  age>=60  and age<=64  and pohlavie==1 and hatlev5==5
+            AGE_M_65_TR:     age==65               and pohlavie==1 and hatlev5==5
+            AGE_M_66_TR:     age==66               and pohlavie==1 and hatlev5==5
+            AGE_M_67_TR:     age==67               and pohlavie==1 and hatlev5==5
+            AGE_M_68_TR:     age==68               and pohlavie==1 and hatlev5==5
+            AGE_M_69_TR:     age==69               and pohlavie==1 and hatlev5==5
+            AGE_M_70_71_TR:  age>=70  and age<=71  and pohlavie==1 and hatlev5==5
+            AGE_M_72_73_TR:  age>=72  and age<=73  and pohlavie==1 and hatlev5==5
+            AGE_M_74_75_TR:  age>=74  and age<=75  and pohlavie==1 and hatlev5==5
+            AGE_M_76_77_TR:  age>=76  and age<=77  and pohlavie==1 and hatlev5==5
+            AGE_M_78_79_TR:  age>=78  and age<=79  and pohlavie==1 and hatlev5==5
+            AGE_M_80_84_TR:  age>=80  and age<=84  and pohlavie==1 and hatlev5==5
+            AGE_M_85_89_TR:  age>=85  and age<=89  and pohlavie==1 and hatlev5==5
+            AGE_M_90_94_TR:  age>=90  and age<=94  and pohlavie==1 and hatlev5==5
+            AGE_M_95_100_TR: age>=95  and age<=100 and pohlavie==1 and hatlev5==5
+
+            AGE_F_16_19_TR:  age>=16  and age<=19  and pohlavie==2 and hatlev5==5
+            AGE_F_20_24_TR:  age>=20  and age<=24  and pohlavie==2 and hatlev5==5
+            AGE_F_25_29_TR:  age>=25  and age<=29  and pohlavie==2 and hatlev5==5
+            AGE_F_30_34_TR:  age>=30  and age<=34  and pohlavie==2 and hatlev5==5
+            AGE_F_35_39_TR:  age>=35  and age<=39  and pohlavie==2 and hatlev5==5
+            AGE_F_40_44_TR:  age>=40  and age<=44  and pohlavie==2 and hatlev5==5
+            AGE_F_45_49_TR:  age>=45  and age<=49  and pohlavie==2 and hatlev5==5
+            AGE_F_50_54_TR:  age>=50  and age<=54  and pohlavie==2 and hatlev5==5
+            AGE_F_55_59_TR:  age>=55  and age<=59  and pohlavie==2 and hatlev5==5
+            AGE_F_60_TR:     age==60               and pohlavie==2 and hatlev5==5
+            AGE_F_61_TR:     age==61               and pohlavie==2 and hatlev5==5
+            AGE_F_62_TR:     age==62               and pohlavie==2 and hatlev5==5
+            AGE_F_63_TR:     age==63               and pohlavie==2 and hatlev5==5
+            AGE_F_64_TR:     age==64               and pohlavie==2 and hatlev5==5
+            AGE_F_65_TR:     age==65               and pohlavie==2 and hatlev5==5
+            AGE_F_66_TR:     age==66               and pohlavie==2 and hatlev5==5
+            AGE_F_67_TR:     age==67               and pohlavie==2 and hatlev5==5
+            AGE_F_68_TR:     age==68               and pohlavie==2 and hatlev5==5
+            AGE_F_69_TR:     age==69               and pohlavie==2 and hatlev5==5
+            AGE_F_70_71_TR:  age>=70  and age<=71  and pohlavie==2 and hatlev5==5
+            AGE_F_72_73_TR:  age>=72  and age<=73  and pohlavie==2 and hatlev5==5
+            AGE_F_74_75_TR:  age>=74  and age<=75  and pohlavie==2 and hatlev5==5
+            AGE_F_76_77_TR:  age>=76  and age<=77  and pohlavie==2 and hatlev5==5
+            AGE_F_78_79_TR:  age>=78  and age<=79  and pohlavie==2 and hatlev5==5
+            AGE_F_80_84_TR:  age>=80  and age<=84  and pohlavie==2 and hatlev5==5
+            AGE_F_85_89_TR:  age>=85  and age<=89  and pohlavie==2 and hatlev5==5
+            AGE_F_90_94_TR:  age>=90  and age<=94  and pohlavie==2 and hatlev5==5
+            AGE_F_95_100_TR: age>=95  and age<=100 and pohlavie==2 and hatlev5==5
+            
+            AGEG16_AGR: age>=16 and age<=19 and nace==1
+            AGEG22_AGR: age>=20 and age<=24 and nace==1
+            AGEG27_AGR: age>=25 and age<=29 and nace==1
+            AGEG32_AGR: age>=30 and age<=34 and nace==1
+            AGEG37_AGR: age>=35 and age<=39 and nace==1
+            AGEG42_AGR: age>=40 and age<=44 and nace==1
+            AGEG47_AGR: age>=45 and age<=49 and nace==1
+            AGEG52_AGR: age>=50 and age<=54 and nace==1
+            AGEG57_AGR: age>=55 and age<=59 and nace==1
+            AGEG62_AGR: age>=60 and age<=64 and nace==1
+            AGE60_AGR: age==60 and nace==1
+            
+            AGEG16_IND: age>=16 and age<=19 and nace==2
+            AGEG22_IND: age>=20 and age<=24 and nace==2
+            AGEG27_IND: age>=25 and age<=29 and nace==2
+            AGEG32_IND: age>=30 and age<=34 and nace==2
+            AGEG37_IND: age>=35 and age<=39 and nace==2
+            AGEG42_IND: age>=40 and age<=44 and nace==2
+            AGEG47_IND: age>=45 and age<=49 and nace==2
+            AGEG52_IND: age>=50 and age<=54 and nace==2
+            AGEG57_IND: age>=55 and age<=59 and nace==2
+            AGEG62_IND: age>=60 and age<=64 and nace==2
+            AGE60_IND: age==60 and nace==2
+            
+            AGEG16_CON: age>=16 and age<=19 and nace==3
+            AGEG22_CON: age>=20 and age<=24 and nace==3
+            AGEG27_CON: age>=25 and age<=29 and nace==3
+            AGEG32_CON: age>=30 and age<=34 and nace==3
+            AGEG37_CON: age>=35 and age<=39 and nace==3
+            AGEG42_CON: age>=40 and age<=44 and nace==3
+            AGEG47_CON: age>=45 and age<=49 and nace==3
+            AGEG52_CON: age>=50 and age<=54 and nace==3
+            AGEG57_CON: age>=55 and age<=59 and nace==3
+            AGEG62_CON: age>=60 and age<=64 and nace==3
+            AGE60_CON: age==60 and nace==3
+            
+            AGEG16_MAR: age>=16 and age<=19 and nace==4
+            AGEG22_MAR: age>=20 and age<=24 and nace==4
+            AGEG27_MAR: age>=25 and age<=29 and nace==4
+            AGEG32_MAR: age>=30 and age<=34 and nace==4
+            AGEG37_MAR: age>=35 and age<=39 and nace==4
+            AGEG42_MAR: age>=40 and age<=44 and nace==4
+            AGEG47_MAR: age>=45 and age<=49 and nace==4
+            AGEG52_MAR: age>=50 and age<=54 and nace==4
+            AGEG57_MAR: age>=55 and age<=59 and nace==4
+            AGEG62_MAR: age>=60 and age<=64 and nace==5
+            AGE60_MAR: age==60 and nace==4
+            
+            AGEG16_NMAR: age>=16 and age<=19 and nace==5
+            AGEG22_NMAR: age>=20 and age<=24 and nace==5
+            AGEG27_NMAR: age>=25 and age<=29 and nace==5
+            AGEG32_NMAR: age>=30 and age<=34 and nace==5
+            AGEG37_NMAR: age>=35 and age<=39 and nace==5
+            AGEG42_NMAR: age>=40 and age<=44 and nace==5
+            AGEG47_NMAR: age>=45 and age<=49 and nace==5
+            AGEG52_NMAR: age>=50 and age<=54 and nace==5
+            AGEG57_NMAR: age>=55 and age<=59 and nace==5
+            AGEG62_NMAR: age>=60 and age<=64 and nace==5
+            AGE60_NMAR: age==60 and nace==5
+            
+            AGEG16_PR: age>=16 and age<=19 and hatlev5==1
+            AGEG22_PR: age>=20 and age<=24 and hatlev5==1
+            AGEG27_PR: age>=25 and age<=29 and hatlev5==1
+            AGEG32_PR: age>=30 and age<=34 and hatlev5==1
+            AGEG37_PR: age>=35 and age<=39 and hatlev5==1
+            AGEG42_PR: age>=40 and age<=44 and hatlev5==1
+            AGEG47_PR: age>=45 and age<=49 and hatlev5==1
+            AGEG52_PR: age>=50 and age<=54 and hatlev5==1
+            AGEG57_PR: age>=55 and age<=59 and hatlev5==1
+            AGEG62_PR: age>=60 and age<=64 and hatlev5==1
+            AGE60_PR: age==60 and hatlev5==1
+            
+            AGEG16_LS: age>=16 and age<=19 and hatlev5==2
+            AGEG22_LS: age>=20 and age<=24 and hatlev5==2
+            AGEG27_LS: age>=25 and age<=29 and hatlev5==2
+            AGEG32_LS: age>=30 and age<=34 and hatlev5==2
+            AGEG37_LS: age>=35 and age<=39 and hatlev5==2
+            AGEG42_LS: age>=40 and age<=44 and hatlev5==2
+            AGEG47_LS: age>=45 and age<=49 and hatlev5==2
+            AGEG52_LS: age>=50 and age<=54 and hatlev5==2
+            AGEG57_LS: age>=55 and age<=59 and hatlev5==2
+            AGEG62_LS: age>=60 and age<=64 and hatlev5==2
+            AGE60_LS: age==60 and hatlev5==2
+            
+            AGEG16_US: age>=16 and age<=19 and hatlev5==3
+            AGEG22_US: age>=20 and age<=24 and hatlev5==3
+            AGEG27_US: age>=25 and age<=29 and hatlev5==3
+            AGEG32_US: age>=30 and age<=34 and hatlev5==3
+            AGEG37_US: age>=35 and age<=39 and hatlev5==3
+            AGEG42_US: age>=40 and age<=44 and hatlev5==3
+            AGEG47_US: age>=45 and age<=49 and hatlev5==3
+            AGEG52_US: age>=50 and age<=54 and hatlev5==3
+            AGEG57_US: age>=55 and age<=59 and hatlev5==3
+            AGEG62_US: age>=60 and age<=64 and hatlev5==3
+            AGE60_US: age==60 and hatlev5==3
+            
+            AGEG16_PS: age>=16 and age<=19 and hatlev5==4
+            AGEG22_PS: age>=20 and age<=24 and hatlev5==4
+            AGEG27_PS: age>=25 and age<=29 and hatlev5==4
+            AGEG32_PS: age>=30 and age<=34 and hatlev5==4
+            AGEG37_PS: age>=35 and age<=39 and hatlev5==4
+            AGEG42_PS: age>=40 and age<=44 and hatlev5==4
+            AGEG47_PS: age>=45 and age<=49 and hatlev5==4
+            AGEG52_PS: age>=50 and age<=54 and hatlev5==4
+            AGEG57_PS: age>=55 and age<=59 and hatlev5==4
+            AGEG62_PS: age>=60 and age<=64 and hatlev5==4
+            AGE60_PS: age==60 and hatlev5==4
+            
+            AGEG16_TR: age>=16 and age<=19 and hatlev5==5
+            AGEG22_TR: age>=20 and age<=24 and hatlev5==5
+            AGEG27_TR: age>=25 and age<=29 and hatlev5==5
+            AGEG32_TR: age>=30 and age<=34 and hatlev5==5
+            AGEG37_TR: age>=35 and age<=39 and hatlev5==5
+            AGEG42_TR: age>=40 and age<=44 and hatlev5==5
+            AGEG47_TR: age>=45 and age<=49 and hatlev5==5
+            AGEG52_TR: age>=50 and age<=54 and hatlev5==5
+            AGEG57_TR: age>=55 and age<=59 and hatlev5==5
+            AGEG62_TR: age>=60 and age<=64 and hatlev5==5
+            AGE60_TR: age==60 and hatlev5==5
+            
+            MOTHER: maternity==True
+            
+            NEW_RETIRED: retired_new==True
+            EARLY_RETIRED: retired_early==True
+            
+        processes: 
+
+######################################################
+####### Simuluje len d??chodky ########################
+######################################################
+
+            init_disab_pens():
+               - disab_pension_pred: if(disabled, log_regr(5.657274+ISFEMALE*(-0.1890172)+AGRO*(0.1208265)+INDUSTRY*(0.143865)+CONSTRUCTION*(0.0887436)+MAR_SERVICES*(0.1448536)+NMAR_SERVICES*(0.1242352)+PRIMARY*(-0.3036511)+LOWER_SECONDARY*(-0.19964)+UPPER_SECONDARY*(-0.0907901)+POST_SECONDARY*(-0.026079)+TERTIARY*(0.1806148)+age*(-0.0170175)+(age*age)*(0.0002837), filter=disabled, mult=0.0, error_var=None), 0)
+#               - disab_pension_pred: if(IS_DISABLED, exp(disab_ln_score), 0)
+               - disab_pension_pred: disab_pension_pred * 1.43657516
+               - pension: if(disabled, disab_pension_pred, pension)
+               - pension_total: if(disabled, disab_pension_pred, pension_total)
+            
+            init_pillar2_savers():
+               - pillar2_saver: False
+               - pillar2_saver_score: uniform()
+               - pillar2_saver: if(ISMALE,
+                                    align_abs(pillar2_saver_score, 'pillar2_savers_male_sample.csv', filter=ISMALE),
+                                    align_abs(pillar2_saver_score, 'pillar2_savers_female_sample.csv', filter=ISFEMALE))
+               - pillar2_entry_year: 0
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==16, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==17, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==18, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==19, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==20, 2020, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==21, 2020, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==22, 2020, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==23, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==24, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==25, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==26, 2018, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==27, 2018, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==28, 2017, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==29, 2016, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==30, 2016, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==31, 2016, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==32, 2014, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==33, 2012, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==34, 2012, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==35, 2011, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==36, 2009, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==37, 2008, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==38, 2007, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==39, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==40, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==41, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==42, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==43, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==44, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==45, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==46, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==47, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==48, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==49, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==50, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==51, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==52, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==53, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==54, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==55, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==56, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==57, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==58, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==59, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==60, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==61, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==62, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==63, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==64, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==65, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==66, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==67, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==68, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age==69, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISMALE and age>=70, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==16, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==17, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==18, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==19, 2021, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==20, 2020, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==21, 2020, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==22, 2020, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==23, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==24, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==25, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==26, 2019, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==27, 2018, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==28, 2018, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==29, 2017, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==30, 2017, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==31, 2016, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==32, 2015, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==33, 2013, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==34, 2013, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==35, 2011, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==36, 2010, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==37, 2008, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==38, 2007, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==39, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==40, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==41, 2006, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==42, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==43, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==44, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==45, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==46, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==47, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==48, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==49, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==50, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==51, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==52, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==53, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==54, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==55, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==56, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==57, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==58, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==59, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==60, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==61, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==62, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==63, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==64, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==65, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==66, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==67, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==68, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age==69, 2005, pillar2_entry_year)
+               - pillar2_entry_year: if(pillar2_saver and ISFEMALE and age>=70, 2005, pillar2_entry_year)
+            
+            csv_pillar2_stock():
+               - csv(period,
+                     count(pillar2_saver and ISMALE) * 5,
+                     count(pillar2_saver and ISFEMALE) * 5,
+                     count(pillar2_saver) * 5,
+                     fname='pillar2_stock_summary.csv', mode='a')
+            
+            pillar2_mandatory_entry():
+               - pillar2_entry: False
+               - pillar2_entry_score: uniform()
+               - pillar2_entry: if(IS_EMPLOYED and status1y != EMPLOYED and cumulative_omb == 0 and age <= 40 and not pillar2_saver,
+                                   align_abs(pillar2_entry_score,
+                                             round(count(IS_EMPLOYED and status1y != EMPLOYED and cumulative_omb == 0 and age <= 40 and not pillar2_saver) * pillar2_mandatory_entry_rate),
+                                             filter=IS_EMPLOYED and status1y != EMPLOYED and cumulative_omb == 0 and age <= 40 and not pillar2_saver),
+                                   False)
+               - pillar2_saver: if(pillar2_entry, True, pillar2_saver)
+               - pillar2_entry_year: if(pillar2_entry, period, pillar2_entry_year)
+            
+            pillar2_return_entry():
+               - pillar2_return: False
+               - pillar2_return_score: uniform()
+               - pillar2_return: if(period > 2022 and age <= 40 and not pillar2_saver,
+                                    align_abs(pillar2_return_score,
+                                              round(count(period > 2022 and age <= 40 and not pillar2_saver) * pillar2_return_rate),
+                                              filter=period > 2022 and age <= 40 and not pillar2_saver),
+                                    False)
+               - pillar2_saver: if(pillar2_return, True, pillar2_saver)
+               - pillar2_entry_year: if(pillar2_return, period, pillar2_entry_year)
+               
+            maternity():
+                - maternity: False
+                - maternity_score: logit_regr(-22.33631 + age*(1.310724) + (age*age)*(-0.0211879) + PRIMARY*(-1.194066) + LOWER_SECONDARY*(-0.3180492) + POST_SECONDARY*(0.1338316) + TERTIARY*(0.4085348), filter=ISFEMALE and age>=15 and age<40)
+                - maternity: if(age>=15 and age<40 and ISFEMALE,
+                                align_abs(maternity_score, count(age<=3)*0.75),
+                                False)
+               
+####################################################################               
+## Granted pension level
+####################################################################
+# TOTO je SIMPLE SPOSOB AKO simulovat vy??ku d??chodku, nech??me to za n??s spravi?? mincerovsk?? rovnicu, za??nime z t??mto sp??sobom
+            
+            wages():
+            #    - omb: cont_regr(ISFEMALE*(-0.2899631)+AGRO*(0.188833)+INDUSTRY*(0.4991889)+MAR_SERVICES*(0.265033)+NMAR_SERVICES*(0.3805113)+PRIMARY*(-0.2972319)+LOWER_SECONDARY*(-0.2578316)+POST_SECONDARY*(0.1022439)+TERTIARY*(0.6443882)+DETI1*(-0.0840496)+DETI2*(-0.047883)+DETI3*(-0.1053393)+DETI4*(-0.1605323)+DETI5*(-0.2300576)+DETI6*(-0.3045981)+age*(0.0950027)+(age*age)*(-0.00102)+ZENA2040*(-0.2233584)+1*(-0.7825029))
+                - temp_omb_1m: (if(AGE_M_16_19_AGR,AGE_M_16_19_AGR,0))*(0)+(if(AGE_M_16_19_IND,AGE_M_16_19_IND,0))*(0)+(if(AGE_M_16_19_CON,AGE_M_16_19_CON,0))*(0)+(if(AGE_M_16_19_NMAR,AGE_M_16_19_NMAR,0))*(0)+ 
+                            (if(AGE_M_20_24_AGR,AGE_M_20_24_AGR,0))  *(-0.0652)+(if(AGE_M_20_24_IND,AGE_M_20_24_IND,0))  *(0.137)  +(if(AGE_M_20_24_CON,AGE_M_20_24_CON,0))  *(-0.106) +(if(AGE_M_20_24_NMAR,AGE_M_20_24_NMAR,0))  *(-0.0291)+
+                            (if(AGE_M_25_29_AGR,AGE_M_25_29_AGR,0))  *(-0.221) +(if(AGE_M_25_29_IND,AGE_M_25_29_IND,0))  *(0.0922) +(if(AGE_M_25_29_CON,AGE_M_25_29_CON,0))  *(-0.186) +(if(AGE_M_25_29_NMAR,AGE_M_25_29_NMAR,0))  *(-0.00358)+
+                            (if(AGE_M_30_34_AGR,AGE_M_30_34_AGR,0))  *(-0.222) +(if(AGE_M_30_34_IND,AGE_M_30_34_IND,0))  *(0.108)  +(if(AGE_M_30_34_CON,AGE_M_30_34_CON,0))  *(-0.191) +(if(AGE_M_30_34_NMAR,AGE_M_30_34_NMAR,0))  *(-0.0162)+
+                            (if(AGE_M_35_39_AGR,AGE_M_35_39_AGR,0))  *(-0.167) +(if(AGE_M_35_39_IND,AGE_M_35_39_IND,0))  *(0.124)  +(if(AGE_M_35_39_CON,AGE_M_35_39_CON,0))  *(-0.146) +(if(AGE_M_35_39_NMAR,AGE_M_35_39_NMAR,0))  *(0.0278)+
+                            (if(AGE_M_40_44_AGR,AGE_M_40_44_AGR,0))  *(-0.119) +(if(AGE_M_40_44_IND,AGE_M_40_44_IND,0))  *(0.124)  +(if(AGE_M_40_44_CON,AGE_M_40_44_CON,0))  *(-0.113) +(if(AGE_M_40_44_NMAR,AGE_M_40_44_NMAR,0))  *(0.0797)+
+                            (if(AGE_M_45_49_AGR,AGE_M_45_49_AGR,0))  *(-0.106) +(if(AGE_M_45_49_IND,AGE_M_45_49_IND,0))  *(0.105)  +(if(AGE_M_45_49_CON,AGE_M_45_49_CON,0))  *(-0.0777)+(if(AGE_M_45_49_NMAR,AGE_M_45_49_NMAR,0))  *(0.121)+
+                            (if(AGE_M_50_54_AGR,AGE_M_50_54_AGR,0))  *(-0.0873)+(if(AGE_M_50_54_IND,AGE_M_50_54_IND,0))  *(0.0628) +(if(AGE_M_50_54_CON,AGE_M_50_54_CON,0))  *(-0.0534)+(if(AGE_M_50_54_NMAR,AGE_M_50_54_NMAR,0))  *(0.130)+
+                            (if(AGE_M_55_59_AGR,AGE_M_55_59_AGR,0))  *(-0.104) +(if(AGE_M_55_59_IND,AGE_M_55_59_IND,0))  *(-0.0212)+(if(AGE_M_55_59_CON,AGE_M_55_59_CON,0))  *(-0.0251)+(if(AGE_M_55_59_NMAR,AGE_M_55_59_NMAR,0))  *(0.151)+
+                            (if(AGE_M_60_64_AGR,AGE_M_60_64_AGR,0))  *(-0.139) +(if(AGE_M_60_64_IND,AGE_M_60_64_IND,0))  *(-0.0268)+(if(AGE_M_60_64_CON,AGE_M_60_64_CON,0))  *(-0.0111)+(if(AGE_M_60_64_NMAR,AGE_M_60_64_NMAR,0))  *(0.242)
+                - temp_omb_2m: (if(AGE_M_65_AGR,AGE_M_65_AGR,0))        *(-0.248) +(if(AGE_M_65_IND,AGE_M_65_IND,0))        *(-0.0880)+(if(AGE_M_65_CON,AGE_M_65_CON,0))        *(-0.0394)+(if(AGE_M_65_NMAR,AGE_M_65_NMAR,0))        *(0.325)+
+                            (if(AGE_M_66_AGR,AGE_M_66_AGR,0))        *(-0.276) +(if(AGE_M_66_IND,AGE_M_66_IND,0))        *(-0.115) +(if(AGE_M_66_CON,AGE_M_66_CON,0))        *(-0.0207)+(if(AGE_M_66_NMAR,AGE_M_66_NMAR,0))        *(0.330)+
+                            (if(AGE_M_67_AGR,AGE_M_67_AGR,0))        *(-0.290) +(if(AGE_M_67_IND,AGE_M_67_IND,0))        *(-0.133) +(if(AGE_M_67_CON,AGE_M_67_CON,0))        *(-0.0350)+(if(AGE_M_67_NMAR,AGE_M_67_NMAR,0))        *(0.332)+
+                            (if(AGE_M_68_AGR,AGE_M_68_AGR,0))        *(-0.302) +(if(AGE_M_68_IND,AGE_M_68_IND,0))        *(-0.145) +(if(AGE_M_68_CON,AGE_M_68_CON,0))        *(-0.0128)+(if(AGE_M_68_NMAR,AGE_M_68_NMAR,0))        *(0.344)+
+                            (if(AGE_M_69_AGR,AGE_M_69_AGR,0))        *(-0.298) +(if(AGE_M_69_IND,AGE_M_69_IND,0))        *(-0.129) +(if(AGE_M_69_CON,AGE_M_69_CON,0))        *(-0.0003)+(if(AGE_M_69_NMAR,AGE_M_69_NMAR,0))        *(0.351)+
+                            (if(AGE_M_70_71_AGR,AGE_M_70_71_AGR,0))  *(-0.261) +(if(AGE_M_70_71_IND,AGE_M_70_71_IND,0))  *(-0.143) +(if(AGE_M_70_71_CON,AGE_M_70_71_CON,0))  *(0.0995) +(if(AGE_M_70_71_NMAR,AGE_M_70_71_NMAR,0))  *(0.335)+
+                            (if(AGE_M_72_73_AGR,AGE_M_72_73_AGR,0))  *(-0.240) +(if(AGE_M_72_73_IND,AGE_M_72_73_IND,0))  *(-0.170) +(if(AGE_M_72_73_CON,AGE_M_72_73_CON,0))  *(0.128)  +(if(AGE_M_72_73_NMAR,AGE_M_72_73_NMAR,0))  *(0.287)+
+                            (if(AGE_M_74_75_AGR,AGE_M_74_75_AGR,0))  *(-0.216) +(if(AGE_M_74_75_IND,AGE_M_74_75_IND,0))  *(-0.167) +(if(AGE_M_74_75_CON,AGE_M_74_75_CON,0))  *(0.171)  +(if(AGE_M_74_75_NMAR,AGE_M_74_75_NMAR,0))  *(0.284)+
+                            (if(AGE_M_76_77_AGR,AGE_M_76_77_AGR,0))  *(-0.222) +(if(AGE_M_76_77_IND,AGE_M_76_77_IND,0))  *(-0.174) +(if(AGE_M_76_77_CON,AGE_M_76_77_CON,0))  *(0.100)  +(if(AGE_M_76_77_NMAR,AGE_M_76_77_NMAR,0))  *(0.261)+
+                            (if(AGE_M_78_79_AGR,AGE_M_78_79_AGR,0))  *(-0.264) +(if(AGE_M_78_79_IND,AGE_M_78_79_IND,0))  *(-0.256) +(if(AGE_M_78_79_CON,AGE_M_78_79_CON,0))  *(0.375)  +(if(AGE_M_78_79_NMAR,AGE_M_78_79_NMAR,0))  *(0.274)+
+                            (if(AGE_M_80_84_AGR,AGE_M_80_84_AGR,0))  *(-0.205) +(if(AGE_M_80_84_IND,AGE_M_80_84_IND,0))  *(-0.196) +(if(AGE_M_80_84_CON,AGE_M_80_84_CON,0))  *(0.0546) +(if(AGE_M_80_84_NMAR,AGE_M_80_84_NMAR,0))  *(0.238)+
+                            (if(AGE_M_85_89_AGR,AGE_M_85_89_AGR,0))  *(-0.342) +(if(AGE_M_85_89_IND,AGE_M_85_89_IND,0))  *(0)      +(if(AGE_M_85_89_CON,AGE_M_85_89_CON,0))  *(0.0525) +(if(AGE_M_85_89_NMAR,AGE_M_85_89_NMAR,0))  *(0.231)+
+                            (if(AGE_M_90_94_AGR,AGE_M_90_94_AGR,0))  *(0)      +(if(AGE_M_90_94_IND,AGE_M_90_94_IND,0))  *(-0.545) +(if(AGE_M_90_94_CON,AGE_M_90_94_CON,0))  *(0)      +(if(AGE_M_90_94_NMAR,AGE_M_90_94_NMAR,0))  *(0.432)+
+                            (if(AGE_M_95_100_AGR,AGE_M_95_100_AGR,0))*(0)      +(if(AGE_M_95_100_IND,AGE_M_95_100_IND,0))*(0)      +(if(AGE_M_95_100_CON,AGE_M_95_100_CON,0))*(0)      +(if(AGE_M_95_100_NMAR,AGE_M_95_100_NMAR,0))*(0)
+                
+                - temp_omb_3m: (if(AGE_M_16_19_PR,AGE_M_16_19_PR,0))*(0)+(if(AGE_M_16_19_LS,AGE_M_16_19_LS,0))*(0)+(if(AGE_M_16_19_PS,AGE_M_16_19_PS,0))*(0)+(if(AGE_M_16_19_TR,AGE_M_16_19_TR,0))*(0)+
+                            (if(AGE_M_20_24_PR,AGE_M_20_24_PR,0))  *(0.0135)+(if(AGE_M_20_24_LS,AGE_M_20_24_LS,0))  *(-0.114) +(if(AGE_M_20_24_PS,AGE_M_20_24_PS,0))  *(0.0819) +(if(AGE_M_20_24_TR,AGE_M_20_24_TR,0))  *(0.0984)+
+                            (if(AGE_M_25_29_PR,AGE_M_25_29_PR,0))  *(-0.230)+(if(AGE_M_25_29_LS,AGE_M_25_29_LS,0))  *(-0.228) +(if(AGE_M_25_29_PS,AGE_M_25_29_PS,0))  *(0.122)  +(if(AGE_M_25_29_TR,AGE_M_25_29_TR,0))  *(0.454) +
+                            (if(AGE_M_30_34_PR,AGE_M_30_34_PR,0))  *(-0.276)+(if(AGE_M_30_34_LS,AGE_M_30_34_LS,0))  *(-0.235) +(if(AGE_M_30_34_PS,AGE_M_30_34_PS,0))  *(0.192)  +(if(AGE_M_30_34_TR,AGE_M_30_34_TR,0))  *(0.531) +
+                            (if(AGE_M_35_39_PR,AGE_M_35_39_PR,0))  *(-0.273)+(if(AGE_M_35_39_LS,AGE_M_35_39_LS,0))  *(-0.219) +(if(AGE_M_35_39_PS,AGE_M_35_39_PS,0))  *(0.151)  +(if(AGE_M_35_39_TR,AGE_M_35_39_TR,0))  *(0.547) +
+                            (if(AGE_M_40_44_PR,AGE_M_40_44_PR,0))  *(-0.246)+(if(AGE_M_40_44_LS,AGE_M_40_44_LS,0))  *(-0.194) +(if(AGE_M_40_44_PS,AGE_M_40_44_PS,0))  *(0.0789) +(if(AGE_M_40_44_TR,AGE_M_40_44_TR,0))  *(0.534) +
+                            (if(AGE_M_45_49_PR,AGE_M_45_49_PR,0))  *(-0.215)+(if(AGE_M_45_49_LS,AGE_M_45_49_LS,0))  *(-0.178) +(if(AGE_M_45_49_PS,AGE_M_45_49_PS,0))  *(0.0771) +(if(AGE_M_45_49_TR,AGE_M_45_49_TR,0))  *(0.529) +
+                            (if(AGE_M_50_54_PR,AGE_M_50_54_PR,0))  *(-0.140)+(if(AGE_M_50_54_LS,AGE_M_50_54_LS,0))  *(-0.153) +(if(AGE_M_50_54_PS,AGE_M_50_54_PS,0))  *(0.0706) +(if(AGE_M_50_54_TR,AGE_M_50_54_TR,0))  *(0.538) +
+                            (if(AGE_M_55_59_PR,AGE_M_55_59_PR,0))  *(-0.076)+(if(AGE_M_55_59_LS,AGE_M_55_59_LS,0))  *(-0.142) +(if(AGE_M_55_59_PS,AGE_M_55_59_PS,0))  *(0.0846) +(if(AGE_M_55_59_TR,AGE_M_55_59_TR,0))  *(0.583) +
+                            (if(AGE_M_60_64_PR,AGE_M_60_64_PR,0))  *(0.0360)+(if(AGE_M_60_64_LS,AGE_M_60_64_LS,0))  *(-0.0995)+(if(AGE_M_60_64_PS,AGE_M_60_64_PS,0))  *(0.0564) +(if(AGE_M_60_64_TR,AGE_M_60_64_TR,0))  *(0.635) 
+                - temp_omb_4m: (if(AGE_M_65_PR,AGE_M_65_PR,0))        *(0.134) +(if(AGE_M_65_LS,AGE_M_65_LS,0))        *(-0.0667)+(if(AGE_M_65_PS,AGE_M_65_PS,0))        *(0.0466) +(if(AGE_M_65_TR,AGE_M_65_TR,0))        *(0.609) +
+                            (if(AGE_M_66_PR,AGE_M_66_PR,0))        *(0.171) +(if(AGE_M_66_LS,AGE_M_66_LS,0))        *(-0.0527)+(if(AGE_M_66_PS,AGE_M_66_PS,0))        *(0.0813) +(if(AGE_M_66_TR,AGE_M_66_TR,0))        *(0.597) +
+                            (if(AGE_M_67_PR,AGE_M_67_PR,0))        *(0.203) +(if(AGE_M_67_LS,AGE_M_67_LS,0))        *(-0.0483)+(if(AGE_M_67_PS,AGE_M_67_PS,0))        *(0.00493)+(if(AGE_M_67_TR,AGE_M_67_TR,0))        *(0.571) +
+                            (if(AGE_M_68_PR,AGE_M_68_PR,0))        *(0.210) +(if(AGE_M_68_LS,AGE_M_68_LS,0))        *(-0.0586)+(if(AGE_M_68_PS,AGE_M_68_PS,0))        *(-0.0355)+(if(AGE_M_68_TR,AGE_M_68_TR,0))        *(0.558) +
+                            (if(AGE_M_69_PR,AGE_M_69_PR,0))        *(0.229) +(if(AGE_M_69_LS,AGE_M_69_LS,0))        *(-0.0549)+(if(AGE_M_69_PS,AGE_M_69_PS,0))        *(0.453)  +(if(AGE_M_69_TR,AGE_M_69_TR,0))        *(0.551) +
+                            (if(AGE_M_70_71_PR,AGE_M_70_71_PR,0))  *(0.195) +(if(AGE_M_70_71_LS,AGE_M_70_71_LS,0))  *(-0.0467)+(if(AGE_M_70_71_PS,AGE_M_70_71_PS,0))  *(0)      +(if(AGE_M_70_71_TR,AGE_M_70_71_TR,0))  *(0.518) +
+                            (if(AGE_M_72_73_PR,AGE_M_72_73_PR,0))  *(0.206) +(if(AGE_M_72_73_LS,AGE_M_72_73_LS,0))  *(-0.0257)+(if(AGE_M_72_73_PS,AGE_M_72_73_PS,0))  *(0)      +(if(AGE_M_72_73_TR,AGE_M_72_73_TR,0))  *(0.494) +
+                            (if(AGE_M_74_75_PR,AGE_M_74_75_PR,0))  *(0.188) +(if(AGE_M_74_75_LS,AGE_M_74_75_LS,0))  *(-0.0129)+(if(AGE_M_74_75_PS,AGE_M_74_75_PS,0))  *(0)      +(if(AGE_M_74_75_TR,AGE_M_74_75_TR,0))  *(0.440) +
+                            (if(AGE_M_76_77_PR,AGE_M_76_77_PR,0))  *(0.254) +(if(AGE_M_76_77_LS,AGE_M_76_77_LS,0))  *(0)      +(if(AGE_M_76_77_PS,AGE_M_76_77_PS,0))  *(0)      +(if(AGE_M_76_77_TR,AGE_M_76_77_TR,0))  *(0.455) +
+                            (if(AGE_M_78_79_PR,AGE_M_78_79_PR,0))  *(0)     +(if(AGE_M_78_79_LS,AGE_M_78_79_LS,0))  *(0)      +(if(AGE_M_78_79_PS,AGE_M_78_79_PS,0))  *(0)      +(if(AGE_M_78_79_TR,AGE_M_78_79_TR,0))  *(0.147) +
+                            (if(AGE_M_80_84_PR,AGE_M_80_84_PR,0))  *(0)     +(if(AGE_M_80_84_LS,AGE_M_80_84_LS,0))  *(0)      +(if(AGE_M_80_84_PS,AGE_M_80_84_PS,0))  *(0)      +(if(AGE_M_80_84_TR,AGE_M_80_84_TR,0))  *(0)     +
+                            (if(AGE_M_85_89_PR,AGE_M_85_89_PR,0))  *(0)     +(if(AGE_M_85_89_LS,AGE_M_85_89_LS,0))  *(0)      +(if(AGE_M_85_89_PS,AGE_M_85_89_PS,0))  *(0)      +(if(AGE_M_85_89_TR,AGE_M_85_89_TR,0))  *(0)     +
+                            (if(AGE_M_90_94_PR,AGE_M_90_94_PR,0))  *(0)     +(if(AGE_M_90_94_LS,AGE_M_90_94_LS,0))  *(0)      +(if(AGE_M_90_94_PS,AGE_M_90_94_PS,0))  *(0)      +(if(AGE_M_90_94_TR,AGE_M_90_94_TR,0))  *(0)     +
+                            (if(AGE_M_95_100_PR,AGE_M_95_100_PR,0))*(0)     +(if(AGE_M_95_100_LS,AGE_M_95_100_LS,0))*(0)      +(if(AGE_M_95_100_PS,AGE_M_95_100_PS,0))*(0)      +(if(AGE_M_95_100_TR,AGE_M_95_100_TR,0))*(0)
+                
+                
+                - omb_m: if(WAGE_AGE and ISMALE,
+                        cont_regr(1*(-0.934)+temp_omb_1m+temp_omb_2m+temp_omb_3m+temp_omb_4m+AGRO*(0.221)+INDUSTRY*(0.229)+CONSTRUCTION*(-0.00595)+NMAR_SERVICES*(-0.0239)+PRIMARY*(-0.228)+LOWER_SECONDARY*(0.006)+POST_SECONDARY*(-0.0648)+TERTIARY*(-0.0888)+AGE_M_20_24*(0.0714)+AGE_M_25_29*(0.152)+AGE_M_30_34*(0.0648)+AGE_M_35_39*(-0.0403)+AGE_M_40_44*(-0.0973)+AGE_M_45_49*(-0.106)+AGE_M_50_54*(-0.069)+AGE_M_55_59*(0.0159)+AGE_M_60_64*(-0.0255)+AGE_M_65*(-0.161)+AGE_M_66*(-0.172)+AGE_M_67*(-0.162)+AGE_M_68*(-0.139)+AGE_M_69*(-0.122)+AGE_M_70_71*(-0.0876)+AGE_M_72_73*(-0.0228)+AGE_M_74_75*(0.0812)+AGE_M_76_77*(0.157)+AGE_M_78_79*(0.569)+AGE_M_80_84*(0.911)+AGE_M_85_89*(1.240)+AGE_M_90_94*(1.657)+AGE_M_95_100*(2.171)+age*(0.0926)+(age*age)*(-0.00106)),-1)
+                                     
+                - temp_omb_1z: (if(AGE_F_16_19_AGR,AGE_F_16_19_AGR,0))*(0)+(if(AGE_F_16_19_IND,AGE_F_16_19_IND,0))*(0)+(if(AGE_F_16_19_CON,AGE_F_16_19_CON,0))*(0)+(if(AGE_F_16_19_NMAR,AGE_F_16_19_NMAR,0))*(0)+ 
+                            (if(AGE_F_20_24_AGR,AGE_F_20_24_AGR,0))  *(-0.0267) +(if(AGE_F_20_24_IND,AGE_F_20_24_IND,0))  *(0.0892)  +(if(AGE_F_20_24_CON,AGE_F_20_24_CON,0))  *(-0.0664) +(if(AGE_F_20_24_NMAR,AGE_F_20_24_NMAR,0))  *(0.0960) +
+                            (if(AGE_F_25_29_AGR,AGE_F_25_29_AGR,0))  *(-0.168)  +(if(AGE_F_25_29_IND,AGE_F_25_29_IND,0))  *(-0.0120) +(if(AGE_F_25_29_CON,AGE_F_25_29_CON,0))  *(-0.145)  +(if(AGE_F_25_29_NMAR,AGE_F_25_29_NMAR,0))  *(-0.0865)+
+                            (if(AGE_F_30_34_AGR,AGE_F_30_34_AGR,0))  *(-0.114)  +(if(AGE_F_30_34_IND,AGE_F_30_34_IND,0))  *(-0.00791)+(if(AGE_F_30_34_CON,AGE_F_30_34_CON,0))  *(-0.157)  +(if(AGE_F_30_34_NMAR,AGE_F_30_34_NMAR,0))  *(-0.0940)+
+                            (if(AGE_F_35_39_AGR,AGE_F_35_39_AGR,0))  *(-0.0569) +(if(AGE_F_35_39_IND,AGE_F_35_39_IND,0))  *(0.0467)  +(if(AGE_F_35_39_CON,AGE_F_35_39_CON,0))  *(-0.142)  +(if(AGE_F_35_39_NMAR,AGE_F_35_39_NMAR,0))  *(-0.0423)+
+                            (if(AGE_F_40_44_AGR,AGE_F_40_44_AGR,0))  *(-0.0275) +(if(AGE_F_40_44_IND,AGE_F_40_44_IND,0))  *(0.0690)  +(if(AGE_F_40_44_CON,AGE_F_40_44_CON,0))  *(-0.119)  +(if(AGE_F_40_44_NMAR,AGE_F_40_44_NMAR,0))  *(0.00272)+
+                            (if(AGE_F_45_49_AGR,AGE_F_45_49_AGR,0))  *(-0.00446)+(if(AGE_F_45_49_IND,AGE_F_45_49_IND,0))  *(0.0733)  +(if(AGE_F_45_49_CON,AGE_F_45_49_CON,0))  *(-0.0889) +(if(AGE_F_45_49_NMAR,AGE_F_45_49_NMAR,0))  *(0.0422) +
+                            (if(AGE_F_50_54_AGR,AGE_F_50_54_AGR,0))  *(0.0201)  +(if(AGE_F_50_54_IND,AGE_F_50_54_IND,0))  *(0.0667)  +(if(AGE_F_50_54_CON,AGE_F_50_54_CON,0))  *(-0.0482) +(if(AGE_F_50_54_NMAR,AGE_F_50_54_NMAR,0))  *(0.0441) +
+                            (if(AGE_F_55_59_AGR,AGE_F_55_59_AGR,0))  *(0.0481)  +(if(AGE_F_55_59_IND,AGE_F_55_59_IND,0))  *(0.0562)  +(if(AGE_F_55_59_CON,AGE_F_55_59_CON,0))  *(-0.00241)+(if(AGE_F_55_59_NMAR,AGE_F_55_59_NMAR,0))  *(0.0559) +
+                            (if(AGE_F_60_AGR,AGE_F_60_AGR,0))        *(0.0455)  +(if(AGE_F_60_IND,AGE_F_60_IND,0))        *(0.0395)  +(if(AGE_F_60_CON,AGE_F_60_CON,0))        *(0.0288)  +(if(AGE_F_60_NMAR,AGE_F_60_NMAR,0))        *(0.101)  +
+                            (if(AGE_F_61_AGR,AGE_F_61_AGR,0))        *(0.0549)  +(if(AGE_F_61_IND,AGE_F_61_IND,0))        *(0.0440)  +(if(AGE_F_61_CON,AGE_F_61_CON,0))        *(0.0432)  +(if(AGE_F_61_NMAR,AGE_F_61_NMAR,0))        *(0.117)  +
+                            (if(AGE_F_62_AGR,AGE_F_62_AGR,0))        *(0.0247)  +(if(AGE_F_62_IND,AGE_F_62_IND,0))        *(0.0460)  +(if(AGE_F_62_CON,AGE_F_62_CON,0))        *(0.0557)  +(if(AGE_F_62_NMAR,AGE_F_62_NMAR,0))        *(0.172)  +
+                            (if(AGE_F_63_AGR,AGE_F_63_AGR,0))        *(0.00975) +(if(AGE_F_63_IND,AGE_F_63_IND,0))        *(0.0349)  +(if(AGE_F_63_CON,AGE_F_63_CON,0))        *(0.0455)  +(if(AGE_F_63_NMAR,AGE_F_63_NMAR,0))        *(0.221)
+                - temp_omb_2z: (if(AGE_F_64_AGR,AGE_F_64_AGR,0))        *(-0.00115)+(if(AGE_F_64_IND,AGE_F_64_IND,0))        *(-0.00375)+(if(AGE_F_64_CON,AGE_F_64_CON,0))        *(0)       +(if(AGE_F_64_NMAR,AGE_F_64_NMAR,0))        *(0.235)  +
+                            (if(AGE_F_65_AGR,AGE_F_65_AGR,0))        *(-0.0245) +(if(AGE_F_65_IND,AGE_F_65_IND,0))        *(-0.0287) +(if(AGE_F_65_CON,AGE_F_65_CON,0))        *(0)       +(if(AGE_F_65_NMAR,AGE_F_65_NMAR,0))        *(0.230)  +
+                            (if(AGE_F_66_AGR,AGE_F_66_AGR,0))        *(-0.0515) +(if(AGE_F_66_IND,AGE_F_66_IND,0))        *(-0.0494) +(if(AGE_F_66_CON,AGE_F_66_CON,0))        *(0)       +(if(AGE_F_66_NMAR,AGE_F_66_NMAR,0))        *(0.213)  +
+                            (if(AGE_F_67_AGR,AGE_F_67_AGR,0))        *(-0.0209) +(if(AGE_F_67_IND,AGE_F_67_IND,0))        *(-0.0521) +(if(AGE_F_67_CON,AGE_F_67_CON,0))        *(0)       +(if(AGE_F_67_NMAR,AGE_F_67_NMAR,0))        *(0.207)  +
+                            (if(AGE_F_68_AGR,AGE_F_68_AGR,0))        *(-0.0584) +(if(AGE_F_68_IND,AGE_F_68_IND,0))        *(-0.0668) +(if(AGE_F_68_CON,AGE_F_68_CON,0))        *(0)       +(if(AGE_F_68_NMAR,AGE_F_68_NMAR,0))        *(0.215)  +
+                            (if(AGE_F_69_AGR,AGE_F_69_AGR,0))        *(-0.0952) +(if(AGE_F_69_IND,AGE_F_69_IND,0))        *(-0.0661) +(if(AGE_F_69_CON,AGE_F_69_CON,0))        *(0)       +(if(AGE_F_69_NMAR,AGE_F_69_NMAR,0))        *(0.212)  +
+                            (if(AGE_F_70_71_AGR,AGE_F_70_71_AGR,0))  *(-0.109)  +(if(AGE_F_70_71_IND,AGE_F_70_71_IND,0))  *(-0.0872) +(if(AGE_F_70_71_CON,AGE_F_70_71_CON,0))  *(0)       +(if(AGE_F_70_71_NMAR,AGE_F_70_71_NMAR,0))  *(0.212)  +
+                            (if(AGE_F_72_73_AGR,AGE_F_72_73_AGR,0))  *(-0.138)  +(if(AGE_F_72_73_IND,AGE_F_72_73_IND,0))  *(-0.116)  +(if(AGE_F_72_73_CON,AGE_F_72_73_CON,0))  *(0)       +(if(AGE_F_72_73_NMAR,AGE_F_72_73_NMAR,0))  *(0.172)  +
+                            (if(AGE_F_74_75_AGR,AGE_F_74_75_AGR,0))  *(-0.121)  +(if(AGE_F_74_75_IND,AGE_F_74_75_IND,0))  *(-0.111)  +(if(AGE_F_74_75_CON,AGE_F_74_75_CON,0))  *(0)       +(if(AGE_F_74_75_NMAR,AGE_F_74_75_NMAR,0))  *(0.227)  +
+                            (if(AGE_F_76_77_AGR,AGE_F_76_77_AGR,0))  *(0)       +(if(AGE_F_76_77_IND,AGE_F_76_77_IND,0))  *(0)       +(if(AGE_F_76_77_CON,AGE_F_76_77_CON,0))  *(0)       +(if(AGE_F_76_77_NMAR,AGE_F_76_77_NMAR,0))  *(0.197)  +
+                            (if(AGE_F_78_79_AGR,AGE_F_78_79_AGR,0))  *(0)       +(if(AGE_F_78_79_IND,AGE_F_78_79_IND,0))  *(-0.177)  +(if(AGE_F_78_79_CON,AGE_F_78_79_CON,0))  *(0)       +(if(AGE_F_78_79_NMAR,AGE_F_78_79_NMAR,0))  *(0.135)  +
+                            (if(AGE_F_80_84_AGR,AGE_F_80_84_AGR,0))  *(0)       +(if(AGE_F_80_84_IND,AGE_F_80_84_IND,0))  *(-0.293)  +(if(AGE_F_80_84_CON,AGE_F_80_84_CON,0))  *(0)       +(if(AGE_F_80_84_NMAR,AGE_F_80_84_NMAR,0))  *(0.0899) +
+                            (if(AGE_F_85_89_AGR,AGE_F_85_89_AGR,0))  *(0)       +(if(AGE_F_85_89_IND,AGE_F_85_89_IND,0))  *(-0.533)  +(if(AGE_F_85_89_CON,AGE_F_85_89_CON,0))  *(0)       +(if(AGE_F_85_89_NMAR,AGE_F_85_89_NMAR,0))  *(-0.0202)+
+                            (if(AGE_F_90_94_AGR,AGE_F_90_94_AGR,0))  *(0)       +(if(AGE_F_90_94_IND,AGE_F_90_94_IND,0))  *(0)       +(if(AGE_F_90_94_CON,AGE_F_90_94_CON,0))  *(0)       +(if(AGE_F_90_94_NMAR,AGE_F_90_94_NMAR,0))  *(-1.238) +
+                            (if(AGE_F_95_100_AGR,AGE_F_95_100_AGR,0))*(0)       +(if(AGE_F_95_100_IND,AGE_F_95_100_IND,0))*(0)       +(if(AGE_F_95_100_CON,AGE_F_95_100_CON,0))*(0)       +(if(AGE_F_95_100_NMAR,AGE_F_95_100_NMAR,0))*(0)
+                
+                - temp_omb_3z: (if(AGE_F_16_19_PR,AGE_F_16_19_PR,0))*(0)+(if(AGE_F_16_19_LS,AGE_F_16_19_LS,0))*(0)+(if(AGE_F_16_19_PS,AGE_F_16_19_PS,0))*(0)+(if(AGE_F_16_19_TR,AGE_F_16_19_TR,0))*(0)+
+                            (if(AGE_F_20_24_PR,AGE_F_20_24_PR,0))  *(0.0536)  +(if(AGE_F_20_24_LS,AGE_F_20_24_LS,0))  *(-0.127) +(if(AGE_F_20_24_PS,AGE_F_20_24_PS,0))  *(0.0835) +(if(AGE_F_20_24_TR,AGE_F_20_24_TR,0))  *(0.0815)+
+                            (if(AGE_F_25_29_PR,AGE_F_25_29_PR,0))  *(-0.122)  +(if(AGE_F_25_29_LS,AGE_F_25_29_LS,0))  *(-0.274) +(if(AGE_F_25_29_PS,AGE_F_25_29_PS,0))  *(0.112)  +(if(AGE_F_25_29_TR,AGE_F_25_29_TR,0))  *(0.362) +
+                            (if(AGE_F_30_34_PR,AGE_F_30_34_PR,0))  *(-0.115)  +(if(AGE_F_30_34_LS,AGE_F_30_34_LS,0))  *(-0.258) +(if(AGE_F_30_34_PS,AGE_F_30_34_PS,0))  *(0.129)  +(if(AGE_F_30_34_TR,AGE_F_30_34_TR,0))  *(0.357) +
+                            (if(AGE_F_35_39_PR,AGE_F_35_39_PR,0))  *(-0.149)  +(if(AGE_F_35_39_LS,AGE_F_35_39_LS,0))  *(-0.269) +(if(AGE_F_35_39_PS,AGE_F_35_39_PS,0))  *(0.0942) +(if(AGE_F_35_39_TR,AGE_F_35_39_TR,0))  *(0.419) +
+                            (if(AGE_F_40_44_PR,AGE_F_40_44_PR,0))  *(-0.178)  +(if(AGE_F_40_44_LS,AGE_F_40_44_LS,0))  *(-0.274) +(if(AGE_F_40_44_PS,AGE_F_40_44_PS,0))  *(0.105)  +(if(AGE_F_40_44_TR,AGE_F_40_44_TR,0))  *(0.489) +
+                            (if(AGE_F_45_49_PR,AGE_F_45_49_PR,0))  *(-0.178)  +(if(AGE_F_45_49_LS,AGE_F_45_49_LS,0))  *(-0.269) +(if(AGE_F_45_49_PS,AGE_F_45_49_PS,0))  *(0.0742) +(if(AGE_F_45_49_TR,AGE_F_45_49_TR,0))  *(0.565) +
+                            (if(AGE_F_50_54_PR,AGE_F_50_54_PR,0))  *(-0.138)  +(if(AGE_F_50_54_LS,AGE_F_50_54_LS,0))  *(-0.269) +(if(AGE_F_50_54_PS,AGE_F_50_54_PS,0))  *(0.0640) +(if(AGE_F_50_54_TR,AGE_F_50_54_TR,0))  *(0.623) +
+                            (if(AGE_F_55_59_PR,AGE_F_55_59_PR,0))  *(-0.117)  +(if(AGE_F_55_59_LS,AGE_F_55_59_LS,0))  *(-0.270) +(if(AGE_F_55_59_PS,AGE_F_55_59_PS,0))  *(0.0240) +(if(AGE_F_55_59_TR,AGE_F_55_59_TR,0))  *(0.669) +
+                            (if(AGE_F_60_PR,AGE_F_60_PR,0))        *(-0.130)  +(if(AGE_F_60_LS,AGE_F_60_LS,0))        *(-0.281) +(if(AGE_F_60_PS,AGE_F_60_PS,0))        *(0.0537) +(if(AGE_F_60_TR,AGE_F_60_TR,0))        *(0.709) +
+                            (if(AGE_F_61_PR,AGE_F_61_PR,0))        *(-0.122)  +(if(AGE_F_61_LS,AGE_F_61_LS,0))        *(-0.282) +(if(AGE_F_61_PS,AGE_F_61_PS,0))        *(0.0821) +(if(AGE_F_61_TR,AGE_F_61_TR,0))        *(0.684) +
+                            (if(AGE_F_62_PR,AGE_F_62_PR,0))        *(-0.0943) +(if(AGE_F_60_LS,AGE_F_62_LS,0))        *(-0.271) +(if(AGE_F_62_PS,AGE_F_62_PS,0))        *(0.0571) +(if(AGE_F_62_TR,AGE_F_62_TR,0))        *(0.664) +
+                            (if(AGE_F_63_PR,AGE_F_63_PR,0))        *(-0.0441) +(if(AGE_F_60_LS,AGE_F_63_LS,0))        *(-0.243) +(if(AGE_F_63_PS,AGE_F_63_PS,0))        *(0.0988) +(if(AGE_F_63_TR,AGE_F_63_TR,0))        *(0.613)
+                - temp_omb_4z: (if(AGE_F_64_PR,AGE_F_64_PR,0))        *(-0.00150)+(if(AGE_F_60_LS,AGE_F_64_LS,0))        *(-0.213) +(if(AGE_F_64_PS,AGE_F_64_PS,0))        *(0.0004) +(if(AGE_F_64_TR,AGE_F_64_TR,0))        *(0.587) +
+                            (if(AGE_F_65_PR,AGE_F_65_PR,0))        *(0.0369)  +(if(AGE_F_65_LS,AGE_F_65_LS,0))        *(-0.190) +(if(AGE_F_65_PS,AGE_F_65_PS,0))        *(0.0067) +(if(AGE_F_65_TR,AGE_F_65_TR,0))        *(0.560) +
+                            (if(AGE_F_66_PR,AGE_F_66_PR,0))        *(0.0641)  +(if(AGE_F_66_LS,AGE_F_66_LS,0))        *(-0.170) +(if(AGE_F_66_PS,AGE_F_66_PS,0))        *(-0.0649)+(if(AGE_F_66_TR,AGE_F_66_TR,0))        *(0.535) +
+                            (if(AGE_F_67_PR,AGE_F_67_PR,0))        *(0.0809)  +(if(AGE_F_67_LS,AGE_F_67_LS,0))        *(-0.149) +(if(AGE_F_67_PS,AGE_F_67_PS,0))        *(0.256)  +(if(AGE_F_67_TR,AGE_F_67_TR,0))        *(0.517) +
+                            (if(AGE_F_68_PR,AGE_F_68_PR,0))        *(0.0779)  +(if(AGE_F_68_LS,AGE_F_68_LS,0))        *(-0.142) +(if(AGE_F_68_PS,AGE_F_68_PS,0))        *(0.00814)+(if(AGE_F_68_TR,AGE_F_68_TR,0))        *(0.486) +
+                            (if(AGE_F_69_PR,AGE_F_69_PR,0))        *(0.0973)  +(if(AGE_F_69_LS,AGE_F_69_LS,0))        *(-0.123) +(if(AGE_F_69_PS,AGE_F_69_PS,0))        *(-0.465) +(if(AGE_F_69_TR,AGE_F_69_TR,0))        *(0.447) +
+                            (if(AGE_F_70_71_PR,AGE_F_70_71_PR,0))  *(0.113)   +(if(AGE_F_70_71_LS,AGE_F_70_71_LS,0))  *(-0.119) +(if(AGE_F_70_71_PS,AGE_F_70_71_PS,0))  *(0)      +(if(AGE_F_70_71_TR,AGE_F_70_71_TR,0))  *(0.396) +
+                            (if(AGE_F_72_73_PR,AGE_F_72_73_PR,0))  *(0.0798)  +(if(AGE_F_72_73_LS,AGE_F_72_73_LS,0))  *(-0.0846)+(if(AGE_F_72_73_PS,AGE_F_72_73_PS,0))  *(-0.145) +(if(AGE_F_72_73_TR,AGE_F_72_73_TR,0))  *(0.331) +
+                            (if(AGE_F_74_75_PR,AGE_F_74_75_PR,0))  *(0.0273)  +(if(AGE_F_74_75_LS,AGE_F_74_75_LS,0))  *(-0.227) +(if(AGE_F_74_75_PS,AGE_F_74_75_PS,0))  *(-0.226) +(if(AGE_F_74_75_TR,AGE_F_74_75_TR,0))  *(0.261) +
+                            (if(AGE_F_76_77_PR,AGE_F_76_77_PR,0))  *(0)       +(if(AGE_F_76_77_LS,AGE_F_76_77_LS,0))  *(-0.341) +(if(AGE_F_76_77_PS,AGE_F_76_77_PS,0))  *(-0.383) +(if(AGE_F_76_77_TR,AGE_F_76_77_TR,0))  *(0.0656)+
+                            (if(AGE_F_78_79_PR,AGE_F_78_79_PR,0))  *(0)       +(if(AGE_F_78_79_LS,AGE_F_78_79_LS,0))  *(0)      +(if(AGE_F_78_79_PS,AGE_F_78_79_PS,0))  *(0)      +(if(AGE_F_78_79_TR,AGE_F_78_79_TR,0))  *(0.144) +
+                            (if(AGE_F_80_84_PR,AGE_F_80_84_PR,0))  *(0)       +(if(AGE_F_80_84_LS,AGE_F_80_84_LS,0))  *(0)      +(if(AGE_F_80_84_PS,AGE_F_80_84_PS,0))  *(0)      +(if(AGE_F_80_84_TR,AGE_F_80_84_TR,0))  *(-0.585)+
+                            (if(AGE_F_85_89_PR,AGE_F_85_89_PR,0))  *(0)       +(if(AGE_F_85_89_LS,AGE_F_85_89_LS,0))  *(0)      +(if(AGE_F_85_89_PS,AGE_F_85_89_PS,0))  *(0)      +(if(AGE_F_85_89_TR,AGE_F_85_89_TR,0))  *(0)     +
+                            (if(AGE_F_90_94_PR,AGE_F_90_94_PR,0))  *(0)       +(if(AGE_F_90_94_LS,AGE_F_90_94_LS,0))  *(0)      +(if(AGE_F_90_94_PS,AGE_F_90_94_PS,0))  *(0)      +(if(AGE_F_90_94_TR,AGE_F_90_94_TR,0))  *(0)     +
+                            (if(AGE_F_95_100_PR,AGE_F_95_100_PR,0))*(0)       +(if(AGE_F_95_100_LS,AGE_F_95_100_LS,0))*(0)      +(if(AGE_F_95_100_PS,AGE_F_95_100_PS,0))*(0)      +(if(AGE_F_95_100_TR,AGE_F_95_100_TR,0))*(0)
+
+                
+                - omb_f: if(WAGE_AGE and ISFEMALE,
+                        cont_regr(1*(-0.741)+temp_omb_1z+temp_omb_2z+temp_omb_3z+temp_omb_4z+AGRO*(0.0307)+INDUSTRY*(0.112)+CONSTRUCTION*(-0.0220)+NMAR_SERVICES*(0.105)+PRIMARY*(-0.135)+LOWER_SECONDARY*(0.0937)+POST_SECONDARY*(0)+TERTIARY*(0.00298)+AGE_F_20_24*(0.0587)+AGE_F_25_29*(0.112)+AGE_F_30_34*(-0.00653)+AGE_F_35_39*(-0.0758)+AGE_F_40_44*(-0.107)+AGE_F_45_49*(-0.155)+AGE_F_50_54*(-0.189)+AGE_F_55_59*(-0.191)+AGE_F_60*(-0.208)+AGE_F_61*(-0.258)+AGE_F_62*(-0.345)+AGE_F_63*(-0.444)+AGE_F_64*(-0.504)+AGE_F_65*(-0.542)+AGE_F_66*(-0.563)+AGE_F_67*(-0.580)+AGE_F_68*(-0.582)+AGE_F_69*(-0.592)+AGE_F_70_71*(-0.580)+AGE_F_72_73*(-0.545)+AGE_F_74_75*(-0.494)+AGE_F_76_77*(-0.263)+AGE_F_78_79*(-0.279)+AGE_F_80_84*(0.560)+AGE_F_85_89*(0.311)+AGE_F_90_94*(1.700)+AGE_F_95_100*(0.267)+age*(0.0677)+(age*age)*(-0.000663)),-1)
+            
+                - omb: if(ISMALE, omb_m, omb_f)
+            
+            # For working ages outside the wage equation range, keep the last
+            # observed wage level instead of falling through to the 0.3 floor.
+                - omb: if((IS_EMPLOYED or disabled_working) and omb < 0 and last_wage_level > 0, last_wage_level, omb)
+
+            # Minimum OMB na 0.3 - uroven minimalnej mzdy je 0,55 ale nemusi byt cely rok
+                - omb: if(IS_EMPLOYED or disabled_working, max(0.3, omb), 0)
+
+            # Older-worker wage calibration: higher retirement ages make 65+
+            # workers less selected than in the historical wage equation sample.
+                - omb: if((IS_EMPLOYED or disabled_working) and ISMALE and age >= 65 and age <= 66 and avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISMALE and age >= 60 and age <= 64 and omb > 0) > 0,
+                          max(omb, older_worker_omb_floor_factor_65_66 * avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISMALE and age >= 60 and age <= 64 and omb > 0)),
+                          omb)
+                - omb: if((IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 65 and age <= 66 and avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 60 and age <= 64 and omb > 0) > 0,
+                          max(omb, older_worker_omb_floor_factor_65_66 * avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 60 and age <= 64 and omb > 0)),
+                          omb)
+                - omb: if((IS_EMPLOYED or disabled_working) and ISMALE and age >= 67 and age <= 68 and avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISMALE and age >= 60 and age <= 64 and omb > 0) > 0,
+                          max(omb, older_worker_omb_floor_factor_67_68 * avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISMALE and age >= 60 and age <= 64 and omb > 0)),
+                          omb)
+                - omb: if((IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 67 and age <= 68 and avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 60 and age <= 64 and omb > 0) > 0,
+                          max(omb, older_worker_omb_floor_factor_67_68 * avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 60 and age <= 64 and omb > 0)),
+                          omb)
+                - omb: if((IS_EMPLOYED or disabled_working) and ISMALE and age >= 69 and avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISMALE and age >= 60 and age <= 64 and omb > 0) > 0,
+                          max(omb, older_worker_omb_floor_factor_69_plus * avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISMALE and age >= 60 and age <= 64 and omb > 0)),
+                          omb)
+                - omb: if((IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 69 and avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 60 and age <= 64 and omb > 0) > 0,
+                          max(omb, older_worker_omb_floor_factor_69_plus * avg(omb, filter=(IS_EMPLOYED or disabled_working) and ISFEMALE and age >= 60 and age <= 64 and omb > 0)),
+                          omb)
+                
+            # OMB pre matky na urovni minimalnej mzdy - 60% priemernej mzdy spred dvoch rokov = pribli??ne 55% priemernej mzdy v tomto roku
+                - omb: if(MOTHER, 0.55, omb)
+                - omb: if(disabled_working, omb + 0.3, omb)
+
+            # From 2025, keep the aggregate wage distribution consistent with
+            # MONTHLY_AVG_WAGE by normalising mean OMB among ordinary employed
+            # persons to 1. Use ordinary employment (status == 1) to calculate
+            # the factor because contribution payers are selected randomly only
+            # afterwards. Apply the same factor to all positive labour-income
+            # OMBs, including disabled workers, so that relative group wage
+            # differences are preserved. This is deliberately done after the
+            # wage floors and group-specific adjustments, but before OMB career
+            # accumulation, nominal wages and contributions.
+                - omb: if(period >= 2025 and (IS_EMPLOYED or disabled_working) and omb > 0 and avg(omb, filter=IS_EMPLOYED and omb > 0) > 0,
+                          omb / avg(omb, filter=IS_EMPLOYED and omb > 0),
+                          omb)
+                
+            # Kumulacia OMB pre vypocet POMB
+                - cumulative_omb: if(IS_EMPLOYED or disabled_working, cumulative_omb + omb, cumulative_omb)
+                - cumulative_omb_sk: if(awg_migrant and (IS_EMPLOYED or disabled_working), cumulative_omb_sk + omb, cumulative_omb_sk)
+
+            nominal_wage_vyp():
+                - nominal_wage: if(status == 1, omb * MONTHLY_AVG_WAGE, 0)
+                - last_nominal_wage: if(nominal_wage > 0, nominal_wage, last_nominal_wage)
+                - last_wage_level: if(nominal_wage > 0, omb, last_wage_level)
+
+            social_contribution_payer_vyp():
+                - pays_social_contributions_score: uniform()
+                - pays_social_contributions: status == 1 and align_abs(pays_social_contributions_score,
+                                                                        round(count(status == 1) * if(period == base_year,
+                                                                                                      social_contribution_payer_baseyear_alignment_ratio,
+                                                                                                      social_contribution_payer_future_alignment_ratio)),
+                                                                        filter=status == 1)
+
+            social_insurance_contribution_vyp():
+                - social_insurance_contribution: if(pays_social_contributions, nominal_wage * SOCIAL_INSURANCE_CONTRIB_RATE, 0)
+                - oldage_insurance_contribution: if(pays_social_contributions, nominal_wage * oldage_insurance_contrib_rate, 0)
+                - disability_insurance_contribution: if(pays_social_contributions, nominal_wage * disability_insurance_contrib_rate, 0)
+                - reserve_fund_contribution: if(pays_social_contributions, nominal_wage * reserve_fund_contrib_rate, 0)
+                - pension_relevant_contribution: oldage_insurance_contribution + disability_insurance_contribution + reserve_fund_contribution
+                - pillar2_contribution: if(pays_social_contributions and pillar2_saver, nominal_wage * if(period < 2025, pillar2_contrib_rate_pre_2025, if(period < 2027, pillar2_contrib_rate_2025_2026, pillar2_contrib_rate)), 0)
+                - first_pillar_oldage_contribution: oldage_insurance_contribution - pillar2_contribution
+                
+            update_mean_omb():
+                - mean_omb_temp: sum(omb * (IS_EMPLOYED or disabled_working)) / sum(IS_EMPLOYED or disabled_working)
+                - csv(period, dump(mean_omb_temp), fname='align_omb.csv', mode='a')
+            
+            # ODP
+            pridat_odp():
+                - odp: if(IS_EMPLOYED or IS_DISABLED, odp + 1, odp)
+                - roky_pomb: if(IS_EMPLOYED or disabled_working, roky_pomb + 1, roky_pomb)
+                - odp_sk: if(awg_migrant and (IS_EMPLOYED or IS_DISABLED), odp_sk + 1, odp_sk)
+                - roky_pomb_sk: if(awg_migrant and (IS_EMPLOYED or disabled_working), roky_pomb_sk + 1, roky_pomb_sk)
+                
+            # POMB - z vypoctu POMB su vylucene nahradne doby a invalidita (ak neexistoval VZ)
+            vypocet_pomb():
+                # Annual OMB is capped at 3, so cumulative_omb implies at least
+                # cumulative_omb / 3 contributory years. Keep raw roky_pomb for diagnostics.
+                - roky_pomb_for_calc: max(roky_pomb, cumulative_omb / 3)
+                - pomb: if(roky_pomb_for_calc > 0, cumulative_omb / roky_pomb_for_calc, 0)
+                # 0,3 za nahradne doby
+                #- nd_roky: if(odp > roky_pomb, odp - roky_pomb, 0)
+                #- pomb: if(roky_pomb + nd_roky > 0,
+                #          pomb + (0.3 * nd_roky)*0.5,
+                #          0)
+                # solidarizacia
+                - pomb: if(pomb==0, 0,
+                        if(pomb > 1.25, 1.25 + (pomb - 1.25) * 0.68,
+                        if(pomb < 1.0, pomb + (1.0 - pomb) * 0.20, pomb)))
+                - roky_pomb_sk_for_calc: max(roky_pomb_sk, cumulative_omb_sk / 3)
+                - pomb_sk: if(roky_pomb_sk_for_calc > 0, cumulative_omb_sk / roky_pomb_sk_for_calc, 0)
+                - pomb_sk: if(pomb_sk==0, 0,
+                        if(pomb_sk > 1.25, 1.25 + (pomb_sk - 1.25) * 0.68,
+                        if(pomb_sk < 1.0, pomb_sk + (1.0 - pomb_sk) * 0.20, pomb_sk)))
+                
+            pension_vyp():
+                - odp_pension: odp + 0.3 * max(0, 40 - odp)
+                - pillar2_years: if(pillar2_saver and pillar2_entry_year > 0 and period > pillar2_entry_year and odp_pension > 0,
+                                    min((period - pillar2_entry_year) * 0.75, odp_pension),
+                                    0)
+                - pillar2_pension_base: 0
+                - pillar2_pension_reduction: 0
+                - pillar2_pension_base: if(retired==True and pension==0 and odp>=15, odp * pomb * ADH, 0)
+                - eu_pension_proration: if(awg_migrant and pillar2_pension_base > 0 and roky_pomb > 0, min(1, roky_pomb_sk / roky_pomb), eu_pension_proration)
+                - pillar2_pension_base: if(awg_migrant and pillar2_pension_base > 0, pillar2_pension_base * eu_pension_proration, pillar2_pension_base)
+                - pillar2_pension_reduction: if(pillar2_pension_base > 0 and pillar2_years > 0,
+                                                pillar2_pension_base * (pillar2_years / odp) * pillar2_first_pillar_reduction_rate,
+                                                0)
+                - pension: if(pillar2_pension_base > 0,
+                              pillar2_pension_base - pillar2_pension_reduction,
+                              pension)
+                - pension_oldage: if(pillar2_pension_base > 0, pension, pension_oldage)
+                - pension_survivor: if(pillar2_pension_base > 0, 0, pension_survivor)
+                - pension_widow: if(pillar2_pension_base > 0, 0, pension_widow)
+                - pension_widower: if(pillar2_pension_base > 0, 0, pension_widower)
+                - pension_total: if(pillar2_pension_base > 0, pension_oldage + pension_survivor, pension_total)
+
+                - pension_disab: 0
+                - pension_disab: if(disabled_inflow==True,
+                                     log_regr(5.258931+ISFEMALE*(-0.1525087)+AGRO*(0.1767879)+INDUSTRY*(0.2419439)+CONSTRUCTION*(0.1262901)+MAR_SERVICES*(0.1953445)+NMAR_SERVICES*(0.1817261)+PRIMARY*(-0.445983)+LOWER_SECONDARY*(-0.2773276)+UPPER_SECONDARY*(-0.161481)+POST_SECONDARY*(-0.0419054)+TERTIARY*(0.2208268)+age*(0.004332)+(age*age)*(0.0000485), filter=disabled, mult=0.0, error_var=None), 0)
+                - pension_disab: if(disabled_inflow==True, pension_disab * ADH / disability_new_pension_base_adh, pension_disab)
+                - disability_award_benefit_uplift: if(period >= 2025, disability_benefit_uplift_factor, 1)
+                - pension_disab: if(disabled_inflow==True, pension_disab * disability_award_benefit_uplift, pension_disab)
+                - pension: if(disabled_inflow==True, pension_disab, pension)
+                - pension_total: if(disabled_inflow==True, pension_disab, pension_total)
+
+                #- pension_early: 0
+                - pension_early: if(EARLY_RETIRED and odp>=15, odp * pomb * ADH, pension_early)
+                - pension_early: if(EARLY_RETIRED, pension_early * (1 + 0.06 * trunc(toret)), pension_early)
+                - eu_pension_proration: if(EARLY_RETIRED and awg_migrant and roky_pomb > 0, min(1, roky_pomb_sk / roky_pomb), eu_pension_proration)
+                - pension_early: if(EARLY_RETIRED and awg_migrant, pension_early * eu_pension_proration, pension_early)
+                - pillar2_pension_reduction: if(EARLY_RETIRED and odp>=15 and pillar2_years > 0,
+                                                pension_early * (pillar2_years / odp) * pillar2_first_pillar_reduction_rate,
+                                                pillar2_pension_reduction)
+                - pension_early: if(EARLY_RETIRED and pillar2_years > 0, pension_early - pillar2_pension_reduction, pension_early)
+                - pension: if(EARLY_RETIRED, pension_early, pension)
+                - pension_oldage: if(EARLY_RETIRED, pension_early, pension_oldage)
+                - pension_survivor: if(EARLY_RETIRED, 0, pension_survivor)
+                - pension_widow: if(EARLY_RETIRED, 0, pension_widow)
+                - pension_widower: if(EARLY_RETIRED, 0, pension_widower)
+                - pension_total: if(EARLY_RETIRED, pension_oldage + pension_survivor, pension_total)
+    
+                #- pension_new: 0
+                - pension_new: if(NEW_RETIRED and odp_pension>=15, odp_pension * pomb * ADH, 0)
+                #- pension_new: if(NEW_RETIRED and roky_pomb>=15, roky_pomb * pomb * ADH, 0)
+                - pension_new: if(NEW_RETIRED and toret>0, pension_new * (1 + 0.06 * trunc(toret)), pension_new)
+                - pension_new_full_eu: if(NEW_RETIRED and awg_migrant, pension_new, pension_new_full_eu)
+                - eu_pension_proration: if(NEW_RETIRED and awg_migrant and roky_pomb > 0, min(1, roky_pomb_sk / roky_pomb), eu_pension_proration)
+                - pension_new: if(NEW_RETIRED and awg_migrant, pension_new * eu_pension_proration, pension_new)
+                - pillar2_pension_reduction: if(NEW_RETIRED and odp_pension>=15 and pillar2_years > 0,
+                                                pension_new * (pillar2_years / odp_pension) * pillar2_first_pillar_reduction_rate,
+                                                pillar2_pension_reduction)
+                - pension_new: if(NEW_RETIRED and pillar2_years > 0, pension_new - pillar2_pension_reduction, pension_new)
+                - pension_new: pension_new * (1 + PRVA_VALORIZACIA)
+                - replacement_rate: if(NEW_RETIRED and pension_new > 0 and last_wage_level > 0 and MONTHLY_AVG_WAGE > 0,
+                                       pension_new / (last_wage_level * MONTHLY_AVG_WAGE),
+                                       replacement_rate)
+                - disability_oldage_pension: if(disabled and toret>=0, max(odp, 30) * max(pomb, 0.8) * ADH, 0)
+                - disability_oldage_pension: if(disabled and toret>=0 and toret>0,
+                                                disability_oldage_pension * (1 + 0.06 * trunc(toret)),
+                                                disability_oldage_pension)
+                - eu_pension_proration: if(disabled and toret>=0 and awg_migrant and roky_pomb > 0, min(1, roky_pomb_sk / roky_pomb), eu_pension_proration)
+                - disability_oldage_pension: if(disabled and toret>=0 and awg_migrant, disability_oldage_pension * eu_pension_proration, disability_oldage_pension)
+                - pillar2_pension_reduction: if(disabled and toret>=0 and pillar2_years > 0,
+                                                disability_oldage_pension * (pillar2_years / odp) * pillar2_first_pillar_reduction_rate,
+                                                pillar2_pension_reduction)
+                - disability_oldage_pension: if(disabled and toret>=0 and pillar2_years > 0,
+                                                disability_oldage_pension - pillar2_pension_reduction,
+                                                disability_oldage_pension)
+                - disability_oldage_pension: if(disabled and toret>=0,
+                                                disability_oldage_pension * (1 + PRVA_VALORIZACIA),
+                                                disability_oldage_pension)
+                - pension_oldage: if(retired and not disabled and not NEW_RETIRED and not EARLY_RETIRED,
+                                     pension_oldage * (1 + VALORIZACIA) * (1 + MIMORIADNA),
+                                     pension_oldage)
+                - survivor_existing_benefit_uplift: if(period == 2025, survivor_benefit_uplift_factor, 1)
+                - pension_survivor: if(retired and not disabled and not NEW_RETIRED and not EARLY_RETIRED,
+                                       pension_survivor * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                       pension_survivor)
+                - pension_widow: if(retired and not disabled and not NEW_RETIRED and not EARLY_RETIRED,
+                                    pension_widow * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                    pension_widow)
+                - pension_widower: if(retired and not disabled and not NEW_RETIRED and not EARLY_RETIRED,
+                                      pension_widower * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                      pension_widower)
+                - pension_oldage_full: if(retired and not disabled and not NEW_RETIRED and not EARLY_RETIRED,
+                                          pension_oldage_full * (1 + VALORIZACIA) * (1 + MIMORIADNA),
+                                          pension_oldage_full)
+                - pension_survivor_full: if(retired and not disabled and not NEW_RETIRED and not EARLY_RETIRED,
+                                            pension_survivor_full * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                            pension_survivor_full)
+                - pension_survivor: if(standalone_survivor and not retired and not disabled,
+                                       pension_survivor * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                       pension_survivor)
+                - pension_widow: if(standalone_survivor and not retired and not disabled,
+                                    pension_widow * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                    pension_widow)
+                - pension_widower: if(standalone_survivor and not retired and not disabled,
+                                      pension_widower * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                      pension_widower)
+                - pension_survivor_full: if(standalone_survivor and not retired and not disabled,
+                                            pension_survivor_full * (1 + VALORIZACIA) * (1 + MIMORIADNA) * survivor_existing_benefit_uplift,
+                                            pension_survivor_full)
+                - pension_oldage_full: if(NEW_RETIRED, pension_new, pension_oldage_full)
+                - pension_survivor_full: if(NEW_RETIRED and standalone_survivor and pension_survivor > 0,
+                                            pension_survivor,
+                                            if(NEW_RETIRED, 0, pension_survivor_full))
+                - pension_oldage: if(NEW_RETIRED and standalone_survivor and pension_survivor > 0,
+                                     if(pension_new <= pension_survivor, pension_new * 0.5, pension_new),
+                                     if(NEW_RETIRED, pension_new, pension_oldage))
+                - pension_survivor: if(NEW_RETIRED and standalone_survivor and pension_survivor > 0,
+                                       if(pension_survivor < pension_new, pension_survivor * 0.5, pension_survivor),
+                                       if(NEW_RETIRED, 0, pension_survivor))
+                - pension_widow: if(NEW_RETIRED and standalone_survivor and pension_widow > 0,
+                                    if(pension_widow < pension_new, pension_widow * 0.5, pension_widow),
+                                    if(NEW_RETIRED, 0, pension_widow))
+                - pension_widower: if(NEW_RETIRED and standalone_survivor and pension_widower > 0,
+                                      if(pension_widower < pension_new, pension_widower * 0.5, pension_widower),
+                                      if(NEW_RETIRED, 0, pension_widower))
+                - pension_total: if(retired and not disabled, pension_oldage + pension_survivor, pension_total)
+                - pension: if(retired and not disabled, pension_total, pension * (1 + VALORIZACIA) * (1 + MIMORIADNA))
+                - disability_existing_benefit_uplift: if(period == 2025, disability_benefit_uplift_factor, 1)
+                - pension: if(disabled and not disabled_inflow, pension * disability_existing_benefit_uplift, pension)
+                - pension_total: if(disabled and not disabled_inflow, pension, pension_total)
+                - disability_to_oldage: disabled and toret>=0 and disability_oldage_pension > pension
+                - pension: if(disability_to_oldage, disability_oldage_pension, pension)
+                - pension_oldage: if(disability_to_oldage, disability_oldage_pension, pension_oldage)
+                - pension_survivor: if(disability_to_oldage, 0, pension_survivor)
+                - pension_widow: if(disability_to_oldage, 0, pension_widow)
+                - pension_widower: if(disability_to_oldage, 0, pension_widower)
+                - pension_oldage_full: if(disability_to_oldage, disability_oldage_pension, pension_oldage_full)
+                - pension_survivor_full: if(disability_to_oldage, 0, pension_survivor_full)
+                - pension_total: if(disability_to_oldage, pension_oldage + pension_survivor, pension_total)
+                - retired: if(disability_to_oldage, True, retired)
+                - disabled: if(disability_to_oldage, False, disabled)
+                - disabled_working: if(disability_to_oldage, False, disabled_working)
+                - status: if(disability_to_oldage, RETIRED, status)
+                - standalone_survivor: if(retired or retired_early or disabled, False, standalone_survivor)
+
+                - pension: if(retired==False and disabled==False and not standalone_survivor, 0, pension)
+                - pension_total: if(retired==False and disabled==False and not standalone_survivor, 0, pension_total)
+                - pension_oldage: if(retired==False and disabled==False, 0, pension_oldage)
+                - pension_survivor: if(retired==False and disabled==False and not standalone_survivor, 0, pension_survivor)
+                - pension_widow: if(retired==False and disabled==False and not standalone_survivor, 0, pension_widow)
+                - pension_widower: if(retired==False and disabled==False and not standalone_survivor, 0, pension_widower)
+                - pension_oldage_full: if(retired==False and disabled==False, 0, pension_oldage_full)
+                - pension_survivor_full: if(retired==False and disabled==False and not standalone_survivor, 0, pension_survivor_full)
+
+                - standalone_survivor_score: uniform()
+                - standalone_survivor_alignment_age: if(age > 100, 100, age)
+                - standalone_survivor_stock: if(period == 2022 and ISMALE,
+                                                align(standalone_survivor_score,
+                                                      'standalone_survivor_prevalence_male.csv',
+                                                      leave=standalone_survivor,
+                                                      filter=age >= 18 and not retired and not retired_early and not disabled and (standalone_survivor or pension_survivor <= 0) and ISMALE),
+                                                if(period == 2022 and ISFEMALE,
+                                                   align(standalone_survivor_score,
+                                                         'standalone_survivor_prevalence_female.csv',
+                                                         leave=standalone_survivor,
+                                                         filter=age >= 18 and not retired and not retired_early and not disabled and (standalone_survivor or pension_survivor <= 0) and ISFEMALE),
+                                                   standalone_survivor))
+                - standalone_survivor_award: period == 2022 and not retired and not retired_early and not disabled and standalone_survivor_stock and pension_survivor <= 0
+                - standalone_survivor_amount: if(ISMALE,
+                                                if(standalone_survivor_alignment_age < 30, 187.399990,
+                                                if(standalone_survivor_alignment_age < 35, 230.000006,
+                                                if(standalone_survivor_alignment_age < 40, 201.407694,
+                                                if(standalone_survivor_alignment_age < 45, 220.143662,
+                                                if(standalone_survivor_alignment_age < 50, 217.921973,
+                                                if(standalone_survivor_alignment_age < 55, 219.933728,
+                                                if(standalone_survivor_alignment_age < 60, 221.047376,
+                                                if(standalone_survivor_alignment_age < 65, 200.484165,
+                                                if(standalone_survivor_alignment_age < 70, 148.421100,
+                                                if(standalone_survivor_alignment_age < 75, 139.605125,
+                                                if(standalone_survivor_alignment_age < 80, 181.488889,
+                                                if(standalone_survivor_alignment_age < 85, 230.826667,
+                                                if(standalone_survivor_alignment_age < 90, 218.192352,
+                                                if(standalone_survivor_alignment_age < 95, 221.802670,
+                                                if(standalone_survivor_alignment_age < 100, 215.872730,
+                                                                                       212.933330))))))))))))))),
+                                                if(standalone_survivor_alignment_age < 30, 216.569390,
+                                                if(standalone_survivor_alignment_age < 35, 209.632399,
+                                                if(standalone_survivor_alignment_age < 40, 224.104311,
+                                                if(standalone_survivor_alignment_age < 45, 236.291919,
+                                                if(standalone_survivor_alignment_age < 50, 252.138822,
+                                                if(standalone_survivor_alignment_age < 55, 273.694646,
+                                                if(standalone_survivor_alignment_age < 60, 288.511080,
+                                                if(standalone_survivor_alignment_age < 65, 282.441922,
+                                                if(standalone_survivor_alignment_age < 70, 212.635348,
+                                                if(standalone_survivor_alignment_age < 75, 202.898399,
+                                                if(standalone_survivor_alignment_age < 80, 277.667085,
+                                                if(standalone_survivor_alignment_age < 85, 278.808282,
+                                                if(standalone_survivor_alignment_age < 90, 280.478776,
+                                                if(standalone_survivor_alignment_age < 95, 286.653411,
+                                                if(standalone_survivor_alignment_age < 100, 286.497615,
+                                                                                       296.723332))))))))))))))))
+                - standalone_survivor_amount: standalone_survivor_amount * STANDALONE_SURVIVOR_BENEFIT_FACTOR
+                - standalone_survivor: standalone_survivor or standalone_survivor_award
+                - pension_survivor: if(standalone_survivor_award, standalone_survivor_amount, pension_survivor)
+                - pension_widower: if(standalone_survivor_award and ISMALE, standalone_survivor_amount, pension_widower)
+                - pension_widow: if(standalone_survivor_award and ISFEMALE, standalone_survivor_amount, pension_widow)
+                - pension_survivor_full: if(standalone_survivor_award, standalone_survivor_amount, pension_survivor_full)
+                - pension_total: if(standalone_survivor and not retired and not disabled, pension_survivor, pension_total)
+                - pension: if(standalone_survivor and not retired and not disabled, pension_total, pension)
+
+                - survivor_pension_score: if(ISFEMALE,
+                                             0.02 * age + 0.0005 * age * age + 0.5 * retired,
+                                             0.02 * age + 0.0005 * age * age + 0.5 * retired)
+                - survivor_alignment_age: if(age > 100, 100, age)
+                - survivor_pension_stock: pension_survivor > 0
+                - survivor_pension_award: if(age >= 0 and destination == 1 and pension_survivor <= 0,
+                                             if(ISMALE,
+                                                align(survivor_pension_score,
+                                                      'survivor_new_awards_male.csv',
+                                                      leave=pension_survivor > 0),
+                                                align(survivor_pension_score,
+                                                      'survivor_new_awards_female.csv',
+                                                      leave=pension_survivor > 0)),
+                                             False)
+                - survivor_award_benefit_uplift: if(period >= 2025, survivor_benefit_uplift_factor, 1)
+                - survivor_flat_award_amount: 0.60 * 40 * ADH * (1 + PRVA_VALORIZACIA) * survivor_new_benefit_factor * survivor_award_benefit_uplift
+                - survivor_pension_amount: if(ISFEMALE and male_deceased_survivor_donor_base > 0,
+                                              0.60 * male_deceased_survivor_donor_base * (1 + PRVA_VALORIZACIA) * survivor_new_benefit_factor * survivor_award_benefit_uplift,
+                                              if(ISMALE and female_deceased_survivor_donor_base > 0,
+                                                 0.60 * female_deceased_survivor_donor_base * (1 + PRVA_VALORIZACIA) * survivor_new_benefit_factor * survivor_award_benefit_uplift,
+                                                 survivor_flat_award_amount))
+                - pension_survivor_full: if(survivor_pension_award, survivor_pension_amount, pension_survivor_full)
+                - pension_survivor: if(survivor_pension_award,
+                                       if(retired and pension_oldage_full > 0 and survivor_pension_amount < pension_oldage_full,
+                                          survivor_pension_amount * 0.5,
+                                          survivor_pension_amount),
+                                       pension_survivor)
+                - pension_oldage: if(survivor_pension_award and retired and pension_oldage > 0 and pension_oldage <= survivor_pension_amount,
+                                     pension_oldage * 0.5,
+                                     pension_oldage)
+                - pension_widower: if(survivor_pension_award and ISMALE, pension_survivor, pension_widower)
+                - pension_widow: if(survivor_pension_award and ISFEMALE, pension_survivor, pension_widow)
+                - standalone_survivor: if(survivor_pension_award and not retired and not retired_early and not disabled, True, standalone_survivor)
+                - pension_total: if(survivor_pension_award and retired and not disabled, pension_oldage + pension_survivor, pension_total)
+                - pension_total: if(survivor_pension_award and standalone_survivor and not retired and not disabled, pension_survivor, pension_total)
+                - pension: if(survivor_pension_award and (retired or standalone_survivor) and not disabled, pension_total, pension)
+                - survivor_pension_stock: pension_survivor > 0
+                - pension_has_survivor: if(pension_survivor > 0, 1, 0)
+                - pension_has_overlap: if(pension_survivor > 0 and pension_oldage > 0, 1, 0)
+
+                - pension_calib_factor: if(REAL_AVG_OLDAGE_PENSION > 0 and avg(pension_oldage, filter=retired and not disabled and pension_oldage > 0) > 0,
+                                           REAL_AVG_OLDAGE_PENSION / avg(pension_oldage, filter=retired and not disabled and pension_oldage > 0),
+                                           1)
+                - pension_oldage: if(retired and not disabled and REAL_AVG_OLDAGE_PENSION > 0, pension_oldage * pension_calib_factor, pension_oldage)
+                - pension_oldage_full: if(retired and not disabled and REAL_AVG_OLDAGE_PENSION > 0, pension_oldage_full * pension_calib_factor, pension_oldage_full)
+                - pension_total: if(retired and not disabled, pension_oldage + pension_survivor, pension_total)
+                - pension: if(retired and not disabled, pension_total, pension)
+                - benefit_ratio: if(retired and not retired_early and not disabled and pension_oldage > 0 and MONTHLY_AVG_WAGE > 0,
+                                    pension_oldage / MONTHLY_AVG_WAGE,
+                                    0)
+                # MIDO/legislative-style multiplier; requires reliable qualified ODP.
+                # The current base-year data do not contain sufficient qualified ODP
+                # for existing pensioners, so the active model uses a calibrated flat proxy.
+                # - minimum_pension_multiplier: if(qualified_odp < 30, 0,
+                #                              1.45
+                #                              + max(0, min(qualified_odp, 40) - 30) * 0.025
+                #                              + max(0, min(qualified_odp, 50) - 40) * 0.03
+                #                              + max(0, min(qualified_odp, 60) - 50) * 0.05
+                #                              + max(0, qualified_odp - 60) * 0.075)
+                - minimum_pension_multiplier: 1.45
+                - minimum_pension_amount: SUBSISTENCE_MINIMUM * minimum_pension_multiplier
+                - material_need_oldage_reclass_score: uniform()
+                # AWG migrants with a pre-arrival EU career are assumed to receive
+                # pension income from abroad. The model does not simulate that
+                # foreign pension explicitly, so they must not be treated as
+                # pensionless claimants of the simplified Slovak low-income benefits.
+                - material_need_oldage_reclass: period == 2022 and retired and not retired_early and not disabled and pension < MATERIAL_NEED_BENEFIT and not (awg_migrant and (odp > odp_sk or roky_pomb > roky_pomb_sk or cumulative_omb > cumulative_omb_sk)) and align_abs(material_need_oldage_reclass_score,
+                                                                                                                                                693,
+                                                                                                                                                filter=period == 2022 and retired and not retired_early and not disabled and pension < MATERIAL_NEED_BENEFIT and not (awg_migrant and (odp > odp_sk or roky_pomb > roky_pomb_sk or cumulative_omb > cumulative_omb_sk)))
+                - pension_oldage: if(material_need_oldage_reclass,
+                                     avg(pension_oldage, filter=retired and not retired_early and not disabled and pension_oldage > 0 and pension >= MATERIAL_NEED_BENEFIT),
+                                     pension_oldage)
+                - pension_oldage_full: if(material_need_oldage_reclass, pension_oldage, pension_oldage_full)
+                - pension_total: if(material_need_oldage_reclass, pension_oldage + pension_survivor, pension_total)
+                - pension: if(material_need_oldage_reclass, pension_total, pension)
+                - material_need_pension_benefit: if((retired or disabled) and pension < MATERIAL_NEED_BENEFIT and not (awg_migrant and (odp > odp_sk or roky_pomb > roky_pomb_sk or cumulative_omb > cumulative_omb_sk)),
+                                                   MATERIAL_NEED_BENEFIT,
+                                                   0)
+                - pension: if(material_need_pension_benefit > 0, material_need_pension_benefit, pension)
+                - minimum_pension_eligible: ((retired and not disabled) or (disabled and toret >= 0)) and not retired_early and material_need_pension_benefit == 0 and minimum_pension_amount > pension and not (awg_migrant and (odp > odp_sk or roky_pomb > roky_pomb_sk or cumulative_omb > cumulative_omb_sk))
+                - minimum_pension_score: uniform()
+                - min_flag: if(not minimum_pension_eligible, False,
+                            if(min_flag, True,
+                               align_abs(minimum_pension_score,
+                                         max(0, round(count(minimum_pension_eligible) * minimum_pension_takeup_rate) - count(min_flag and minimum_pension_eligible)),
+                                         filter=minimum_pension_eligible and not min_flag)))
+                - minimum_pension_benefit: if(minimum_pension_eligible and min_flag,
+                                             (minimum_pension_amount - pension) * minimum_pension_benefit_factor,
+                                             0)
+               
+            # Toto prerobit aby to vypluvalo len dochodkove parametre. Potom sa moze csv_all vypnut
+            csv_empl():
+              - age: age
+              # - csv(period, dump(period, sex, status, omb, cumulative_omb), fname='emplH2022.csv', mode='a')
+              # - csv(period, dump(period, sex, status, omb, cumulative_omb, filter=ISFEMALE==True), fname='emplH2022_F.csv', mode='a')
+              # - csv(period, dump(period, sex, status, omb, cumulative_omb, filter=ISFEMALE==False), fname='emplH2022_M.csv', mode='a')
+               
+            csv_all():
+              #- csv(period, dump(period, sex, status, age, omb, pomb, cumulative_omb, odp, roky_pomb, pension_new, pension, retired_new, retired), fname='simulation_prospective.csv', mode='a')- csv(period, dump(period, sex, status, age, omb, pomb, cumulative_omb, odp, roky_pomb, pension_new, pension, retired_new, retired), fname='simulation_prospective.csv', mode='a')
+              #- csv(period, dump(period, sex, age, age_float, status, retired, retired_early, retired_new), fname='simulation_prospective_all.csv', mode='a')
+
+              - csv(period, dump(period, sex, age, status, status1y, toret, retired_early, retired, retired_new, omb_m, omb_f, omb, cumulative_omb, pomb, odp, odp_pension, roky_pomb, nominal_wage, last_nominal_wage, last_wage_level, pays_social_contributions, social_insurance_contribution, oldage_insurance_contribution, disability_insurance_contribution, reserve_fund_contribution, pension_relevant_contribution, pillar2_contribution, first_pillar_oldage_contribution, pension_new, replacement_rate, benefit_ratio, disability_oldage_pension, disability_to_oldage, pension_early, pension, pension_total, pension_oldage, pension_survivor, pension_widow, pension_widower, pension_oldage_full, pension_survivor_full, pension_has_survivor, pension_has_overlap, survivor_pension_stock, survivor_pension_award, survivor_pension_amount, survivor_flat_award_amount, survivor_donor_base, male_deceased_survivor_donor_base, female_deceased_survivor_donor_base, standalone_survivor, standalone_survivor_stock, standalone_survivor_award, standalone_survivor_amount, minimum_pension_amount, minimum_pension_benefit, material_need_pension_benefit, material_need_oldage_reclass, non_covered, non_covered_score, retired_new_score, disab_pension_pred, disabled_inflow, disabled, disabled_working, employed, pillar2_saver, pillar2_entry, pillar2_return, pillar2_entry_year, pillar2_years, pillar2_pension_base, pillar2_pension_reduction), fname='simulation_prospective_pens_sample.csv', mode='a')
+              #- csv(period, dump(), fname='simulation_prospective_pens.csv', mode='a')
+
+            csv_benefit_replacement_detail():
+              - csv(period,
+                                    count(NEW_RETIRED and replacement_rate > 0) * 5,
+                                    avg(replacement_rate, filter=NEW_RETIRED and replacement_rate > 0),
+                                    count(NEW_RETIRED and replacement_rate > 0 and ISMALE) * 5,
+                                    avg(replacement_rate, filter=NEW_RETIRED and replacement_rate > 0 and ISMALE),
+                                    count(NEW_RETIRED and replacement_rate > 0 and ISFEMALE) * 5,
+                                    avg(replacement_rate, filter=NEW_RETIRED and replacement_rate > 0 and ISFEMALE),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and ISMALE) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and ISMALE),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and ISFEMALE) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and ISFEMALE),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and age < 65) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and age < 65),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and age >= 65 and age <= 69) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and age >= 65 and age <= 69),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and age >= 70 and age <= 74) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and age >= 70 and age <= 74),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and age >= 75 and age <= 79) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and age >= 75 and age <= 79),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and age >= 80 and age <= 84) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and age >= 80 and age <= 84),
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and age >= 85) * 5,
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0 and age >= 85),
+                    fname='benefit_replacement_detail.csv', mode='a')
+
+            csv_pension_expenditure():
+              - csv(period,
+                                    sum(pension * (retired and not retired_early and not disabled and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_total * (retired and not retired_early and not disabled and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_oldage * (retired and not retired_early and not disabled and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_survivor * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(pension_survivor_full * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(max(0, pension_oldage_full + pension_survivor_full - pension_total) * (retired and not retired_early and not disabled and pension_has_overlap == 1 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_survivor * (retired and not retired_early and not disabled and pension_oldage > 0 and pension_survivor > 0 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_survivor * (standalone_survivor and pension_survivor > 0)) * 12 * 5,
+                                    sum(pension_widow * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(pension_widow * (retired and not retired_early and not disabled and pension_oldage > 0 and pension_widow > 0 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_widow * (standalone_survivor and pension_widow > 0)) * 12 * 5,
+                                    sum(pension_widower * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(pension_widower * (retired and not retired_early and not disabled and pension_oldage > 0 and pension_widower > 0 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_widower * (standalone_survivor and pension_widower > 0)) * 12 * 5,
+                                    sum(pension * (retired_early and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_oldage * (retired_early and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension * (disabled and not retired_early and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(minimum_pension_benefit) * 12 * 5,
+                                    sum(material_need_pension_benefit) * 12 * 5,
+                                    count(retired and not retired_early and not disabled) * 5,
+                                    count(retired_early) * 5,
+                                    count(disabled and not retired_early) * 5,
+                                    count(pension_survivor > 0 and ((retired and not retired_early and not disabled) or standalone_survivor)) * 5,
+                                    count(pension_widow > 0 and ((retired and not retired_early and not disabled) or standalone_survivor)) * 5,
+                                    count(pension_widower > 0 and ((retired and not retired_early and not disabled) or standalone_survivor)) * 5,
+                                    count(pension_has_overlap == 1 and retired and not retired_early and not disabled) * 5,
+                                    count(pension_survivor > 0 and standalone_survivor) * 5,
+                                    count(pension_widow > 0 and pension_oldage > 0 and retired and not retired_early and not disabled) * 5,
+                                    count(pension_widow > 0 and standalone_survivor) * 5,
+                                    count(pension_widower > 0 and pension_oldage > 0 and retired and not retired_early and not disabled) * 5,
+                                    count(pension_widower > 0 and standalone_survivor) * 5,
+                                    count(survivor_pension_stock and retired and not retired_early and not disabled) * 5,
+                                    count(survivor_pension_award) * 5,
+                                    count(survivor_pension_award and ISFEMALE) * 5,
+                                    count(survivor_pension_award and ISMALE) * 5,
+                                    count(minimum_pension_benefit > 0) * 5,
+                                    count(material_need_pension_benefit > 0) * 5,
+                                    avg(pension, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_total, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_oldage, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=pension_survivor > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_survivor_full, filter=pension_survivor_full > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_widow, filter=pension_widow > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_widower, filter=pension_widower > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_total, filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_oldage, filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=pension_survivor > 0 and standalone_survivor),
+                                    avg(pension_widow, filter=pension_widow > 0 and pension_oldage > 0 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_widow, filter=pension_widow > 0 and standalone_survivor),
+                                    avg(pension_widower, filter=pension_widower > 0 and pension_oldage > 0 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_widower, filter=pension_widower > 0 and standalone_survivor),
+                                    avg(max(0, pension_oldage_full + pension_survivor_full - pension_total), filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension, filter=retired_early and material_need_pension_benefit == 0),
+                                    avg(pension, filter=disabled and not retired_early and material_need_pension_benefit == 0),
+                                    avg(minimum_pension_benefit, filter=minimum_pension_benefit > 0),
+                                    avg(material_need_pension_benefit, filter=material_need_pension_benefit > 0),
+                                    avg(replacement_rate, filter=NEW_RETIRED and replacement_rate > 0),
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0),
+                                    sum(oldage_insurance_contribution) * oldage_contribution_effective_collection_factor * 12 * 5,
+                                    sum(disability_insurance_contribution) * disability_contribution_effective_collection_factor * 12 * 5,
+                                    sum(reserve_fund_contribution) * reserve_fund_contribution_effective_collection_factor * 12 * 5,
+                                    (sum(oldage_insurance_contribution) * oldage_contribution_effective_collection_factor + sum(disability_insurance_contribution) * disability_contribution_effective_collection_factor + sum(reserve_fund_contribution) * reserve_fund_contribution_effective_collection_factor) * 12 * 5,
+                                    sum(pillar2_contribution) * pillar2_contribution_effective_collection_factor * 12 * 5,
+                                    (sum(oldage_insurance_contribution) * oldage_contribution_effective_collection_factor - sum(pillar2_contribution) * pillar2_contribution_effective_collection_factor) * 12 * 5,
+                                    sum(social_insurance_contribution) * social_insurance_contribution_effective_collection_factor * 12 * 5,
+                                    count(status == 1) * 5,
+                                    count(pays_social_contributions) * 5,
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and material_need_pension_benefit == 0 and pillar2_years > 0) * 5,
+                                    count(pillar2_contribution > 0) * 5,
+                    fname='pension_expenditure_summary.csv', mode='a')
+              - csv(period,
+                                    sum(pension * (retired and not retired_early and not disabled and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_total * (retired and not retired_early and not disabled and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_oldage * (retired and not retired_early and not disabled and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_survivor * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(pension_survivor_full * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(max(0, pension_oldage_full + pension_survivor_full - pension_total) * (retired and not retired_early and not disabled and pension_has_overlap == 1 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_survivor * (retired and not retired_early and not disabled and pension_oldage > 0 and pension_survivor > 0 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_survivor * (standalone_survivor and pension_survivor > 0)) * 12 * 5,
+                                    sum(pension_widow * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(pension_widow * (retired and not retired_early and not disabled and pension_oldage > 0 and pension_widow > 0 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_widow * (standalone_survivor and pension_widow > 0)) * 12 * 5,
+                                    sum(pension_widower * ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)) * 12 * 5,
+                                    sum(pension_widower * (retired and not retired_early and not disabled and pension_oldage > 0 and pension_widower > 0 and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_widower * (standalone_survivor and pension_widower > 0)) * 12 * 5,
+                                    sum(pension * (retired_early and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension_oldage * (retired_early and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(pension * (disabled and not retired_early and material_need_pension_benefit == 0)) * 12 * 5,
+                                    sum(minimum_pension_benefit) * 12 * 5,
+                                    sum(material_need_pension_benefit) * 12 * 5,
+                                    count(retired and not retired_early and not disabled) * 5,
+                                    count(retired_early) * 5,
+                                    count(disabled and not retired_early) * 5,
+                                    count(pension_survivor > 0 and ((retired and not retired_early and not disabled) or standalone_survivor)) * 5,
+                                    count(pension_widow > 0 and ((retired and not retired_early and not disabled) or standalone_survivor)) * 5,
+                                    count(pension_widower > 0 and ((retired and not retired_early and not disabled) or standalone_survivor)) * 5,
+                                    count(pension_has_overlap == 1 and retired and not retired_early and not disabled) * 5,
+                                    count(pension_survivor > 0 and standalone_survivor) * 5,
+                                    count(pension_widow > 0 and pension_oldage > 0 and retired and not retired_early and not disabled) * 5,
+                                    count(pension_widow > 0 and standalone_survivor) * 5,
+                                    count(pension_widower > 0 and pension_oldage > 0 and retired and not retired_early and not disabled) * 5,
+                                    count(pension_widower > 0 and standalone_survivor) * 5,
+                                    count(survivor_pension_stock and retired and not retired_early and not disabled) * 5,
+                                    count(survivor_pension_award) * 5,
+                                    count(survivor_pension_award and ISFEMALE) * 5,
+                                    count(survivor_pension_award and ISMALE) * 5,
+                                    count(minimum_pension_benefit > 0) * 5,
+                                    count(material_need_pension_benefit > 0) * 5,
+                                    avg(pension, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_total, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_oldage, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=pension_survivor > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_survivor_full, filter=pension_survivor_full > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_widow, filter=pension_widow > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_widower, filter=pension_widower > 0 and ((retired and not retired_early and not disabled and material_need_pension_benefit == 0) or standalone_survivor)),
+                                    avg(pension_total, filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_oldage, filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_survivor, filter=pension_survivor > 0 and standalone_survivor),
+                                    avg(pension_widow, filter=pension_widow > 0 and pension_oldage > 0 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_widow, filter=pension_widow > 0 and standalone_survivor),
+                                    avg(pension_widower, filter=pension_widower > 0 and pension_oldage > 0 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension_widower, filter=pension_widower > 0 and standalone_survivor),
+                                    avg(max(0, pension_oldage_full + pension_survivor_full - pension_total), filter=pension_has_overlap == 1 and retired and not retired_early and not disabled and material_need_pension_benefit == 0),
+                                    avg(pension, filter=retired_early and material_need_pension_benefit == 0),
+                                    avg(pension, filter=disabled and not retired_early and material_need_pension_benefit == 0),
+                                    avg(minimum_pension_benefit, filter=minimum_pension_benefit > 0),
+                                    avg(material_need_pension_benefit, filter=material_need_pension_benefit > 0),
+                                    avg(replacement_rate, filter=NEW_RETIRED and replacement_rate > 0),
+                                    avg(benefit_ratio, filter=retired and not retired_early and not disabled and pension_oldage > 0),
+                                    sum(oldage_insurance_contribution) * oldage_contribution_effective_collection_factor * 12 * 5,
+                                    sum(disability_insurance_contribution) * disability_contribution_effective_collection_factor * 12 * 5,
+                                    sum(reserve_fund_contribution) * reserve_fund_contribution_effective_collection_factor * 12 * 5,
+                                    (sum(oldage_insurance_contribution) * oldage_contribution_effective_collection_factor + sum(disability_insurance_contribution) * disability_contribution_effective_collection_factor + sum(reserve_fund_contribution) * reserve_fund_contribution_effective_collection_factor) * 12 * 5,
+                                    sum(pillar2_contribution) * pillar2_contribution_effective_collection_factor * 12 * 5,
+                                    (sum(oldage_insurance_contribution) * oldage_contribution_effective_collection_factor - sum(pillar2_contribution) * pillar2_contribution_effective_collection_factor) * 12 * 5,
+                                    sum(social_insurance_contribution) * social_insurance_contribution_effective_collection_factor * 12 * 5,
+                                    count(status == 1) * 5,
+                                    count(pays_social_contributions) * 5,
+                                    count(retired and not retired_early and not disabled and pension_oldage > 0 and material_need_pension_benefit == 0 and pillar2_years > 0) * 5,
+                                    count(pillar2_contribution > 0) * 5,
+                    fname='pension_expenditure_summary_formatted.csv', mode='a')
+
+            
+               
+simulation:
+   init: 
+        - person: [init_variable, init_define, time_to_leave1, edulev_init, init_disab, init_retired, init_non_covered, init_disab_pens, init_pillar2_savers, csv_pillar2_stock]
+
+   processes:   
+        - person: [ageing, birth, awg_baseyear_age1_cohort, death, awg_migration, immigration, edulev, edufield, later_studying, statusing, study, disability, retirement, inactivity, economic_activity, employment, employment_nace_score, employment_nace, employment_nace_qual, unemployment, pillar2_mandatory_entry, pillar2_return_entry, maternity, wages, nominal_wage_vyp, social_contribution_payer_vyp, social_insurance_contribution_vyp, pridat_odp, vypocet_pomb, pension_vyp, csv_pension_expenditure, csv_benefit_replacement_detail, awg_initial_population_stock_calibration, awg_initial_population_stock_calibration_remove] 
+        #- person: [historical_year, ageing, rebirth, maternity, immigration, statusing, study, retirement, disability, inactivity, economic_activity, employment_nace_score, employment, unidentified]        
+        #- person: [csv_empl]
+        - person: [csv_all]
+   
+   input:
+        path:   "INPUT_DATA"
+        file:   "prospective_input_constant_retirement_age.h5"
+
+   output:
+        path:   "OUTPUT_DATA_constant_retirement_age"
+        file:   "simulation.h5"
+        
+   start_period: 2022
+   periods: 49
+   random_seed: 1                
+            
+

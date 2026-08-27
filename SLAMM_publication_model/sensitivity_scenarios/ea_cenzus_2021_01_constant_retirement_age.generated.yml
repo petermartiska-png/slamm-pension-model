@@ -1,0 +1,684 @@
+import: 
+     - premenne_dopyt.yml
+     - demo_cenzus_2021_01.yml
+     - edu_cenzus_2021_01.yml
+       
+globals:               
+     globaltable:
+         path: globaltable.csv
+         transposed: True 
+         fields:
+            - PERIOD: int
+            - MALE_RA: float
+            - FEMALE_RA_0: float 
+            - FEMALE_RA_1: float 
+            - FEMALE_RA_2: float 
+            - FEMALE_RA_3_4: float 
+            - FEMALE_RA_5: float 
+            - W_avg: float
+            - unem_rate: float
+            - inac_elas: float
+
+     awg_participation:
+         path: awg_participation_rates_no_reform.csv
+         fields:
+            - PERIOD: int
+            - PR_M_15: float
+            - PR_M_16: float
+            - PR_M_17: float
+            - PR_M_18: float
+            - PR_M_19: float
+            - PR_M_20: float
+            - PR_M_21: float
+            - PR_M_22: float
+            - PR_M_23: float
+            - PR_M_24: float
+            - PR_M_25: float
+            - PR_M_26: float
+            - PR_M_27: float
+            - PR_M_28: float
+            - PR_M_29: float
+            - PR_M_30: float
+            - PR_M_31: float
+            - PR_M_32: float
+            - PR_M_33: float
+            - PR_M_34: float
+            - PR_M_35: float
+            - PR_M_36: float
+            - PR_M_37: float
+            - PR_M_38: float
+            - PR_M_39: float
+            - PR_M_40: float
+            - PR_M_41: float
+            - PR_M_42: float
+            - PR_M_43: float
+            - PR_M_44: float
+            - PR_M_45: float
+            - PR_M_46: float
+            - PR_M_47: float
+            - PR_M_48: float
+            - PR_M_49: float
+            - PR_M_50: float
+            - PR_M_51: float
+            - PR_M_52: float
+            - PR_M_53: float
+            - PR_M_54: float
+            - PR_M_55: float
+            - PR_M_56: float
+            - PR_M_57: float
+            - PR_M_58: float
+            - PR_M_59: float
+            - PR_M_60: float
+            - PR_M_61: float
+            - PR_M_62: float
+            - PR_M_63: float
+            - PR_M_64: float
+            - PR_M_65: float
+            - PR_M_66: float
+            - PR_M_67: float
+            - PR_M_68: float
+            - PR_M_69: float
+            - PR_M_70: float
+            - PR_M_71: float
+            - PR_M_72: float
+            - PR_M_73: float
+            - PR_M_74: float
+            - PR_F_15: float
+            - PR_F_16: float
+            - PR_F_17: float
+            - PR_F_18: float
+            - PR_F_19: float
+            - PR_F_20: float
+            - PR_F_21: float
+            - PR_F_22: float
+            - PR_F_23: float
+            - PR_F_24: float
+            - PR_F_25: float
+            - PR_F_26: float
+            - PR_F_27: float
+            - PR_F_28: float
+            - PR_F_29: float
+            - PR_F_30: float
+            - PR_F_31: float
+            - PR_F_32: float
+            - PR_F_33: float
+            - PR_F_34: float
+            - PR_F_35: float
+            - PR_F_36: float
+            - PR_F_37: float
+            - PR_F_38: float
+            - PR_F_39: float
+            - PR_F_40: float
+            - PR_F_41: float
+            - PR_F_42: float
+            - PR_F_43: float
+            - PR_F_44: float
+            - PR_F_45: float
+            - PR_F_46: float
+            - PR_F_47: float
+            - PR_F_48: float
+            - PR_F_49: float
+            - PR_F_50: float
+            - PR_F_51: float
+            - PR_F_52: float
+            - PR_F_53: float
+            - PR_F_54: float
+            - PR_F_55: float
+            - PR_F_56: float
+            - PR_F_57: float
+            - PR_F_58: float
+            - PR_F_59: float
+            - PR_F_60: float
+            - PR_F_61: float
+            - PR_F_62: float
+            - PR_F_63: float
+            - PR_F_64: float
+            - PR_F_65: float
+            - PR_F_66: float
+            - PR_F_67: float
+            - PR_F_68: float
+            - PR_F_69: float
+            - PR_F_70: float
+            - PR_F_71: float
+            - PR_F_72: float
+            - PR_F_73: float
+            - PR_F_74: float
+    
+entities: 
+     person: 
+         fields:           
+            - ea: {type: bool, initialdata: False}
+            - retired: {type: bool, initialdata: False}
+            - retired_new: {type: bool, initialdata: False}
+            - retired_new_score: {type: float, initialdata: False}
+            - working_retired: {type: bool, initialdata: False}
+            - retired_early: {type: bool, initialdata: False}
+            - non_covered: {type: bool, initialdata: False}
+            - non_covered_score: {type: float, initialdata: False}
+            - student: {type: bool, initialdata: False}
+            - disabled: {type: bool, initialdata: False}
+            - disabled_inflow: {type: bool, initialdata: False}
+            - disabled_to_lf: {type: bool, initialdata: False}
+            - disabled_stock: {type: bool, initialdata: False}
+            - disabled_died: {type: bool, initialdata: False}
+            - disabled_to_ret: {type: bool, initialdata: False}
+            - disabled_outflow: {type: bool, initialdata: False}
+            - disabled_plus: {type: bool, initialdata: False}
+            - disabled_working: {type: bool, initialdata: False}
+            - inactivity: {type: bool, initialdata: False}
+            - inactivity_score: {type: float, initialdata: False}
+            - inactivity_plus: {type: bool, initialdata: False}
+            - awg_participation_candidate: {type: bool, initialdata: False}
+            - awg_participation_score: {type: float, initialdata: False}
+            - awg_participation_active: {type: bool, initialdata: False}
+            - toret: {type: int, initialdata: False}      
+            - immigrant_new: {type: bool, initialdata: False}
+            - init_disab: {type: bool, initialdata: False}
+            
+         macros:
+            MALE_RA: globaltable.MALE_RA[period]
+            FEMALE_RA_0: globaltable.FEMALE_RA_0[period]
+            FEMALE_RA_1: globaltable.FEMALE_RA_1[period]
+            FEMALE_RA_2: globaltable.FEMALE_RA_2[period]
+            FEMALE_RA_3_4: globaltable.FEMALE_RA_3_4[period]
+            FEMALE_RA_5: globaltable.FEMALE_RA_5[period]
+            W_avg: globaltable.W_avg[period]
+            unem_rate: globaltable.unem_rate[period]
+            inac_elas: globaltable.inac_elas[period] 
+         
+            EMPLOYED: 1
+            UNEMPLOYED: 2
+            STUDENT: 3
+            RETIRED: 4
+            INACTIVE: 5
+            DISABLED: 6
+
+            IS_EMPLOYED: status==1
+            IS_UNEMPLOYED: status==2
+            IS_STUDENT: status==3
+            IS_RETIRED: status==4
+            IS_INACTIVE: status==5
+            IS_DISABLED: status==6
+
+            WAS_EMPLOYED: status1y==1
+            WAS_UNEMPLOYED: status1y==2
+            WAS_STUDENT: status1y==3
+            WAS_RETIRED: status1y==4
+            WAS_INACTIVE: status1y==5            
+            WAS_DISABLED: status1y==6
+    
+            WAS_NOT_RETIRED: status1y==1 or status1y==2 or status1y==3 or status1y==5 or status1y==6 
+
+            ISMALE: sex == 1
+            ISFEMALE: sex == 2            
+
+            AGE19: age==19
+            AGE20: age==20
+            AGE21: age==21
+            AGE22: age==22
+            AGE23: age==23
+            AGE24: age==24
+            AGE25: age==25
+            AGE26: age==26
+            AGE27: age==27
+            AGE28: age==28
+            AGE29: age==29
+            AGE30: age==30
+            AGE31: age==31
+            AGE32: age==32
+            AGE33: age==33
+            AGE34: age==34
+            AGE35: age==35
+            AGE36: age==36
+            AGE37: age==37
+            AGE38: age==38
+            AGE39: age==39
+            AGE40: age==40
+            AGE41: age==41
+            AGE42: age==42
+            AGE43: age==43
+            AGE44: age==44
+            AGE45: age==45
+            AGE46: age==46
+            AGE47: age==47
+            AGE48: age==48
+            AGE49: age==49
+            AGE50: age==50
+            AGE51: age==51
+            AGE52: age==52
+            AGE53: age==53
+            AGE54: age==54
+            AGE55: age==55
+            AGE56: age==56
+            AGE57: age==57
+            AGE58: age==58
+            AGE59: age==59
+            AGE60: age==60
+            AGE61: age==61
+            AGE62: age==62
+            AGE63: age==63
+            AGE64: age==64
+            AGE65: age==65
+            AGE66: age==66
+            AGE67: age==67
+            AGE68: age==68
+            AGE69: age==69
+            AGE70: age==70
+            AGE71: age==71
+            AGE72: age==72
+            AGE73: age==73
+            AGE74: age==74
+            AGE75: age==75
+            AGE76: age==76
+            AGE77: age==77
+            AGE78: age==78
+            AGE79: age==79
+            AGE80: age==80
+            AGE81: age==81
+            AGE82: age==82
+            AGE83: age==83
+            AGE84: age==84
+            AGE85: age==85
+            AGE86: age==86
+            AGE87: age==87
+    
+            AGEG17: age>=15 and age<=19
+            AGEG22: age>=20 and age<=24
+            AGEG27: age>=25 and age<=29
+            AGEG32: age>=30 and age<=34
+            AGEG37: age>=35 and age<=39
+            AGEG42: age>=40 and age<=44
+            AGEG47: age>=45 and age<=49
+            AGEG52: age>=50 and age<=54
+            AGEG57: age>=55 and age<=59
+            AGEG62: age>=60 and age<=64
+            AGEG67: age>=65 and age<=69
+            
+            ISCO1_0: isco>=0 and isco<=9
+            ISCO1_1: isco>=10 and isco<=19
+            ISCO1_2: isco>=20 and isco<=29
+            ISCO1_3: isco>=30 and isco<=39
+            ISCO1_4: isco>=40 and isco<=49
+            ISCO1_5: isco>=50 and isco<=59
+            ISCO1_6: isco>=60 and isco<=69
+            ISCO1_7: isco>=70 and isco<=79
+            ISCO1_8: isco>=80 and isco<=89
+            ISCO1_9: isco>=90 and isco<=98
+
+            FIELD0: hatfield==0 or hatfield==99
+            FIELD1: hatfield==1
+            FIELD2: hatfield==2
+            FIELD3: hatfield==3
+            FIELD4: hatfield==4
+            FIELD5: hatfield==5
+            FIELD6: hatfield==6
+            FIELD7: hatfield==7
+            FIELD8: hatfield==8
+            FIELD9: hatfield==9
+            FIELD10: hatfield==10
+            
+            AGRO: nace==1
+            INDUSTRY: nace==2
+            CONSTRUCTION: nace==3
+            MAR_SERVICES: nace==4
+            NMAR_SERVICES: nace==5
+
+            L_AGRO: nace1y==1
+            L_INDUSTRY: nace1y==2
+            L_CONSTRUCTION: nace1y==3
+            L_MAR_SERVICES: nace1y==4
+            L_NMAR_SERVICES: nace1y==5
+
+            DETI1: pocet_deti==1 
+            DETI2: pocet_deti==2
+            DETI3: pocet_deti==3
+            DETI4: pocet_deti==4
+            DETI5: pocet_deti==5
+            DETI6: pocet_deti==6
+
+                                    
+
+            
+         processes: 
+
+            init_disab():
+               - disabled_score: logit_regr(ISFEMALE*(-0.011774)+AGRO*(0.2301949)+INDUSTRY*(-0.0892453)+MAR_SERVICES*(0.1889849)+NMAR_SERVICES*(0.4119144)+PRIMARY*(0.4828295)+LOWER_SECONDARY*(0.3662102)+POST_SECONDARY*(0.1159768)+TERTIARY*(-0.6491878)+DETI1*(-0.3018152)+DETI2*(-0.392612)+DETI3*(-0.3703769)+DETI4*(-0.3384038)+DETI5*(-0.4508266)+DETI6*(-0.5884336)+age*(0.3414163)+(age*age)*(-0.002962)+1*(-12.0914))
+               - disabled_score: if(status==5, 3, disabled_score)
+               - disabled: if(age>=18 and age<=62, 
+                              if(ISMALE,
+                                 align_abs(disabled_score, 'disability_male_2021_sample_20.csv', leave=retired),
+                                 align_abs(disabled_score, 'disability_female_2021_sample_20.csv', leave=retired)),
+                                 False) 
+
+               - status: if(disabled, DISABLED, status)
+
+            init_retired():
+               - retired: False
+               - retired: if(ISMALE and age_float>MALE_RA and destination==1, True, retired)
+               - retired: if(ISFEMALE and age_float>FEMALE_RA_0 and pocet_deti==0 and destination==1, True, retired)
+               - retired: if(ISFEMALE and age_float>FEMALE_RA_1 and pocet_deti==1 and destination==1, True, retired)
+               - retired: if(ISFEMALE and age_float>FEMALE_RA_2 and pocet_deti==2 and destination==1, True, retired)
+               - retired: if(ISFEMALE and age_float>FEMALE_RA_3_4 and pocet_deti>=3 and pocet_deti<=4 and destination==1, True, retired)
+               - retired: if(ISFEMALE and age_float>FEMALE_RA_5 and pocet_deti>=5 and destination==1, True, retired)
+    
+            init_non_covered():
+               - non_covered_score: logit_score(ISFEMALE*(-0.3467642)+PRIMARY*(-1.791834)+LOWER_SECONDARY*(-1.2385046)+UPPER_SECONDARY*(-.8123603)+POST_SECONDARY*(-.526055)+1*(-0.3785907))
+               - non_covered_score: if(status1y==1, non_covered_score+1, non_covered_score)
+               - non_covered: if(retired==True and age>=60 and age<=100, 
+                               if(ISMALE, align(non_covered_score, 'non_covered_male.csv'), align(non_covered_score, 'non_covered_female.csv')), False)
+               - non_covered: if(non_covered,
+                                  align(non_covered_score, oldage_non_covered_factor, filter=non_covered),
+                                  False)
+
+               - retired: if(non_covered==True, False, retired)
+ 
+            statusing(): 
+               - status1y: status                             
+               - status: -1
+
+               - retired_new: False
+                           
+            study(): 
+               - student: if(age<GRADUATIONAGE_P, True, False)
+               - student: if(hatlev5==1, if(age<=GRADUATIONAGE_P,  True,  False), student)
+               - student: if(hatlev5==2, if(age<=GRADUATIONAGE_LS, True,  False), student)
+               - student: if(hatlev5==3, if(age<=GRADUATIONAGE_US, True,  False), student)                            
+               - student: if(hatlev5==4, if(age<=GRADUATIONAGE_PS, True,  False), student)  
+               - student: if(hatlev5==5, if(age<=GRADUATIONAGE_T,  True,  False), student)
+               - student: if(later_student, True, student)
+               - status: if(student, STUDENT, status)             
+
+            # Disability   
+            disability():
+#  disability  
+               - disabled_stock: if(disabled,True,False)
+               - disabled_score: logit_regr(ISFEMALE*(0.00579)+AGRO*(0.1306392)+INDUSTRY*(0.0105579)+MAR_SERVICES*(-0.0763007)+NMAR_SERVICES*(0.0542867)+PRIMARY*(0.0956477)+UPPER_SECONDARY*(-0.366249)+POST_SECONDARY*(-0.6365903)+AGE19*(1.165045)+AGE20*(0.6861873)+AGE21*(0.6314152)+AGE22*(0.6033639)+AGE23*(0.7224996)+AGE24*(0.8894379)+AGE25*(0.8116643)+AGE26*(0.9078458)+AGE27*(1.062477)+AGE28*(1.139865)+AGE29*(1.043332)+AGE30*(1.183759)+AGE31*(1.280347)+AGE32*(1.33931)+AGE33*(1.425686)+AGE34*(1.524327)+AGE35*(1.485485)+AGE36*(1.640075)+AGE37*(1.694091)+AGE38*(1.784646)+AGE39*(1.867493)+AGE40*(1.960563)+AGE41*(2.020408)+AGE42*(2.111877)+AGE43*(2.166896)+AGE44*(2.269408)+AGE45*(2.333404)+AGE46*(2.406646)+AGE47*(2.493796)+AGE48*(2.581267)+AGE49*(2.674065)+AGE50*(2.828941)+AGE51*(2.856149)+AGE52*(2.95132)+AGE53*(3.026513)+AGE54*(3.126306)+AGE55*(3.182339)+AGE56*(3.279115)+AGE57*(3.349162)+AGE58*(3.367154)+AGE59*(3.345914)+AGE60*(3.245815)+AGE61*(2.96839)+AGE62*(2.200672)+1*(-7.38156)) 
+               # Novych invalidov vybera z pracujucich a mimo trhu prace
+               - disabled_inflow: if(status==-1 and status1y!=5 and toret<=0 and not immigrant_new and destination==1 and age>=15, 
+                                  if(ISMALE,
+                                     align(disabled_score, 'disability_new_male.csv', leave=retired and student),
+                                     align(disabled_score, 'disability_new_female.csv', leave=retired and student)),
+                                     False) 
+
+               # Priblizne 0,2% invalidov rocne "vyzdravie" a vrati sa na trh prace
+               - disabled_to_lf: if(disabled_stock and age<50, align(0.0, 0.002), False)
+               # Podiely zomierajucich invalidov
+               - disabled_died: if(disabled_stock and disabled_to_lf==False, align(0.0, 'disability_dead.csv', take=dead), False)
+               # dat pozor, ci vyhadzuje dead na konci
+               # toret nefunguje, lebo align tabulky pre inflow koncia pred dochodkovym vekom
+               #- disabled_to_ret: if(WAS_DISABLED and toret>=0, True, False)
+               - disabled_outflow: if(disabled_to_lf or disabled_died or disabled_to_ret, True, False)
+               # pomocny vypocet pre disabled v dalsom riadku
+               - disabled_plus: if(disabled_stock or disabled_inflow, True, False)
+               - disabled: if(disabled_plus==True and disabled_outflow==False, True, False)
+               - status: if(disabled, DISABLED, status)
+               - remove(dead)
+
+            # Retirement   
+            retirement():
+#               - retired: False
+#               - retired: if(ISMALE and age_float>MALE_RA and destination==1, True, retired)
+#               - retired: if(ISFEMALE and age_float>FEMALE_RA_0 and pocet_deti==0 and destination==1, True, retired)
+#               - retired: if(ISFEMALE and age_float>FEMALE_RA_1 and pocet_deti==1 and destination==1, True, retired)
+#               - retired: if(ISFEMALE and age_float>FEMALE_RA_2 and pocet_deti==2 and destination==1, True, retired)
+#               - retired: if(ISFEMALE and age_float>FEMALE_RA_3_4 and pocet_deti>=3 and pocet_deti<=4 and destination==1, True, retired)
+#               - retired: if(ISFEMALE and age_float>FEMALE_RA_5 and pocet_deti>=5 and destination==1, True, retired)               
+               - toret: if(ISMALE,  trunc(age_float-MALE_RA), 
+                        if(pocet_deti==0, trunc(age_float-FEMALE_RA_0),
+                        if(pocet_deti==1, trunc(age_float-FEMALE_RA_1),
+                        if(pocet_deti==2, trunc(age_float-FEMALE_RA_2),
+                        if(pocet_deti>=3 and pocet_deti<=4, trunc(age_float-FEMALE_RA_3_4), trunc(age_float-FEMALE_RA_5))))))
+               # Disabled pensioners are converted to old-age pensions in pension_vyp()
+               # only if the recalculated old-age pension is higher than their disability pension.
+               
+#  early_ret 
+               - retired_early: False
+               - retired_early_score: logit_score(ISFEMALE*(-1.464065)+PRIMARY*(-6.446514)+LOWER_SECONDARY*(-0.7186568 )+UPPER_SECONDARY*(-0.2306876)+POST_SECONDARY*(0.033602)+1*(-4.979105))  
+               - retired_early_score: if(status1y==RETIRED, retired_early_score+1, retired_early_score)
+               - retired_early: if(cumulative_omb>0 and odp>=15 and roky_pomb>0,
+                                if(ISMALE, align(retired_early_score,'early_retired_male.csv', filter=toret<=0 and toret>=-50 and age>15 and status==-1 ),
+                                           align(retired_early_score,'early_retired_female.csv', filter=toret<=0 and toret>=-50 and age>15 and status==-1 )),
+                                False)
+               - retired: if(retired_early, True, retired)
+               - status: if(retired_early and not disabled, RETIRED, status)
+               - status: if(retired and not disabled, RETIRED, status)
+
+               - status: if(status1y==RETIRED and age>=60 and not disabled, RETIRED, status)
+               - retired: if(status1y==RETIRED and age>=60 and not disabled, True, retired)
+
+#  ret_work 
+               - working_retired: False
+               - working_retired_score: logit_score(ISFEMALE*(-0.2608523)+PRIMARY*(-0.3754713)+LOWER_SECONDARY*(0.1430446)+UPPER_SECONDARY*(-0.2801457)+POST_SECONDARY*(-0.361988)+AGRO*(0.3240631)+INDUSTRY*(-0.8002981)+CONSTRUCTION*(0.0388439)+MAR_SERVICES*(-0.0763857)+ISCO1_0*(0.0)+ISCO1_1*(3.451295)+ISCO1_2*(3.375769)+ISCO1_3*(2.864193)+ISCO1_4*(2.445416)+ISCO1_5*(3.079464)+ISCO1_6*(3.060181)+ISCO1_7*(2.19925)+ISCO1_8*(1.623005)+1*(-6.689368))
+               - working_retired_score: if(status1y==1, working_retired_score+1, working_retired_score) 
+               - working_retired: if(toret>=0 and not disabled and not retired_early, 
+                                  if(ISMALE, align(working_retired_score, 'working_retired_male.csv'), align(working_retired_score, 'working_retired_female.csv')), False)   
+               - status: if(working_retired==True, -1, status)
+
+#  new_ret
+               - retired_new_score: logit_score(ISFEMALE*(-0.1905694)+PRIMARY*(-0.113779)+LOWER_SECONDARY*(0.0247395)+UPPER_SECONDARY*(0.0480346)+POST_SECONDARY*(0.3399977)+AGE57*(-0.3277618)+AGE58*(0.4321917)+AGE59*(2.003736)+AGE60*(3.225146)+AGE61*(3.799576)+AGE62*(5.528103)+AGE63*(4.934643)+AGE64*(1.585193)+AGE65*(0.8784134)+AGE66*(0.290496)+AGE67*(0.0039973)+AGE68*(-0.2195785)+AGE69*(-0.7464353)+AGE70*(-1.046403)+AGE71*(-1.441672)+AGE72*(-1.643266)+AGE73*(-1.774879)+AGE74*(-1.699499)+AGE75*(-2.167043)+AGE76*(-2.802444)+AGE77*(-3.034333)+AGE78*(-1.826607)+AGE79*(-1.987846)+AGE80*(-1.631678)+AGE81*(-2.166664)+AGE82*(-2.434894)+AGE83*(-2.903919)+AGE84*(-2.903919)+AGE85*(-2.803967)+AGE86*(-2.689698)+AGE87*(2.554428)+1*(-6.066541))
+               # sem treba pridat invalidov, ktori sa preklasifikuju
+               - retired_new: False
+               - retired_new: if(cumulative_omb>0 and odp>=15 and retired==False and status1y!=RETIRED and not disabled,
+                              if(ISMALE, align(retired_new_score,'new_retired_male_hazard.csv', filter=toret>=0 and toret<=24),
+                                         align(retired_new_score,'new_retired_female_hazard.csv', filter=toret>=0 and toret<=24)),
+                                         False)
+               - retired: if(retired_new, True, retired)
+               - status: if(retired_new and not disabled, RETIRED, status)
+
+            
+            # Inactivity 
+            inactivity():          
+               - inactivity_score: logit_score(ISFEMALE*(1.306702)+PRIMARY*(2.292582)+LOWER_SECONDARY*(0.8210773)+UPPER_SECONDARY*(0.5358828)+POST_SECONDARY*(0.6890947)+AGEG17*(1.611657)+AGEG22*(3.71789)+AGEG27*(4.523448)+AGEG32*(4.524653)+AGEG37*(3.913862)+AGEG42*(3.599382)+AGEG47*(3.519993)+AGEG52*(3.556672)+AGEG57*(3.479803)+1*(-8.111224))
+               - inactivity_score: if(status1y==5, inactivity_score+1, inactivity_score)
+               - inactivity: if(status==-1 and age>15 and toret<=0 and destination==1,
+                                if(ISMALE,
+                                align(inactivity_score, 'inactivity_male.csv', leave=retired and student and immigrant),
+                                align(inactivity_score, 'inactivity_female.csv', leave=retired and student and immigrant)),                                
+                                False)
+# useing elasticity of inactivity                                  
+               - inactivity_plus: if(inactivity, if(W_avg/lag(W_avg)>1.015, align_abs(-inactivity_score, count(inactivity)*inac_elas),inactivity_plus),inactivity_plus)
+##               - inactivity: if(status1y==3 and inactivity, False, inactivity)   
+               - inactivity: if(inactivity_plus, False, inactivity)
+
+               - status: if(inactivity, INACTIVE, status)
+
+               
+#             ENTERING LF PROCESSES
+            economic_activity():
+#               return of graduates
+#               - destination: if(age==GRADUATIONAGE_P and destination==2 and status1y==3 and hatlev5==1, choice([1,2], [ReturnP, 1-ReturnP]), destination) 
+#               - destination: if(age==GRADUATIONAGE_LS and destination==2 and status1y==3 and hatlev5==2, choice([1,2], [ReturnLS, 1-ReturnLS]), destination) 
+#               - destination: if(age==GRADUATIONAGE_US and destination==2 and status1y==3 and hatlev5==3, choice([1,2], [ReturnUS, 1-ReturnUS]), destination) 
+#               - destination: if(age==GRADUATIONAGE_PS and destination==2 and status1y==3 and hatlev5==4, choice([1,2], [ReturnPS, 1-ReturnPS]), destination) 
+#               - destination: if(age==GRADUATIONAGE_T and destination==2 and status1y==3 and hatlev5==5, choice([1,2], [ReturnT, 1-ReturnT]), destination) 
+
+#               leaving of workers
+               - probability_of_leave: 0.0008 
+#               - destination: if(status==-1 and destination==1, choice([1,2], [1-probability_of_leave, probability_of_leave]), destination)
+#               return of workers
+               - probability_of_return: 0.02 
+#               - destination: if(status==-1 and destination==2, choice([1,2], [probability_of_return, 1-probability_of_return]), destination)
+               
+               
+               - ea: if(status==-1, if(destination==1, True, False), False)
+
+#               working retired:    
+               - ea: if(working_retired and destination==1, True, ea)  
+               - ea: if(retired_early, False, ea)
+               # Preserve the legacy 50 percent working-disabled selection in
+               # the imported/base year only. From 2023 onward AWG
+               # participation selects active disabled pensioners together
+               # with all other otherwise eligible persons; employment then
+               # determines disabled_working.
+               - disabled_working: if(period < 2023 and disabled and destination==1, align(0.0, 0.5), False)
+               - ea: if(disabled_working, True, ea)
+               - ea: if(disabled and not disabled_working, False, ea)
+               # AWG participation alignment applies from 2023 onward. It keeps
+               # 2022 governed by the imported/base model structure.
+               # Students remain identified by student=True, but can be
+               # economically active under the AWG/LFS participation concept.
+               - awg_participation_candidate: period >= 2023 and destination == 1 and age >= 15 and age <= 74 and not retired_early and (not retired or working_retired)
+               - awg_participation_score: -inactivity_score + if(status1y == EMPLOYED, 2, 0) + if(status1y == UNEMPLOYED, 1, 0) + if(status == -1, 0.5, 0)
+               - awg_participation_active: False
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 15, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 15), round(count(destination == 1 and ISMALE and age == 15) * awg_participation.PR_M_15[period])), filter=awg_participation_candidate and ISMALE and age == 15), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 16, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 16), round(count(destination == 1 and ISMALE and age == 16) * awg_participation.PR_M_16[period])), filter=awg_participation_candidate and ISMALE and age == 16), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 17, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 17), round(count(destination == 1 and ISMALE and age == 17) * awg_participation.PR_M_17[period])), filter=awg_participation_candidate and ISMALE and age == 17), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 18, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 18), round(count(destination == 1 and ISMALE and age == 18) * awg_participation.PR_M_18[period])), filter=awg_participation_candidate and ISMALE and age == 18), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 19, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 19), round(count(destination == 1 and ISMALE and age == 19) * awg_participation.PR_M_19[period])), filter=awg_participation_candidate and ISMALE and age == 19), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 20, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 20), round(count(destination == 1 and ISMALE and age == 20) * awg_participation.PR_M_20[period])), filter=awg_participation_candidate and ISMALE and age == 20), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 21, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 21), round(count(destination == 1 and ISMALE and age == 21) * awg_participation.PR_M_21[period])), filter=awg_participation_candidate and ISMALE and age == 21), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 22, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 22), round(count(destination == 1 and ISMALE and age == 22) * awg_participation.PR_M_22[period])), filter=awg_participation_candidate and ISMALE and age == 22), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 23, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 23), round(count(destination == 1 and ISMALE and age == 23) * awg_participation.PR_M_23[period])), filter=awg_participation_candidate and ISMALE and age == 23), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 24, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 24), round(count(destination == 1 and ISMALE and age == 24) * awg_participation.PR_M_24[period])), filter=awg_participation_candidate and ISMALE and age == 24), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 25, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 25), round(count(destination == 1 and ISMALE and age == 25) * awg_participation.PR_M_25[period])), filter=awg_participation_candidate and ISMALE and age == 25), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 26, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 26), round(count(destination == 1 and ISMALE and age == 26) * awg_participation.PR_M_26[period])), filter=awg_participation_candidate and ISMALE and age == 26), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 27, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 27), round(count(destination == 1 and ISMALE and age == 27) * awg_participation.PR_M_27[period])), filter=awg_participation_candidate and ISMALE and age == 27), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 28, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 28), round(count(destination == 1 and ISMALE and age == 28) * awg_participation.PR_M_28[period])), filter=awg_participation_candidate and ISMALE and age == 28), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 29, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 29), round(count(destination == 1 and ISMALE and age == 29) * awg_participation.PR_M_29[period])), filter=awg_participation_candidate and ISMALE and age == 29), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 30, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 30), round(count(destination == 1 and ISMALE and age == 30) * awg_participation.PR_M_30[period])), filter=awg_participation_candidate and ISMALE and age == 30), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 31, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 31), round(count(destination == 1 and ISMALE and age == 31) * awg_participation.PR_M_31[period])), filter=awg_participation_candidate and ISMALE and age == 31), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 32, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 32), round(count(destination == 1 and ISMALE and age == 32) * awg_participation.PR_M_32[period])), filter=awg_participation_candidate and ISMALE and age == 32), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 33, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 33), round(count(destination == 1 and ISMALE and age == 33) * awg_participation.PR_M_33[period])), filter=awg_participation_candidate and ISMALE and age == 33), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 34, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 34), round(count(destination == 1 and ISMALE and age == 34) * awg_participation.PR_M_34[period])), filter=awg_participation_candidate and ISMALE and age == 34), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 35, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 35), round(count(destination == 1 and ISMALE and age == 35) * awg_participation.PR_M_35[period])), filter=awg_participation_candidate and ISMALE and age == 35), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 36, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 36), round(count(destination == 1 and ISMALE and age == 36) * awg_participation.PR_M_36[period])), filter=awg_participation_candidate and ISMALE and age == 36), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 37, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 37), round(count(destination == 1 and ISMALE and age == 37) * awg_participation.PR_M_37[period])), filter=awg_participation_candidate and ISMALE and age == 37), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 38, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 38), round(count(destination == 1 and ISMALE and age == 38) * awg_participation.PR_M_38[period])), filter=awg_participation_candidate and ISMALE and age == 38), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 39, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 39), round(count(destination == 1 and ISMALE and age == 39) * awg_participation.PR_M_39[period])), filter=awg_participation_candidate and ISMALE and age == 39), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 40, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 40), round(count(destination == 1 and ISMALE and age == 40) * awg_participation.PR_M_40[period])), filter=awg_participation_candidate and ISMALE and age == 40), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 41, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 41), round(count(destination == 1 and ISMALE and age == 41) * awg_participation.PR_M_41[period])), filter=awg_participation_candidate and ISMALE and age == 41), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 42, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 42), round(count(destination == 1 and ISMALE and age == 42) * awg_participation.PR_M_42[period])), filter=awg_participation_candidate and ISMALE and age == 42), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 43, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 43), round(count(destination == 1 and ISMALE and age == 43) * awg_participation.PR_M_43[period])), filter=awg_participation_candidate and ISMALE and age == 43), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 44, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 44), round(count(destination == 1 and ISMALE and age == 44) * awg_participation.PR_M_44[period])), filter=awg_participation_candidate and ISMALE and age == 44), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 45, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 45), round(count(destination == 1 and ISMALE and age == 45) * awg_participation.PR_M_45[period])), filter=awg_participation_candidate and ISMALE and age == 45), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 46, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 46), round(count(destination == 1 and ISMALE and age == 46) * awg_participation.PR_M_46[period])), filter=awg_participation_candidate and ISMALE and age == 46), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 47, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 47), round(count(destination == 1 and ISMALE and age == 47) * awg_participation.PR_M_47[period])), filter=awg_participation_candidate and ISMALE and age == 47), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 48, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 48), round(count(destination == 1 and ISMALE and age == 48) * awg_participation.PR_M_48[period])), filter=awg_participation_candidate and ISMALE and age == 48), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 49, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 49), round(count(destination == 1 and ISMALE and age == 49) * awg_participation.PR_M_49[period])), filter=awg_participation_candidate and ISMALE and age == 49), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 50, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 50), round(count(destination == 1 and ISMALE and age == 50) * awg_participation.PR_M_50[period])), filter=awg_participation_candidate and ISMALE and age == 50), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 51, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 51), round(count(destination == 1 and ISMALE and age == 51) * awg_participation.PR_M_51[period])), filter=awg_participation_candidate and ISMALE and age == 51), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 52, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 52), round(count(destination == 1 and ISMALE and age == 52) * awg_participation.PR_M_52[period])), filter=awg_participation_candidate and ISMALE and age == 52), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 53, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 53), round(count(destination == 1 and ISMALE and age == 53) * awg_participation.PR_M_53[period])), filter=awg_participation_candidate and ISMALE and age == 53), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 54, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 54), round(count(destination == 1 and ISMALE and age == 54) * awg_participation.PR_M_54[period])), filter=awg_participation_candidate and ISMALE and age == 54), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 55, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 55), round(count(destination == 1 and ISMALE and age == 55) * awg_participation.PR_M_55[period])), filter=awg_participation_candidate and ISMALE and age == 55), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 56, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 56), round(count(destination == 1 and ISMALE and age == 56) * awg_participation.PR_M_56[period])), filter=awg_participation_candidate and ISMALE and age == 56), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 57, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 57), round(count(destination == 1 and ISMALE and age == 57) * awg_participation.PR_M_57[period])), filter=awg_participation_candidate and ISMALE and age == 57), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 58, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 58), round(count(destination == 1 and ISMALE and age == 58) * awg_participation.PR_M_58[period])), filter=awg_participation_candidate and ISMALE and age == 58), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 59, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 59), round(count(destination == 1 and ISMALE and age == 59) * awg_participation.PR_M_59[period])), filter=awg_participation_candidate and ISMALE and age == 59), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 60, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 60), round(count(destination == 1 and ISMALE and age == 60) * awg_participation.PR_M_60[period])), filter=awg_participation_candidate and ISMALE and age == 60), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 61, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 61), round(count(destination == 1 and ISMALE and age == 61) * awg_participation.PR_M_61[period])), filter=awg_participation_candidate and ISMALE and age == 61), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 62, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 62), round(count(destination == 1 and ISMALE and age == 62) * awg_participation.PR_M_62[period])), filter=awg_participation_candidate and ISMALE and age == 62), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 63, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 63), round(count(destination == 1 and ISMALE and age == 63) * awg_participation.PR_M_63[period])), filter=awg_participation_candidate and ISMALE and age == 63), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 64, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 64), round(count(destination == 1 and ISMALE and age == 64) * awg_participation.PR_M_64[period])), filter=awg_participation_candidate and ISMALE and age == 64), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 65, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 65), round(count(destination == 1 and ISMALE and age == 65) * awg_participation.PR_M_65[period])), filter=awg_participation_candidate and ISMALE and age == 65), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 66, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 66), round(count(destination == 1 and ISMALE and age == 66) * awg_participation.PR_M_66[period])), filter=awg_participation_candidate and ISMALE and age == 66), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 67, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 67), round(count(destination == 1 and ISMALE and age == 67) * awg_participation.PR_M_67[period])), filter=awg_participation_candidate and ISMALE and age == 67), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 68, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 68), round(count(destination == 1 and ISMALE and age == 68) * awg_participation.PR_M_68[period])), filter=awg_participation_candidate and ISMALE and age == 68), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 69, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 69), round(count(destination == 1 and ISMALE and age == 69) * awg_participation.PR_M_69[period])), filter=awg_participation_candidate and ISMALE and age == 69), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 70, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 70), round(count(destination == 1 and ISMALE and age == 70) * awg_participation.PR_M_70[period])), filter=awg_participation_candidate and ISMALE and age == 70), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 71, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 71), round(count(destination == 1 and ISMALE and age == 71) * awg_participation.PR_M_71[period])), filter=awg_participation_candidate and ISMALE and age == 71), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 72, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 72), round(count(destination == 1 and ISMALE and age == 72) * awg_participation.PR_M_72[period])), filter=awg_participation_candidate and ISMALE and age == 72), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 73, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 73), round(count(destination == 1 and ISMALE and age == 73) * awg_participation.PR_M_73[period])), filter=awg_participation_candidate and ISMALE and age == 73), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISMALE and age == 74, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISMALE and age == 74), round(count(destination == 1 and ISMALE and age == 74) * awg_participation.PR_M_74[period])), filter=awg_participation_candidate and ISMALE and age == 74), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 15, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 15), round(count(destination == 1 and ISFEMALE and age == 15) * awg_participation.PR_F_15[period])), filter=awg_participation_candidate and ISFEMALE and age == 15), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 16, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 16), round(count(destination == 1 and ISFEMALE and age == 16) * awg_participation.PR_F_16[period])), filter=awg_participation_candidate and ISFEMALE and age == 16), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 17, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 17), round(count(destination == 1 and ISFEMALE and age == 17) * awg_participation.PR_F_17[period])), filter=awg_participation_candidate and ISFEMALE and age == 17), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 18, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 18), round(count(destination == 1 and ISFEMALE and age == 18) * awg_participation.PR_F_18[period])), filter=awg_participation_candidate and ISFEMALE and age == 18), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 19, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 19), round(count(destination == 1 and ISFEMALE and age == 19) * awg_participation.PR_F_19[period])), filter=awg_participation_candidate and ISFEMALE and age == 19), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 20, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 20), round(count(destination == 1 and ISFEMALE and age == 20) * awg_participation.PR_F_20[period])), filter=awg_participation_candidate and ISFEMALE and age == 20), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 21, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 21), round(count(destination == 1 and ISFEMALE and age == 21) * awg_participation.PR_F_21[period])), filter=awg_participation_candidate and ISFEMALE and age == 21), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 22, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 22), round(count(destination == 1 and ISFEMALE and age == 22) * awg_participation.PR_F_22[period])), filter=awg_participation_candidate and ISFEMALE and age == 22), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 23, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 23), round(count(destination == 1 and ISFEMALE and age == 23) * awg_participation.PR_F_23[period])), filter=awg_participation_candidate and ISFEMALE and age == 23), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 24, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 24), round(count(destination == 1 and ISFEMALE and age == 24) * awg_participation.PR_F_24[period])), filter=awg_participation_candidate and ISFEMALE and age == 24), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 25, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 25), round(count(destination == 1 and ISFEMALE and age == 25) * awg_participation.PR_F_25[period])), filter=awg_participation_candidate and ISFEMALE and age == 25), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 26, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 26), round(count(destination == 1 and ISFEMALE and age == 26) * awg_participation.PR_F_26[period])), filter=awg_participation_candidate and ISFEMALE and age == 26), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 27, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 27), round(count(destination == 1 and ISFEMALE and age == 27) * awg_participation.PR_F_27[period])), filter=awg_participation_candidate and ISFEMALE and age == 27), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 28, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 28), round(count(destination == 1 and ISFEMALE and age == 28) * awg_participation.PR_F_28[period])), filter=awg_participation_candidate and ISFEMALE and age == 28), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 29, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 29), round(count(destination == 1 and ISFEMALE and age == 29) * awg_participation.PR_F_29[period])), filter=awg_participation_candidate and ISFEMALE and age == 29), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 30, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 30), round(count(destination == 1 and ISFEMALE and age == 30) * awg_participation.PR_F_30[period])), filter=awg_participation_candidate and ISFEMALE and age == 30), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 31, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 31), round(count(destination == 1 and ISFEMALE and age == 31) * awg_participation.PR_F_31[period])), filter=awg_participation_candidate and ISFEMALE and age == 31), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 32, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 32), round(count(destination == 1 and ISFEMALE and age == 32) * awg_participation.PR_F_32[period])), filter=awg_participation_candidate and ISFEMALE and age == 32), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 33, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 33), round(count(destination == 1 and ISFEMALE and age == 33) * awg_participation.PR_F_33[period])), filter=awg_participation_candidate and ISFEMALE and age == 33), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 34, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 34), round(count(destination == 1 and ISFEMALE and age == 34) * awg_participation.PR_F_34[period])), filter=awg_participation_candidate and ISFEMALE and age == 34), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 35, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 35), round(count(destination == 1 and ISFEMALE and age == 35) * awg_participation.PR_F_35[period])), filter=awg_participation_candidate and ISFEMALE and age == 35), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 36, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 36), round(count(destination == 1 and ISFEMALE and age == 36) * awg_participation.PR_F_36[period])), filter=awg_participation_candidate and ISFEMALE and age == 36), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 37, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 37), round(count(destination == 1 and ISFEMALE and age == 37) * awg_participation.PR_F_37[period])), filter=awg_participation_candidate and ISFEMALE and age == 37), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 38, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 38), round(count(destination == 1 and ISFEMALE and age == 38) * awg_participation.PR_F_38[period])), filter=awg_participation_candidate and ISFEMALE and age == 38), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 39, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 39), round(count(destination == 1 and ISFEMALE and age == 39) * awg_participation.PR_F_39[period])), filter=awg_participation_candidate and ISFEMALE and age == 39), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 40, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 40), round(count(destination == 1 and ISFEMALE and age == 40) * awg_participation.PR_F_40[period])), filter=awg_participation_candidate and ISFEMALE and age == 40), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 41, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 41), round(count(destination == 1 and ISFEMALE and age == 41) * awg_participation.PR_F_41[period])), filter=awg_participation_candidate and ISFEMALE and age == 41), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 42, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 42), round(count(destination == 1 and ISFEMALE and age == 42) * awg_participation.PR_F_42[period])), filter=awg_participation_candidate and ISFEMALE and age == 42), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 43, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 43), round(count(destination == 1 and ISFEMALE and age == 43) * awg_participation.PR_F_43[period])), filter=awg_participation_candidate and ISFEMALE and age == 43), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 44, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 44), round(count(destination == 1 and ISFEMALE and age == 44) * awg_participation.PR_F_44[period])), filter=awg_participation_candidate and ISFEMALE and age == 44), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 45, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 45), round(count(destination == 1 and ISFEMALE and age == 45) * awg_participation.PR_F_45[period])), filter=awg_participation_candidate and ISFEMALE and age == 45), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 46, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 46), round(count(destination == 1 and ISFEMALE and age == 46) * awg_participation.PR_F_46[period])), filter=awg_participation_candidate and ISFEMALE and age == 46), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 47, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 47), round(count(destination == 1 and ISFEMALE and age == 47) * awg_participation.PR_F_47[period])), filter=awg_participation_candidate and ISFEMALE and age == 47), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 48, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 48), round(count(destination == 1 and ISFEMALE and age == 48) * awg_participation.PR_F_48[period])), filter=awg_participation_candidate and ISFEMALE and age == 48), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 49, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 49), round(count(destination == 1 and ISFEMALE and age == 49) * awg_participation.PR_F_49[period])), filter=awg_participation_candidate and ISFEMALE and age == 49), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 50, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 50), round(count(destination == 1 and ISFEMALE and age == 50) * awg_participation.PR_F_50[period])), filter=awg_participation_candidate and ISFEMALE and age == 50), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 51, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 51), round(count(destination == 1 and ISFEMALE and age == 51) * awg_participation.PR_F_51[period])), filter=awg_participation_candidate and ISFEMALE and age == 51), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 52, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 52), round(count(destination == 1 and ISFEMALE and age == 52) * awg_participation.PR_F_52[period])), filter=awg_participation_candidate and ISFEMALE and age == 52), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 53, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 53), round(count(destination == 1 and ISFEMALE and age == 53) * awg_participation.PR_F_53[period])), filter=awg_participation_candidate and ISFEMALE and age == 53), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 54, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 54), round(count(destination == 1 and ISFEMALE and age == 54) * awg_participation.PR_F_54[period])), filter=awg_participation_candidate and ISFEMALE and age == 54), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 55, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 55), round(count(destination == 1 and ISFEMALE and age == 55) * awg_participation.PR_F_55[period])), filter=awg_participation_candidate and ISFEMALE and age == 55), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 56, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 56), round(count(destination == 1 and ISFEMALE and age == 56) * awg_participation.PR_F_56[period])), filter=awg_participation_candidate and ISFEMALE and age == 56), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 57, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 57), round(count(destination == 1 and ISFEMALE and age == 57) * awg_participation.PR_F_57[period])), filter=awg_participation_candidate and ISFEMALE and age == 57), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 58, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 58), round(count(destination == 1 and ISFEMALE and age == 58) * awg_participation.PR_F_58[period])), filter=awg_participation_candidate and ISFEMALE and age == 58), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 59, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 59), round(count(destination == 1 and ISFEMALE and age == 59) * awg_participation.PR_F_59[period])), filter=awg_participation_candidate and ISFEMALE and age == 59), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 60, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 60), round(count(destination == 1 and ISFEMALE and age == 60) * awg_participation.PR_F_60[period])), filter=awg_participation_candidate and ISFEMALE and age == 60), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 61, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 61), round(count(destination == 1 and ISFEMALE and age == 61) * awg_participation.PR_F_61[period])), filter=awg_participation_candidate and ISFEMALE and age == 61), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 62, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 62), round(count(destination == 1 and ISFEMALE and age == 62) * awg_participation.PR_F_62[period])), filter=awg_participation_candidate and ISFEMALE and age == 62), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 63, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 63), round(count(destination == 1 and ISFEMALE and age == 63) * awg_participation.PR_F_63[period])), filter=awg_participation_candidate and ISFEMALE and age == 63), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 64, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 64), round(count(destination == 1 and ISFEMALE and age == 64) * awg_participation.PR_F_64[period])), filter=awg_participation_candidate and ISFEMALE and age == 64), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 65, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 65), round(count(destination == 1 and ISFEMALE and age == 65) * awg_participation.PR_F_65[period])), filter=awg_participation_candidate and ISFEMALE and age == 65), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 66, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 66), round(count(destination == 1 and ISFEMALE and age == 66) * awg_participation.PR_F_66[period])), filter=awg_participation_candidate and ISFEMALE and age == 66), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 67, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 67), round(count(destination == 1 and ISFEMALE and age == 67) * awg_participation.PR_F_67[period])), filter=awg_participation_candidate and ISFEMALE and age == 67), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 68, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 68), round(count(destination == 1 and ISFEMALE and age == 68) * awg_participation.PR_F_68[period])), filter=awg_participation_candidate and ISFEMALE and age == 68), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 69, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 69), round(count(destination == 1 and ISFEMALE and age == 69) * awg_participation.PR_F_69[period])), filter=awg_participation_candidate and ISFEMALE and age == 69), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 70, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 70), round(count(destination == 1 and ISFEMALE and age == 70) * awg_participation.PR_F_70[period])), filter=awg_participation_candidate and ISFEMALE and age == 70), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 71, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 71), round(count(destination == 1 and ISFEMALE and age == 71) * awg_participation.PR_F_71[period])), filter=awg_participation_candidate and ISFEMALE and age == 71), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 72, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 72), round(count(destination == 1 and ISFEMALE and age == 72) * awg_participation.PR_F_72[period])), filter=awg_participation_candidate and ISFEMALE and age == 72), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 73, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 73), round(count(destination == 1 and ISFEMALE and age == 73) * awg_participation.PR_F_73[period])), filter=awg_participation_candidate and ISFEMALE and age == 73), awg_participation_active)
+               - awg_participation_active: if(period >= 2023 and ISFEMALE and age == 74, align_abs(awg_participation_score, min(count(awg_participation_candidate and ISFEMALE and age == 74), round(count(destination == 1 and ISFEMALE and age == 74) * awg_participation.PR_F_74[period])), filter=awg_participation_candidate and ISFEMALE and age == 74), awg_participation_active)
+               - disabled_working: if(period >= 2023 and awg_participation_candidate and disabled_working and not awg_participation_active, False, disabled_working)
+               - working_retired: if(period >= 2023 and awg_participation_candidate and working_retired and not awg_participation_active, False, working_retired)
+               - status: if(period >= 2023 and awg_participation_candidate and awg_participation_active and not disabled, -1, status)
+               - status: if(period >= 2023 and awg_participation_candidate and not awg_participation_active and retired, RETIRED, status)
+               - status: if(period >= 2023 and awg_participation_candidate and not awg_participation_active and student and not retired and not disabled, STUDENT, status)
+               - status: if(period >= 2023 and awg_participation_candidate and not awg_participation_active and not student and not retired and not disabled, INACTIVE, status)
+               - ea: if(period >= 2023 and awg_participation_candidate, awg_participation_active, ea)
+  
+               
+            csv_ea():
+               - csv(period, groupby(status, age, period), fname='status_ea.csv', mode='a')
+#               - csv(groupby(period, status, immigrant, region), fname='status_ea_immigrant.csv', mode='a')
+#               - csv(dump(period, age, age_float, days), fname='age_float.csv', mode='a')
+#                                            leave=WAS_RETIRED or IS_INACTIVE),               
+            csv_all():
+               - csv(period, dump(pohlavie, age, toret, status, status1y), fname='simulation_ea_for_inactive.csv', mode='a')              
+
+simulation: 
+    init: 
+        - person: [init_variable, init_define, time_to_leave1, edulev_init, init_disab]
+    processes:
+        - person: [ageing, birth, death, awg_migration, immigration, edulev, edufield, later_studying, statusing, study, disability, retirement, inactivity,  economic_activity, csv_ea]
+        - person: [csv_all]
+    input:
+        path:   "INPUT_DATA"
+        file:   "prospective_input.h5"
+
+    output:
+        path:   "OUTPUT_DATA"
+        file:   "simulation.h5"
+        
+    start_period: 2022
+    
+    periods: 1
+    
+    random_seed: 1        
+     
+    
+     
+     
+     
+     
